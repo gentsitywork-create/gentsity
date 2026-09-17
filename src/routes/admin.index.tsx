@@ -318,9 +318,12 @@ function AdminOrders() {
         <p className="mt-6 text-sm text-muted-foreground">কোনো অর্ডার পাওয়া যায়নি।</p>
       ) : (
         <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
-          <table className="w-full min-w-[840px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="border-b bg-secondary/50 text-left">
               <tr>
+                <th className="px-4 py-3">
+                  <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
+                </th>
                 <th className="px-4 py-3 font-semibold">অর্ডার তথ্য</th>
                 <th className="px-4 py-3 font-semibold">পণ্য</th>
                 <th className="px-4 py-3 font-semibold">মোট</th>
