@@ -302,20 +302,20 @@ function Home() {
             {size && (
               <div className="mt-5 rounded-xl border bg-card p-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold">২. ৫টি রঙ বাছুন</h2>
+                  <h2 className="text-lg font-bold">২. পছন্দের ৫টি ডিজাইন বাছুন</h2>
                   <span className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
                     {totalPicked} / ৫
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  নিচের পছন্দের রঙগুলো থেকে আপনার পছন্দের ৫টি পিস সিলেক্ট করুন 👇
+                  নিচের ছবিগুলো থেকে আপনার পছন্দের ৫টি পোলো শার্ট সিলেক্ট করুন (ছবিতে ট্যাপ করুন) 👇
                 </p>
 
                 {isLoading ? (
-                  <p className="mt-4 text-sm text-muted-foreground">রঙ লোড হচ্ছে…</p>
+                  <p className="mt-4 text-sm text-muted-foreground">ছবি লোড হচ্ছে…</p>
                 ) : variants.length === 0 ? (
                   <p className="mt-4 text-sm text-muted-foreground">
-                    এই সাইজে এখন কোনো রঙ স্টকে নেই। অন্য সাইজ দেখুন।
+                    এই সাইজে এখন কোনো ডিজাইন স্টকে নেই। অন্য সাইজ দেখুন।
                   </p>
                 ) : (
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
