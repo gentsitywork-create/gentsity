@@ -350,3 +350,50 @@ export const sendToCourier = createServerFn({ method: "POST" })
       tracking_code: payload.consignment.tracking_code ?? "",
     };
   });
+
+/** BD Courier দিয়ে কাস্টমারের ডেলিভারি সাকসেস রেশিও যাচাই */
+export const checkCourierRatio = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z.object({ phone: z.string().trim().regex(/^01[3-9]\d{8}$/) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const key = await getSetting(supabaseAdmin, "bdcourier_api_key");
+    if (!key) {
+      throw new Error("BD Courier এর API Key সেট করা হয়নি। সেটিংসে Key বসান।");
+    }
+
+    const res = await fetch(
+      `https://bdcourier.com/api/courier-check?phone=${encodeURIComponent(data.phone)}`,
+      { headers: { Authorization: `Bearer ${key}`, Accept: "application/json" } },
+    );
+
+    const payload = (await res.json().catch(() => null)) as any;
+    if (!res.ok || !payload) {
+      throw new Error(payload?.message || "BD Courier থেকে তথ্য আনা যায়নি।");
+    }
+
+    const cd = payload.courierData ?? payload.data?.courierData ?? payload;
+    const summary = cd?.summary ?? {};
+    const couriers: { name: string; total: number; success: number; cancelled: number }[] = [];
+    for (const [name, v] of Object.entries(cd ?? {})) {
+      if (name === "summary" || typeof v !== "object" || v === null) continue;
+      const o = v as any;
+      couriers.push({
+        name,
+        total: Number(o.total_parcel ?? 0),
+        success: Number(o.success_parcel ?? 0),
+        cancelled: Number(o.cancelled_parcel ?? 0),
+      });
+    }
+
+    const total = Number(summary.total_parcel ?? 0);
+    const success = Number(summary.success_parcel ?? 0);
+    const cancelled = Number(summary.cancelled_parcel ?? 0);
+    const ratio = Number(summary.success_ratio ?? (total ? Math.round((success / total) * 100) : 0));
+
+    return { phone: data.phone, total, success, cancelled, ratio, couriers };
+  });
