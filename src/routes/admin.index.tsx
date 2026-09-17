@@ -558,7 +558,9 @@ function AdminOrders() {
                     size="sm"
                     className="h-8 text-xs"
                     onClick={() => toCourier(o.id)}
-                    disabled={busyId === o.id || Boolean(o.courier_consignment_id)}
+                    disabled={
+                      busyId === o.id || Boolean(o.courier_consignment_id) || o.status === "hold"
+                    }
                   >
                     {o.courier_consignment_id
                       ? "পাঠানো ✅"
