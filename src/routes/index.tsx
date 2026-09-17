@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Check, Minus, Plus, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { placeOrder } from "@/lib/orders.functions";
+import { markCartOrdered, placeOrder, saveAbandonedCart } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,19 @@ function Home() {
   const [done, setDone] = useState<{ order_no: number; total: number } | null>(null);
 
   const submit = useServerFn(placeOrder);
+  const saveCart = useServerFn(saveAbandonedCart);
+  const clearCart = useServerFn(markCartOrdered);
+
+  /** ব্রাউজারে একটি স্থায়ী কী — একই ভিজিটরের অসম্পূর্ণ কার্ট একটাই থাকে */
+  const sessionKey = useRef<string>("");
+  if (!sessionKey.current && typeof window !== "undefined") {
+    let k = window.localStorage.getItem("gentsity_cart_key");
+    if (!k) {
+      k = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      window.localStorage.setItem("gentsity_cart_key", k);
+    }
+    sessionKey.current = k;
+  }
 
   const { data: settings } = useQuery({
     queryKey: ["settings"],
