@@ -7,3 +7,6 @@
 - [x] Steadfast কুরিয়ার পাঠানোর বাটন
 - [x] Steadfast API Key ও Secret Key ইনপুট (সেটিংস → Steadfast Courier API)
 - [ ] Facebook Pixel ID সেটিংসে বসাতে হবে
+
+## পেন্ডিং (ইউজারের কাছ থেকে দরকার)
+- BD Courier API Key — সেটিংসে বসালে "রেশিও চেক" কাজ করবে।
