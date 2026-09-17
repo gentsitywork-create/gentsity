@@ -19,6 +19,7 @@ function AdminSettings() {
     fb_pixel_id: "",
     steadfast_api_key: "",
     steadfast_secret_key: "",
+    bdcourier_api_key: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -41,6 +42,7 @@ function AdminSettings() {
         fb_pixel_id: data["fb_pixel_id"] ?? "",
         steadfast_api_key: data["steadfast_api_key"] ?? "",
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
+        bdcourier_api_key: data["bdcourier_api_key"] ?? "",
       });
     }
   }, [data]);
@@ -119,6 +121,21 @@ function AdminSettings() {
           </div>
           <p className="text-xs text-muted-foreground">
             এই দুটি কী বসালে অর্ডার প্যানেল থেকে সরাসরি Steadfast-এ পাঠানো যাবে।
+          </p>
+        </div>
+
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">BD Courier API (কুরিয়ার রেশিও চেক)</h2>
+          <Label htmlFor="bdcourier_api_key">API Key</Label>
+          <Input
+            id="bdcourier_api_key"
+            type="password"
+            value={values.bdcourier_api_key}
+            onChange={(e) => setValues({ ...values, bdcourier_api_key: e.target.value })}
+            placeholder="BD Courier API Key বসান"
+          />
+          <p className="text-xs text-muted-foreground">
+            কী বসালে অর্ডার প্যানেলে "রেশিও চেক" বোতাম দিয়ে কাস্টমারের ডেলিভারি সাকসেস রেশিও দেখা যাবে।
           </p>
         </div>
       </div>
