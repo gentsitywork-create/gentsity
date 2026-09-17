@@ -589,6 +589,17 @@ function AdminOrders() {
                   <Button
                     size="sm"
                     variant="outline"
+                    className={`h-8 text-xs ${
+                      o.status === "hold" ? "bg-slate-200 font-semibold text-slate-800" : ""
+                    }`}
+                    title={o.status === "hold" ? "হোল্ড থেকে সরান" : "অর্ডার হোল্ড করুন"}
+                    onClick={() => setStatus(o.id, o.status === "hold" ? "pending" : "hold")}
+                  >
+                    {o.status === "hold" ? "▶ হোল্ড সরান" : "⏸ হোল্ড"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     className="h-8 text-xs text-rose-600 hover:bg-rose-50"
                     title="এই কাস্টমারের আইপি ব্লক করুন"
                     onClick={() => blockIp(o.customer_ip, o.customer_name)}
