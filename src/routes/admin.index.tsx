@@ -6,7 +6,10 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendToCourier } from "@/lib/orders.functions";
+import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
+import { printCourierLabels } from "@/components/admin/printLabels";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -49,7 +52,7 @@ type OrderRow = {
   courier_consignment_id: string | null;
   courier_tracking_code: string | null;
   created_at: string;
-  order_items: { size: string; color_name: string; qty: number }[];
+  order_items: { variant_id: string | null; size: string; color_name: string; qty: number }[];
 };
 
 function AdminOrders() {
@@ -60,6 +63,10 @@ function AdminOrders() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editOrder, setEditOrder] = useState<EditableOrder | null>(null);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin-orders"],
@@ -67,7 +74,7 @@ function AdminOrders() {
       const { data, error } = await supabase
         .from("orders")
         .select(
-          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(size, color_name, qty)",
+          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(variant_id, size, color_name, qty)",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -129,6 +136,57 @@ function AdminOrders() {
     }
   };
 
+  const selectedRows = useMemo(
+    () => rows.filter((o) => selected.includes(o.id)),
+    [rows, selected],
+  );
+
+  const toggleOne = (id: string) =>
+    setSelected((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+
+  const allChecked = rows.length > 0 && rows.every((o) => selected.includes(o.id));
+  const toggleAll = () => setSelected(allChecked ? [] : rows.map((o) => o.id));
+
+  const bulkStatus = async (status: string) => {
+    setBulkBusy(true);
+    const { error } = await supabase.from("orders").update({ status }).in("id", selected);
+    setBulkBusy(false);
+    if (error) {
+      toast.error("স্ট্যাটাস বদলানো যায়নি।");
+      return;
+    }
+    toast.success(`${selected.length}টি অর্ডারের স্ট্যাটাস আপডেট হয়েছে।`);
+    setSelected([]);
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+  };
+
+  const bulkCourier = async () => {
+    setBulkBusy(true);
+    let ok = 0;
+    let fail = 0;
+    for (const o of selectedRows) {
+      if (o.courier_consignment_id) continue;
+      try {
+        await send({ data: { order_id: o.id } });
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setBulkBusy(false);
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    if (ok) toast.success(`${ok}টি অর্ডার Steadfast এ পাঠানো হয়েছে।`);
+    if (fail) toast.error(`${fail}টি অর্ডার পাঠানো যায়নি।`);
+  };
+
+  const printLabels = async (list: OrderRow[]) => {
+    if (list.length === 0) {
+      toast.error("আগে অর্ডার সিলেক্ট করুন।");
+      return;
+    }
+    await printCourierLabels(list);
+  };
+
   const exportCsv = () => {
     const head = ["অর্ডার", "নাম", "মোবাইল", "ঠিকানা", "জেলা", "পণ্য", "টাকা", "স্ট্যাটাস", "তারিখ"];
     const lines = rows.map((o) =>
@@ -166,9 +224,19 @@ function AdminOrders() {
             অর্ডার দেখুন, স্ট্যাটাস বদলান ও কুরিয়ারে পাঠান।
           </p>
         </div>
-        <Button onClick={exportCsv} disabled={rows.length === 0}>
-          ⬇ এক্সপোর্ট
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              setEditOrder(null);
+              setDialogOpen(true);
+            }}
+          >
+            + ম্যানুয়াল অর্ডার
+          </Button>
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
+            ⬇ এক্সপোর্ট
+          </Button>
+        </div>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -217,15 +285,45 @@ function AdminOrders() {
         })}
       </div>
 
+      {selected.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border bg-secondary/40 p-3">
+          <span className="text-sm font-semibold">{selected.length}টি অর্ডার সিলেক্ট করা হয়েছে</span>
+          <Button size="sm" onClick={bulkCourier} disabled={bulkBusy}>
+            {bulkBusy ? "কাজ চলছে…" : "Steadfast এ পাঠাও"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => printLabels(selectedRows)}>
+            🖨 কুরিয়ার লেবেল প্রিন্ট (QR)
+          </Button>
+          <Select onValueChange={bulkStatus}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="স্ট্যাটাস বদলান" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(STATUS).map(([k, v]) => (
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="ghost" onClick={() => setSelected([])}>
+            বাতিল
+          </Button>
+        </div>
+      )}
+
       {isLoading ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (
         <p className="mt-6 text-sm text-muted-foreground">কোনো অর্ডার পাওয়া যায়নি।</p>
       ) : (
         <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
-          <table className="w-full min-w-[840px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead className="border-b bg-secondary/50 text-left">
               <tr>
+                <th className="px-4 py-3">
+                  <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
+                </th>
                 <th className="px-4 py-3 font-semibold">অর্ডার তথ্য</th>
                 <th className="px-4 py-3 font-semibold">পণ্য</th>
                 <th className="px-4 py-3 font-semibold">মোট</th>
@@ -236,6 +334,12 @@ function AdminOrders() {
             <tbody>
               {rows.map((o) => (
                 <tr key={o.id} className="border-b last:border-0 align-top">
+                  <td className="px-4 py-4">
+                    <Checkbox
+                      checked={selected.includes(o.id)}
+                      onCheckedChange={() => toggleOne(o.id)}
+                    />
+                  </td>
                   <td className="px-4 py-4">
                     <p className="font-bold text-primary">#{o.order_no}</p>
                     <p className="font-semibold">{o.customer_name}</p>
@@ -310,6 +414,21 @@ function AdminOrders() {
                             ? "পাঠানো হচ্ছে…"
                             : "Steadfast এ পাঠাও"}
                       </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditOrder(o as EditableOrder);
+                            setDialogOpen(true);
+                          }}
+                        >
+                          এডিট
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => printLabels([o])}>
+                          🖨 লেবেল
+                        </Button>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -318,6 +437,16 @@ function AdminOrders() {
           </table>
         </div>
       )}
+
+      <OrderDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        order={editOrder}
+        onSaved={() => {
+          qc.invalidateQueries({ queryKey: ["admin-orders"] });
+          qc.invalidateQueries({ queryKey: ["admin-variants-all"] });
+        }}
+      />
     </div>
   );
 }
