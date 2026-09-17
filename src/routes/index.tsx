@@ -400,7 +400,7 @@ function Home() {
 
             {size && totalPicked === 5 && (
               <form id="checkout" onSubmit={handleOrder} className="mt-5 rounded-xl border bg-card p-5">
-                <h2 className="text-lg font-bold">৩. ঠিকানা দিন</h2>
+                <h2 className="text-lg font-bold">আপনার পছন্দের পাঁচটি কালার অর্ডার করতে আপনার তথ্যগুলো দিন</h2>
                 <div className="mt-4 grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="name">আপনার নাম</Label>
