@@ -414,6 +414,21 @@ function AdminOrders() {
                             ? "পাঠানো হচ্ছে…"
                             : "Steadfast এ পাঠাও"}
                       </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditOrder(o as EditableOrder);
+                            setDialogOpen(true);
+                          }}
+                        >
+                          এডিট
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => printLabels([o])}>
+                          🖨 লেবেল
+                        </Button>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -422,6 +437,16 @@ function AdminOrders() {
           </table>
         </div>
       )}
+
+      <OrderDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        order={editOrder}
+        onSaved={() => {
+          qc.invalidateQueries({ queryKey: ["admin-orders"] });
+          qc.invalidateQueries({ queryKey: ["admin-variants-all"] });
+        }}
+      />
     </div>
   );
 }
