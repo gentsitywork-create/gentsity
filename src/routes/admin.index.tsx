@@ -255,15 +255,19 @@ function AdminOrders() {
 
   return (
     <div>
+      {/* হেডার */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight">অর্ডার ম্যানেজমেন্ট</h1>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-primary">
+            অর্ডার ম্যানেজমেন্ট
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            অর্ডার দেখুন, স্ট্যাটাস বদলান ও কুরিয়ারে পাঠান।
+            অর্ডার রিভিউ, ফুলফিলমেন্ট ও ট্র্যাকিং — সব এক জায়গায়।
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
+            className="shadow-sm"
             onClick={() => {
               setEditOrder(null);
               setDialogOpen(true);
@@ -277,25 +281,32 @@ function AdminOrders() {
         </div>
       </div>
 
+      {/* সার্চ ও তারিখ */}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="নাম, মোবাইল বা অর্ডার নম্বর খুঁজুন…"
-          className="w-full sm:w-80"
+          className="w-full bg-card sm:w-96"
         />
         <div className="flex items-center gap-2">
           <Input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="w-40"
+            className="w-40 bg-card"
           />
           <span className="text-sm text-muted-foreground">থেকে</span>
-          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40" />
+          <Input
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="w-40 bg-card"
+          />
         </div>
       </div>
 
+      {/* স্ট্যাটাস ট্যাব */}
       <div className="mt-4 flex flex-wrap gap-2">
         {(["all", ...Object.keys(STATUS)] as string[]).map((k) => {
           const active = filter === k;
@@ -304,7 +315,7 @@ function AdminOrders() {
               key={k}
               type="button"
               onClick={() => setFilter(k)}
-              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition ${
                 active
                   ? "border-primary bg-primary text-primary-foreground"
                   : "bg-card hover:bg-secondary"
@@ -312,7 +323,7 @@ function AdminOrders() {
             >
               {k === "all" ? "সব" : STATUS[k]}
               <span
-                className={`rounded-md px-1.5 py-0.5 text-xs ${
+                className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${
                   active ? "bg-primary-foreground/20" : "bg-secondary"
                 }`}
               >
@@ -323,191 +334,247 @@ function AdminOrders() {
         })}
       </div>
 
+      {/* বাল্ক অ্যাকশন বার */}
       {selected.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border bg-secondary/40 p-3">
-          <span className="text-sm font-semibold">{selected.length}টি অর্ডার সিলেক্ট করা হয়েছে</span>
-          <Button size="sm" onClick={bulkCourier} disabled={bulkBusy}>
-            {bulkBusy ? "কাজ চলছে…" : "Steadfast এ পাঠাও"}
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => printLabels(selectedRows)}>
-            🖨 কুরিয়ার লেবেল প্রিন্ট (QR)
-          </Button>
-          <Select onValueChange={bulkStatus}>
-            <SelectTrigger className="w-44">
-              <SelectValue placeholder="স্ট্যাটাস বদলান" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(STATUS).map(([k, v]) => (
-                <SelectItem key={k} value={k}>
-                  {v}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="ghost" onClick={() => setSelected([])}>
-            বাতিল
-          </Button>
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-primary px-4 py-3 text-primary-foreground shadow-md">
+          <span className="text-sm font-bold">{selected.length}টি অর্ডার সিলেক্ট করা হয়েছে</span>
+          <button
+            type="button"
+            onClick={() => setSelected([])}
+            className="text-sm font-medium underline underline-offset-2 opacity-90 hover:opacity-100"
+          >
+            সব বাদ দিন
+          </button>
+          <div className="ms-auto flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => printLabels(selectedRows)}
+            >
+              🖨 লেবেল প্রিন্ট (QR)
+            </Button>
+            <Button size="sm" variant="secondary" onClick={bulkCourier} disabled={bulkBusy}>
+              {bulkBusy ? "কাজ চলছে…" : "🚚 Steadfast এ পাঠাও"}
+            </Button>
+            <Select onValueChange={bulkStatus}>
+              <SelectTrigger className="h-9 w-40 border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground">
+                <SelectValue placeholder="স্ট্যাটাস বদলান" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(STATUS).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>
+                    {v}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 
+      {/* অর্ডার তালিকা */}
       {isLoading ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">কোনো অর্ডার পাওয়া যায়নি।</p>
+        <div className="mt-5 rounded-xl border bg-card p-10 text-center text-sm text-muted-foreground">
+          কোনো অর্ডার পাওয়া যায়নি।
+        </div>
       ) : (
-        <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
-          <table className="w-full min-w-[900px] text-sm">
-            <thead className="border-b bg-secondary/50 text-left">
-              <tr>
-                <th className="px-4 py-3">
-                  <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
-                </th>
-                <th className="px-4 py-3 font-semibold">অর্ডার তথ্য</th>
-                <th className="px-4 py-3 font-semibold">পণ্য</th>
-                <th className="px-4 py-3 font-semibold">মোট</th>
-                <th className="px-4 py-3 font-semibold">স্ট্যাটাস</th>
-                <th className="px-4 py-3 text-right font-semibold">অ্যাকশন</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((o) => (
-                <tr key={o.id} className="border-b last:border-0 align-top">
-                  <td className="px-4 py-4">
-                    <Checkbox
-                      checked={selected.includes(o.id)}
-                      onCheckedChange={() => toggleOne(o.id)}
-                    />
-                  </td>
-                  <td className="px-4 py-4">
-                    <p className="font-bold text-primary">#{o.order_no}</p>
-                    <p className="font-semibold">{o.customer_name}</p>
-                    <a href={`tel:${o.phone}`} className="text-muted-foreground underline">
+        <div className="mt-5 overflow-hidden rounded-xl border bg-card shadow-sm">
+          {/* টেবিল হেড */}
+          <div className="hidden items-center gap-4 border-b bg-secondary/40 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground lg:grid lg:grid-cols-[28px_minmax(240px,1.3fr)_minmax(200px,1fr)_90px_110px_110px_180px]">
+            <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
+            <span>অর্ডার তথ্য</span>
+            <span>পণ্য</span>
+            <span>মোট</span>
+            <span>পেমেন্ট</span>
+            <span>স্ট্যাটাস</span>
+            <span className="text-right">অ্যাকশন</span>
+          </div>
+
+          {rows.map((o) => {
+            const isSel = selected.includes(o.id);
+            return (
+              <div
+                key={o.id}
+                className={`grid gap-3 border-b px-4 py-4 last:border-0 transition lg:grid-cols-[28px_minmax(240px,1.3fr)_minmax(200px,1fr)_90px_110px_110px_180px] lg:items-start lg:gap-4 ${
+                  isSel ? "bg-primary/5" : "hover:bg-secondary/30"
+                }`}
+              >
+                <div className="pt-1">
+                  <Checkbox checked={isSel} onCheckedChange={() => toggleOne(o.id)} />
+                </div>
+
+                {/* অর্ডার তথ্য */}
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
+                  <p className="mt-0.5 font-bold">{o.customer_name}</p>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                    <a href={`tel:${o.phone}`} className="font-medium hover:underline">
                       {o.phone}
                     </a>
-                    <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-                      {o.address}
-                      {o.district ? `, ${o.district}` : ""}
-                    </p>
-                    {o.note && (
-                      <p className="mt-1 text-xs text-muted-foreground">নোট: {o.note}</p>
-                    )}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {new Date(o.created_at).toLocaleString("bn-BD")}
-                    </p>
-                    {o.customer_ip && (
-                      <p className="mt-1 text-xs text-muted-foreground">আইপি: {o.customer_ip}</p>
-                    )}
-                    {ratios[o.id] && (
-                      <p
-                        className={`mt-1 text-xs font-semibold ${
-                          ratios[o.id]!.ratio >= 70
-                            ? "text-emerald-700"
-                            : ratios[o.id]!.ratio >= 40
-                              ? "text-amber-700"
-                              : "text-rose-700"
-                        }`}
-                      >
-                        সাকসেস রেশিও: {ratios[o.id]!.ratio}% (মোট {ratios[o.id]!.total}, সফল{" "}
-                        {ratios[o.id]!.success}, বাতিল {ratios[o.id]!.cancelled})
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {o.order_items.map((it, i) => (
-                        <span
-                          key={i}
-                          className="rounded-full border bg-secondary/60 px-2 py-1 text-xs font-medium"
-                        >
-                          {it.color_name} ({it.size}) ×{it.qty}
-                        </span>
-                      ))}
-                    </div>
-                    {o.courier_consignment_id && (
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        Steadfast: {o.courier_consignment_id}
-                        {o.courier_tracking_code ? ` · ${o.courier_tracking_code}` : ""}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    <p className="font-bold">৳{o.total_amount}</p>
-                    <p className="text-xs text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span
-                      className={`inline-block rounded-md px-2 py-1 text-xs font-semibold ${
-                        STATUS_CLASS[o.status] ?? "bg-secondary"
+                    <a
+                      href={`https://wa.me/88${o.phone}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      title="WhatsApp এ মেসেজ করুন"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black text-white"
+                    >
+                      W
+                    </a>
+                  </div>
+                  {ratios[o.id] ? (
+                    <p
+                      className={`mt-1 text-xs font-bold ${
+                        ratios[o.id]!.ratio >= 70
+                          ? "text-emerald-600"
+                          : ratios[o.id]!.ratio >= 40
+                            ? "text-amber-600"
+                            : "text-rose-600"
                       }`}
                     >
-                      {STATUS[o.status] ?? o.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex flex-col items-end gap-2">
-                      <Select value={o.status} onValueChange={(v) => setStatus(o.id, v)}>
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(STATUS).map(([k, v]) => (
-                            <SelectItem key={k} value={k}>
-                              {v}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        size="sm"
-                        className="w-40"
-                        onClick={() => toCourier(o.id)}
-                        disabled={busyId === o.id || Boolean(o.courier_consignment_id)}
+                      {ratios[o.id]!.ratio}% Success · মোট {ratios[o.id]!.total} · বাতিল{" "}
+                      {ratios[o.id]!.cancelled}
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={ratioBusy === o.id}
+                      onClick={() => runRatio(o.id, o.phone)}
+                      className="mt-1 text-xs font-semibold text-primary underline underline-offset-2 hover:opacity-80 disabled:opacity-50"
+                    >
+                      {ratioBusy === o.id ? "রেশিও চেক হচ্ছে…" : "রেশিও চেক করুন"}
+                    </button>
+                  )}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {o.address}
+                    {o.district ? `, ${o.district}` : ""}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {new Date(o.created_at).toLocaleString("bn-BD", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                    {o.customer_ip ? ` · আইপি: ${o.customer_ip}` : ""}
+                  </p>
+                  {o.note && (
+                    <p className="mt-1.5 inline-block rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+                      নোট: {o.note}
+                    </p>
+                  )}
+                </div>
+
+                {/* পণ্য */}
+                <div className="min-w-0">
+                  <div className="flex flex-wrap gap-1">
+                    {o.order_items.map((it, i) => (
+                      <span
+                        key={i}
+                        className="rounded-md border bg-secondary/60 px-2 py-0.5 text-xs font-medium"
                       >
-                        {o.courier_consignment_id
-                          ? "কুরিয়ারে পাঠানো"
-                          : busyId === o.id
-                            ? "পাঠানো হচ্ছে…"
-                            : "Steadfast এ পাঠাও"}
-                      </Button>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditOrder(o as EditableOrder);
-                            setDialogOpen(true);
-                          }}
-                        >
-                          এডিট
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => printLabels([o])}>
-                          🖨 লেবেল
-                        </Button>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={ratioBusy === o.id}
-                          onClick={() => runRatio(o.id, o.phone)}
-                        >
-                          {ratioBusy === o.id ? "চেক হচ্ছে…" : "রেশিও চেক"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-rose-700"
-                          onClick={() => blockIp(o.customer_ip, o.customer_name)}
-                        >
-                          আইপি ব্লক
-                        </Button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {it.color_name} ({it.size}) ×{it.qty}
+                      </span>
+                    ))}
+                  </div>
+                  {o.courier_consignment_id && (
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      Steadfast: {o.courier_consignment_id}
+                      {o.courier_tracking_code ? ` · ${o.courier_tracking_code}` : ""}
+                    </p>
+                  )}
+                </div>
+
+                {/* মোট */}
+                <p className="pt-0.5 text-base font-extrabold">৳{o.total_amount}</p>
+
+                {/* পেমেন্ট */}
+                <div>
+                  <span
+                    className={`inline-block rounded-md px-2 py-1 text-xs font-bold ${
+                      o.status === "delivered"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {o.status === "delivered" ? "Paid" : "Pending"}
+                  </span>
+                  <p className="mt-1 text-[11px] text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
+                </div>
+
+                {/* স্ট্যাটাস */}
+                <div>
+                  <span
+                    className={`inline-block rounded-md px-2 py-1 text-xs font-bold ${
+                      STATUS_CLASS[o.status] ?? "bg-secondary"
+                    }`}
+                  >
+                    {STATUS[o.status] ?? o.status}
+                  </span>
+                  <div className="mt-2">
+                    <Select value={o.status} onValueChange={(v) => setStatus(o.id, v)}>
+                      <SelectTrigger className="h-8 w-28 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(STATUS).map(([k, v]) => (
+                          <SelectItem key={k} value={k}>
+                            {v}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* অ্যাকশন */}
+                <div className="flex flex-wrap gap-1.5 lg:justify-end">
+                  <Button
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => toCourier(o.id)}
+                    disabled={busyId === o.id || Boolean(o.courier_consignment_id)}
+                  >
+                    {o.courier_consignment_id
+                      ? "পাঠানো ✅"
+                      : busyId === o.id
+                        ? "পাঠানো হচ্ছে…"
+                        : "🚚 Steadfast"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      setEditOrder(o as EditableOrder);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    এডিট
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs"
+                    title="কুরিয়ার লেবেল প্রিন্ট"
+                    onClick={() => printLabels([o])}
+                  >
+                    🖨
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs text-rose-600 hover:bg-rose-50"
+                    title="এই কাস্টমারের আইপি ব্লক করুন"
+                    onClick={() => blockIp(o.customer_ip, o.customer_name)}
+                  >
+                    আইপি ব্লক
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
