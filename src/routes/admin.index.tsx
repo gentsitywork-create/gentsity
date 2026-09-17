@@ -484,6 +484,24 @@ function AdminOrders() {
                           🖨 লেবেল
                         </Button>
                       </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={ratioBusy === o.id}
+                          onClick={() => runRatio(o.id, o.phone)}
+                        >
+                          {ratioBusy === o.id ? "চেক হচ্ছে…" : "রেশিও চেক"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-rose-700"
+                          onClick={() => blockIp(o.customer_ip, o.customer_name)}
+                        >
+                          আইপি ব্লক
+                        </Button>
+                      </div>
                     </div>
                   </td>
                 </tr>
