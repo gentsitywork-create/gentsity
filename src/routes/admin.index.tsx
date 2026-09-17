@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendToCourier } from "@/lib/orders.functions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,14 @@ const STATUS: Record<string, string> = {
   shipped: "কুরিয়ারে",
   delivered: "ডেলিভারি হয়েছে",
   cancelled: "বাতিল",
+};
+
+const STATUS_CLASS: Record<string, string> = {
+  pending: "bg-amber-100 text-amber-800",
+  confirmed: "bg-blue-100 text-blue-800",
+  shipped: "bg-violet-100 text-violet-800",
+  delivered: "bg-emerald-100 text-emerald-800",
+  cancelled: "bg-rose-100 text-rose-800",
 };
 
 type OrderRow = {
@@ -47,23 +56,55 @@ function AdminOrders() {
   const qc = useQueryClient();
   const send = useServerFn(sendToCourier);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["admin-orders", filter],
+    queryKey: ["admin-orders"],
     queryFn: async () => {
-      let q = supabase
+      const { data, error } = await supabase
         .from("orders")
         .select(
           "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(size, color_name, qty)",
         )
         .order("created_at", { ascending: false });
-      if (filter !== "all") q = q.eq("status", filter);
-      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as OrderRow[];
     },
   });
+
+  const dateFiltered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return orders.filter((o) => {
+      const d = new Date(o.created_at);
+      if (from && d < new Date(`${from}T00:00:00`)) return false;
+      if (to && d > new Date(`${to}T23:59:59`)) return false;
+      if (
+        q &&
+        !(
+          o.customer_name.toLowerCase().includes(q) ||
+          o.phone.includes(q) ||
+          String(o.order_no).includes(q)
+        )
+      )
+        return false;
+      return true;
+    });
+  }, [orders, search, from, to]);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: dateFiltered.length };
+    for (const k of Object.keys(STATUS)) c[k] = 0;
+    for (const o of dateFiltered) c[o.status] = (c[o.status] ?? 0) + 1;
+    return c;
+  }, [dateFiltered]);
+
+  const rows = useMemo(
+    () => (filter === "all" ? dateFiltered : dateFiltered.filter((o) => o.status === filter)),
+    [dateFiltered, filter],
+  );
 
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
@@ -88,101 +129,193 @@ function AdminOrders() {
     }
   };
 
+  const exportCsv = () => {
+    const head = ["অর্ডার", "নাম", "মোবাইল", "ঠিকানা", "জেলা", "পণ্য", "টাকা", "স্ট্যাটাস", "তারিখ"];
+    const lines = rows.map((o) =>
+      [
+        o.order_no,
+        o.customer_name,
+        o.phone,
+        o.address,
+        o.district ?? "",
+        o.order_items.map((i) => `${i.size}-${i.color_name}x${i.qty}`).join(" | "),
+        o.total_amount,
+        STATUS[o.status] ?? o.status,
+        new Date(o.created_at).toLocaleString("bn-BD"),
+      ]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(","),
+    );
+    const blob = new Blob(["\uFEFF" + [head.join(","), ...lines].join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold">অর্ডার ({orders.length})</h1>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">সব অর্ডার</SelectItem>
-            {Object.entries(STATUS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight">অর্ডার ম্যানেজমেন্ট</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            অর্ডার দেখুন, স্ট্যাটাস বদলান ও কুরিয়ারে পাঠান।
+          </p>
+        </div>
+        <Button onClick={exportCsv} disabled={rows.length === 0}>
+          ⬇ এক্সপোর্ট
+        </Button>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="নাম, মোবাইল বা অর্ডার নম্বর খুঁজুন…"
+          className="w-full sm:w-80"
+        />
+        <div className="flex items-center gap-2">
+          <Input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="w-40"
+          />
+          <span className="text-sm text-muted-foreground">থেকে</span>
+          <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40" />
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {(["all", ...Object.keys(STATUS)] as string[]).map((k) => {
+          const active = filter === k;
+          return (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setFilter(k)}
+              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "bg-card hover:bg-secondary"
+              }`}
+            >
+              {k === "all" ? "সব" : STATUS[k]}
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-xs ${
+                  active ? "bg-primary-foreground/20" : "bg-secondary"
+                }`}
+              >
+                {counts[k] ?? 0}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {isLoading ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
-      ) : orders.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">এখনো কোনো অর্ডার নেই।</p>
+      ) : rows.length === 0 ? (
+        <p className="mt-6 text-sm text-muted-foreground">কোনো অর্ডার পাওয়া যায়নি।</p>
       ) : (
-        <div className="mt-5 grid gap-4">
-          {orders.map((o) => (
-            <div key={o.id} className="rounded-xl border bg-card p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-bold">
-                    #{o.order_no} — {o.customer_name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {o.phone} · {new Date(o.created_at).toLocaleString("bn-BD")}
-                  </p>
-                  <p className="mt-1 text-sm">
-                    {o.address}
-                    {o.district ? `, ${o.district}` : ""}
-                  </p>
-                  {o.note && <p className="mt-1 text-sm text-muted-foreground">নোট: {o.note}</p>}
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold">{o.total_amount} টাকা</p>
-                  <p className="text-xs text-muted-foreground">ডেলিভারি ফ্রি</p>
-                </div>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {o.order_items.map((it, i) => (
-                  <span key={i} className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">
-                    {it.size} · {it.color_name} × {it.qty}
-                  </span>
-                ))}
-              </div>
-
-              {o.courier_consignment_id && (
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Steadfast: {o.courier_consignment_id}
-                  {o.courier_tracking_code ? ` · ট্র্যাকিং ${o.courier_tracking_code}` : ""}
-                </p>
-              )}
-
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <Select value={o.status} onValueChange={(v) => setStatus(o.id, v)}>
-                  <SelectTrigger className="w-44">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(STATUS).map(([k, v]) => (
-                      <SelectItem key={k} value={k}>
-                        {v}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  size="sm"
-                  onClick={() => toCourier(o.id)}
-                  disabled={busyId === o.id || Boolean(o.courier_consignment_id)}
-                >
-                  {o.courier_consignment_id
-                    ? "কুরিয়ারে পাঠানো হয়েছে"
-                    : busyId === o.id
-                      ? "পাঠানো হচ্ছে…"
-                      : "Steadfast এ পাঠাও"}
-                </Button>
-                <a
-                  href={`tel:${o.phone}`}
-                  className="rounded-md border px-3 py-2 text-sm font-medium"
-                >
-                  কল করুন
-                </a>
-              </div>
-            </div>
-          ))}
+        <div className="mt-5 overflow-x-auto rounded-xl border bg-card">
+          <table className="w-full min-w-[840px] text-sm">
+            <thead className="border-b bg-secondary/50 text-left">
+              <tr>
+                <th className="px-4 py-3 font-semibold">অর্ডার তথ্য</th>
+                <th className="px-4 py-3 font-semibold">পণ্য</th>
+                <th className="px-4 py-3 font-semibold">মোট</th>
+                <th className="px-4 py-3 font-semibold">স্ট্যাটাস</th>
+                <th className="px-4 py-3 text-right font-semibold">অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((o) => (
+                <tr key={o.id} className="border-b last:border-0 align-top">
+                  <td className="px-4 py-4">
+                    <p className="font-bold text-primary">#{o.order_no}</p>
+                    <p className="font-semibold">{o.customer_name}</p>
+                    <a href={`tel:${o.phone}`} className="text-muted-foreground underline">
+                      {o.phone}
+                    </a>
+                    <p className="mt-1 max-w-xs text-xs text-muted-foreground">
+                      {o.address}
+                      {o.district ? `, ${o.district}` : ""}
+                    </p>
+                    {o.note && (
+                      <p className="mt-1 text-xs text-muted-foreground">নোট: {o.note}</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(o.created_at).toLocaleString("bn-BD")}
+                    </p>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {o.order_items.map((it, i) => (
+                        <span
+                          key={i}
+                          className="rounded-full border bg-secondary/60 px-2 py-1 text-xs font-medium"
+                        >
+                          {it.color_name} ({it.size}) ×{it.qty}
+                        </span>
+                      ))}
+                    </div>
+                    {o.courier_consignment_id && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Steadfast: {o.courier_consignment_id}
+                        {o.courier_tracking_code ? ` · ${o.courier_tracking_code}` : ""}
+                      </p>
+                    )}
+                  </td>
+                  <td className="px-4 py-4">
+                    <p className="font-bold">৳{o.total_amount}</p>
+                    <p className="text-xs text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span
+                      className={`inline-block rounded-md px-2 py-1 text-xs font-semibold ${
+                        STATUS_CLASS[o.status] ?? "bg-secondary"
+                      }`}
+                    >
+                      {STATUS[o.status] ?? o.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col items-end gap-2">
+                      <Select value={o.status} onValueChange={(v) => setStatus(o.id, v)}>
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(STATUS).map(([k, v]) => (
+                            <SelectItem key={k} value={k}>
+                              {v}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        size="sm"
+                        className="w-40"
+                        onClick={() => toCourier(o.id)}
+                        disabled={busyId === o.id || Boolean(o.courier_consignment_id)}
+                      >
+                        {o.courier_consignment_id
+                          ? "কুরিয়ারে পাঠানো"
+                          : busyId === o.id
+                            ? "পাঠানো হচ্ছে…"
+                            : "Steadfast এ পাঠাও"}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
