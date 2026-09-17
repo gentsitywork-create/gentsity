@@ -285,6 +285,33 @@ function AdminOrders() {
         })}
       </div>
 
+      {selected.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border bg-secondary/40 p-3">
+          <span className="text-sm font-semibold">{selected.length}টি অর্ডার সিলেক্ট করা হয়েছে</span>
+          <Button size="sm" onClick={bulkCourier} disabled={bulkBusy}>
+            {bulkBusy ? "কাজ চলছে…" : "Steadfast এ পাঠাও"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => printLabels(selectedRows)}>
+            🖨 কুরিয়ার লেবেল প্রিন্ট (QR)
+          </Button>
+          <Select onValueChange={bulkStatus}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="স্ট্যাটাস বদলান" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(STATUS).map(([k, v]) => (
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button size="sm" variant="ghost" onClick={() => setSelected([])}>
+            বাতিল
+          </Button>
+        </div>
+      )}
+
       {isLoading ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (
