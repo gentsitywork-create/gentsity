@@ -52,7 +52,7 @@ type OrderRow = {
   courier_consignment_id: string | null;
   courier_tracking_code: string | null;
   created_at: string;
-  order_items: { size: string; color_name: string; qty: number }[];
+  order_items: { variant_id: string | null; size: string; color_name: string; qty: number }[];
 };
 
 function AdminOrders() {
@@ -63,6 +63,10 @@ function AdminOrders() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editOrder, setEditOrder] = useState<EditableOrder | null>(null);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin-orders"],
@@ -70,7 +74,7 @@ function AdminOrders() {
       const { data, error } = await supabase
         .from("orders")
         .select(
-          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(size, color_name, qty)",
+          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(variant_id, size, color_name, qty)",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
