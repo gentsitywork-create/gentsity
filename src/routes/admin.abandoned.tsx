@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/abandoned")({
-  component: AbandonedCarts;
+  component: AbandonedCarts,
 });
 
 type CartItem = { variant_id: string; qty: number; color_name?: string };
