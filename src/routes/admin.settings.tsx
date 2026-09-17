@@ -94,6 +94,33 @@ function AdminSettings() {
             আইডি বসালেই ওয়েবসাইটে পিক্সেল চালু হয়ে যাবে (PageView, ViewContent, Purchase)।
           </p>
         </div>
+
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">Steadfast Courier API</h2>
+          <div className="grid gap-2">
+            <Label htmlFor="steadfast_api_key">API Key</Label>
+            <Input
+              id="steadfast_api_key"
+              type="password"
+              value={values.steadfast_api_key}
+              onChange={(e) => setValues({ ...values, steadfast_api_key: e.target.value })}
+              placeholder="Steadfast API Key বসান"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="steadfast_secret_key">Secret Key</Label>
+            <Input
+              id="steadfast_secret_key"
+              type="password"
+              value={values.steadfast_secret_key}
+              onChange={(e) => setValues({ ...values, steadfast_secret_key: e.target.value })}
+              placeholder="Steadfast Secret Key বসান"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            এই দুটি কী বসালে অর্ডার প্যানেল থেকে সরাসরি Steadfast-এ পাঠানো যাবে।
+          </p>
+        </div>
       </div>
       <Button type="submit" className="mt-5" disabled={saving}>
         {saving ? "সেভ হচ্ছে…" : "সেভ করুন"}
