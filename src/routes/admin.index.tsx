@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { sendToCourier } from "@/lib/orders.functions";
+import { sendToCourier, checkCourierRatio } from "@/lib/orders.functions";
 import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
 import { printCourierLabels } from "@/components/admin/printLabels";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ type OrderRow = {
   status: string;
   courier_consignment_id: string | null;
   courier_tracking_code: string | null;
+  customer_ip: string | null;
   created_at: string;
   order_items: { variant_id: string | null; size: string; color_name: string; qty: number }[];
 };
@@ -58,6 +59,11 @@ type OrderRow = {
 function AdminOrders() {
   const qc = useQueryClient();
   const send = useServerFn(sendToCourier);
+  const checkRatio = useServerFn(checkCourierRatio);
+  const [ratioBusy, setRatioBusy] = useState<string | null>(null);
+  const [ratios, setRatios] = useState<
+    Record<string, { total: number; success: number; cancelled: number; ratio: number }>
+  >({});
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [from, setFrom] = useState("");
@@ -74,7 +80,7 @@ function AdminOrders() {
       const { data, error } = await supabase
         .from("orders")
         .select(
-          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(variant_id, size, color_name, qty)",
+          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, created_at, order_items(variant_id, size, color_name, qty)",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
