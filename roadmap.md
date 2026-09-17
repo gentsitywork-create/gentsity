@@ -5,5 +5,5 @@
 - [x] কাস্টমার অর্ডার পেজ (সাইজ → রঙ → ৫ পিস → ঠিকানা)
 - [x] অ্যাডমিন লগইন ও প্যানেল (অর্ডার, স্টক, সেটিংস)
 - [x] Steadfast কুরিয়ার পাঠানোর বাটন
-- [ ] Steadfast API Key ও Secret Key দরকার (ইউজারের কাছ থেকে)
+- [x] Steadfast API Key ও Secret Key ইনপুট (সেটিংস → Steadfast Courier API)
 - [ ] Facebook Pixel ID সেটিংসে বসাতে হবে

@@ -255,6 +255,11 @@ export const claimAdmin = createServerFn({ method: "POST" })
     return { admin: true };
   });
 
+async function getSetting(supabaseAdmin: any, key: string): Promise<string | null> {
+  const { data } = await supabaseAdmin.from("settings").select("value").eq("key", key).maybeSingle();
+  return data?.value ?? null;
+}
+
 export const sendToCourier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ order_id: z.string().uuid() }).parse(data))
@@ -265,13 +270,16 @@ export const sendToCourier = createServerFn({ method: "POST" })
     });
     if (!isAdmin) throw new Error("অনুমতি নেই।");
 
-    const apiKey = process.env["STEADFAST_API_KEY"];
-    const secretKey = process.env["STEADFAST_SECRET_KEY"];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [apiKey, secretKey] = await Promise.all([
+      getSetting(supabaseAdmin, "steadfast_api_key"),
+      getSetting(supabaseAdmin, "steadfast_secret_key"),
+    ]);
     if (!apiKey || !secretKey) {
-      throw new Error("Steadfast এর API Key এখনো সেট করা হয়নি।");
+      throw new Error("Steadfast এর API Key এখনো সেট করা হয়নি। সেটিংসে Key গুলো বসান।");
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: order, error } = await supabaseAdmin
       .from("orders")
       .select("*")
