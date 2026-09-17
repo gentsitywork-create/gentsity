@@ -83,6 +83,7 @@ function Home() {
     queryKey: ["variants", size],
     enabled: Boolean(size),
     queryFn: async () => {
+      if (!size) return [] as Variant[];
       const { data, error } = await supabase
         .from("product_variants")
         .select("id, size, color_name, color_hex, image_url, stock")
