@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/stock")({
-  component: AdminStock;
+  component: AdminStock,
 });
 
 const SIZES = ["M", "L", "XL", "XXL"];
