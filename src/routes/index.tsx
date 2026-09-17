@@ -47,7 +47,7 @@ type Variant = {
 
 
 function Home() {
-  const [size, setSize] = useState<Size | null>(null);
+  const [size, setSize] = useState<Size | null>("M");
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "", note: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -387,7 +387,7 @@ function Home() {
             )}
 
             {size && totalPicked === 5 && (
-              <form onSubmit={handleOrder} className="mt-5 rounded-xl border bg-card p-5">
+              <form id="checkout" onSubmit={handleOrder} className="mt-5 rounded-xl border bg-card p-5">
                 <h2 className="text-lg font-bold">৩. ঠিকানা দিন</h2>
                 <div className="mt-4 grid gap-4">
                   <div className="grid gap-2">
