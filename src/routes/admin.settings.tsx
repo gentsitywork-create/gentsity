@@ -13,7 +13,13 @@ export const Route = createFileRoute("/admin/settings")({
 });
 
 function AdminSettings() {
-  const [values, setValues] = useState({ combo_price: "999", combo_qty: "5", fb_pixel_id: "" });
+  const [values, setValues] = useState({
+    combo_price: "999",
+    combo_qty: "5",
+    fb_pixel_id: "",
+    steadfast_api_key: "",
+    steadfast_secret_key: "",
+  });
   const [saving, setSaving] = useState(false);
 
   const { data } = useQuery({
@@ -33,6 +39,8 @@ function AdminSettings() {
         combo_price: data["combo_price"] ?? "999",
         combo_qty: data["combo_qty"] ?? "5",
         fb_pixel_id: data["fb_pixel_id"] ?? "",
+        steadfast_api_key: data["steadfast_api_key"] ?? "",
+        steadfast_secret_key: data["steadfast_secret_key"] ?? "",
       });
     }
   }, [data]);
