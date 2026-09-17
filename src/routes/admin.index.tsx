@@ -67,7 +67,10 @@ function AdminOrders() {
 
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-    if (error) return toast.error("স্ট্যাটাস বদলানো যায়নি।");
+    if (error) {
+      toast.error("স্ট্যাটাস বদলানো যায়নি।");
+      return;
+    }
     toast.success("স্ট্যাটাস আপডেট হয়েছে।");
     qc.invalidateQueries({ queryKey: ["admin-orders"] });
   };

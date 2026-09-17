@@ -1,0 +1,95 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+export const Route = createFileRoute("/admin/settings")({
+  component: AdminSettings,
+});
+
+function AdminSettings() {
+  const [values, setValues] = useState({ combo_price: "999", combo_qty: "5", fb_pixel_id: "" });
+  const [saving, setSaving] = useState(false);
+
+  const { data } = useQuery({
+    queryKey: ["admin-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("settings").select("key, value");
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r) => (map[r.key] = r.value ?? ""));
+      return map;
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      setValues({
+        combo_price: data["combo_price"] ?? "999",
+        combo_qty: data["combo_qty"] ?? "5",
+        fb_pixel_id: data["fb_pixel_id"] ?? "",
+      });
+    }
+  }, [data]);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const rows = Object.entries(values).map(([key, value]) => ({ key, value }));
+    const { error } = await supabase.from("settings").upsert(rows, { onConflict: "key" });
+    setSaving(false);
+    if (error) {
+      toast.error("সেভ হয়নি।");
+      return;
+    }
+    toast.success("সেভ হয়েছে।");
+  };
+
+  return (
+    <form onSubmit={save} className="max-w-lg rounded-xl border bg-card p-5">
+      <h1 className="text-lg font-bold">সেটিংস</h1>
+      <div className="mt-4 grid gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="price">কম্বো দাম (টাকা)</Label>
+          <Input
+            id="price"
+            type="number"
+            min={1}
+            value={values.combo_price}
+            onChange={(e) => setValues({ ...values, combo_price: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="qty">কত পিস কম্বো</Label>
+          <Input
+            id="qty"
+            type="number"
+            min={1}
+            value={values.combo_qty}
+            onChange={(e) => setValues({ ...values, combo_qty: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="pixel">Facebook Pixel ID</Label>
+          <Input
+            id="pixel"
+            value={values.fb_pixel_id}
+            onChange={(e) => setValues({ ...values, fb_pixel_id: e.target.value })}
+            placeholder="যেমন: 1234567890"
+          />
+          <p className="text-xs text-muted-foreground">
+            আইডি বসালেই ওয়েবসাইটে পিক্সেল চালু হয়ে যাবে (PageView, ViewContent, Purchase)।
+          </p>
+        </div>
+      </div>
+      <Button type="submit" className="mt-5" disabled={saving}>
+        {saving ? "সেভ হচ্ছে…" : "সেভ করুন"}
+      </Button>
+    </form>
+  );
+}
