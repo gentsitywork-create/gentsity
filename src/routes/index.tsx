@@ -72,7 +72,7 @@ function Home() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product_variants")
-        .select("id, size, color_name, color_hex, stock")
+        .select("id, size, color_name, color_hex, image_url, stock")
         .eq("size", size!)
         .eq("is_active", true)
         .gt("stock", 0)
@@ -81,6 +81,22 @@ function Home() {
       return data as Variant[];
     },
   });
+
+  const { data: images = {} } = useQuery({
+    queryKey: ["variant-images", variants.map((v) => v.image_url).join(",")],
+    enabled: variants.length > 0,
+    queryFn: async () => {
+      const paths = variants.map((v) => v.image_url).filter((p): p is string => Boolean(p));
+      const map: Record<string, string> = {};
+      if (paths.length === 0) return map;
+      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
+      (data ?? []).forEach((d) => {
+        if (d.path && d.signedUrl) map[d.path] = d.signedUrl;
+      });
+      return map;
+    },
+  });
+
 
   const totalPicked = useMemo(
     () => Object.values(picks).reduce((s, n) => s + n, 0),
