@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Minus, Plus, ShieldCheck, Truck, Wallet } from "lucide-react";
+import { Check, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { markCartOrdered, placeOrder, saveAbandonedCart } from "@/lib/orders.functions";
@@ -86,7 +86,7 @@ function Home() {
       const { data, error } = await supabase
         .from("product_variants")
         .select("id, size, color_name, color_hex, image_url, stock")
-        .eq("size", size!)
+        .eq("size", size)
         .eq("is_active", true)
         .gt("stock", 0)
         .order("sort_order");
@@ -162,23 +162,18 @@ function Home() {
     trackPixel("ViewContent", { content_name: `Polo ${s}` });
   };
 
-  const change = (v: Variant, delta: number) => {
+  const togglePick = (v: Variant) => {
     setPicks((prev) => {
-      const current = prev[v.id] ?? 0;
-      const next = current + delta;
-      if (next < 0) return prev;
-      if (next > v.stock) {
-        toast.error(`${v.color_name} রঙে মাত্র ${v.stock} পিস আছে।`);
-        return prev;
+      if (prev[v.id]) {
+        const copy = { ...prev };
+        delete copy[v.id];
+        return copy;
       }
-      if (delta > 0 && totalPicked >= 5) {
+      if (totalPicked >= 5) {
         toast.error("সর্বোচ্চ ৫ পিস নেওয়া যাবে।");
         return prev;
       }
-      const copy = { ...prev };
-      if (next === 0) delete copy[v.id];
-      else copy[v.id] = next;
-      return copy;
+      return { ...prev, [v.id]: 1 };
     });
   };
 
@@ -374,17 +369,20 @@ function Home() {
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {variants.map((v) => {
                       const qty = picks[v.id] ?? 0;
+                      const selectionNumber = Object.keys(picks).indexOf(v.id) + 1;
                       const img = v.image_url ? images[v.image_url] : undefined;
                       return (
                         <div
                           key={v.id}
-                          className={`overflow-hidden rounded-lg border ${
-                            qty > 0 ? "border-primary ring-2 ring-primary" : ""
+                          className={`overflow-hidden rounded-lg border-2 transition ${
+                            qty > 0 ? "border-primary ring-2 ring-primary" : "border-border"
                           }`}
                         >
                           <button
                             type="button"
-                            onClick={() => change(v, 1)}
+                            onClick={() => togglePick(v)}
+                            aria-pressed={qty > 0}
+                            aria-label={`${v.color_name} ${qty > 0 ? "বাদ দিন" : "সিলেক্ট করুন"}`}
                             className="relative block w-full"
                           >
                             {img ? (
@@ -400,35 +398,25 @@ function Home() {
                               />
                             )}
                             {qty > 0 && (
-                              <span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                                {qty}
-                              </span>
+                              <>
+                                <span className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                                  <Check className="h-5 w-5" />
+                                </span>
+                                <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-sm">
+                                  {selectionNumber}
+                                </span>
+                                <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm">
+                                  <Check className="h-4 w-4" /> সিলেক্টেড
+                                </span>
+                              </>
                             )}
                           </button>
                           <div className="p-2">
                             <p className="truncate text-sm font-semibold">{v.color_name}</p>
                             <p className="text-xs text-muted-foreground">স্টক: {v.stock} পিস</p>
-                            <div className="mt-2 flex items-center justify-between gap-1">
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                onClick={() => change(v, -1)}
-                                disabled={qty === 0}
-                              >
-                                <Minus className="h-4 w-4" />
-                              </Button>
-                              <span className="text-sm font-bold">{qty}</span>
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                onClick={() => change(v, 1)}
-                                disabled={totalPicked >= 5}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
+                            <p className={`mt-2 text-xs font-semibold ${qty > 0 ? "text-primary" : "text-muted-foreground"}`}>
+                              {qty > 0 ? `${selectionNumber} নম্বর পছন্দ` : "ছবিতে ট্যাপ করে সিলেক্ট করুন"}
+                            </p>
                           </div>
                         </div>
                       );
