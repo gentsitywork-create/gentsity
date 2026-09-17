@@ -26,6 +26,7 @@ export const Route = createFileRoute("/admin/")({
 const STATUS: Record<string, string> = {
   pending: "নতুন",
   confirmed: "কনফার্ম",
+  hold: "হোল্ড",
   shipped: "কুরিয়ারে",
   delivered: "ডেলিভারি হয়েছে",
   cancelled: "বাতিল",
@@ -34,6 +35,7 @@ const STATUS: Record<string, string> = {
 const STATUS_CLASS: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   confirmed: "bg-blue-100 text-blue-800",
+  hold: "bg-slate-200 text-slate-800",
   shipped: "bg-violet-100 text-violet-800",
   delivered: "bg-emerald-100 text-emerald-800",
   cancelled: "bg-rose-100 text-rose-800",
@@ -556,7 +558,9 @@ function AdminOrders() {
                     size="sm"
                     className="h-8 text-xs"
                     onClick={() => toCourier(o.id)}
-                    disabled={busyId === o.id || Boolean(o.courier_consignment_id)}
+                    disabled={
+                      busyId === o.id || Boolean(o.courier_consignment_id) || o.status === "hold"
+                    }
                   >
                     {o.courier_consignment_id
                       ? "পাঠানো ✅"
@@ -583,6 +587,17 @@ function AdminOrders() {
                     onClick={() => printLabels([o])}
                   >
                     🖨
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className={`h-8 text-xs ${
+                      o.status === "hold" ? "bg-slate-200 font-semibold text-slate-800" : ""
+                    }`}
+                    title={o.status === "hold" ? "হোল্ড থেকে সরান" : "অর্ডার হোল্ড করুন"}
+                    onClick={() => setStatus(o.id, o.status === "hold" ? "pending" : "hold")}
+                  >
+                    {o.status === "hold" ? "▶ হোল্ড সরান" : "⏸ হোল্ড"}
                   </Button>
                   <Button
                     size="sm"
