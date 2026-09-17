@@ -335,6 +335,12 @@ function AdminOrders() {
               {rows.map((o) => (
                 <tr key={o.id} className="border-b last:border-0 align-top">
                   <td className="px-4 py-4">
+                    <Checkbox
+                      checked={selected.includes(o.id)}
+                      onCheckedChange={() => toggleOne(o.id)}
+                    />
+                  </td>
+                  <td className="px-4 py-4">
                     <p className="font-bold text-primary">#{o.order_no}</p>
                     <p className="font-semibold">{o.customer_name}</p>
                     <a href={`tel:${o.phone}`} className="text-muted-foreground underline">
