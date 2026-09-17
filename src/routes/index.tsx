@@ -187,40 +187,77 @@ function Home() {
         </section>
       ) : (
         <>
-          <section className="mx-auto grid max-w-5xl gap-8 px-4 py-8 md:grid-cols-2 md:items-center">
+          <section className="mx-auto max-w-3xl px-4 pt-10 text-center">
+            <h1 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">
+              ১০০% কটন কাপড়ের ৫ পিস পোলো শার্ট{" "}
+              <span className="text-primary">{price} টাকা</span>{" "}
+              <span className="text-muted-foreground">(ফ্রী ডেলিভারি)</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। সাথে ডেলিভারি চার্জ
+                সম্পূর্ণ ফ্রি এবং ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, পণ্য নিয়ে টাকা
+                দিবেন।
+            </p>
+
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border bg-card p-4">
+                <p className="font-display text-2xl font-extrabold text-primary">{price}</p>
+                <p className="text-sm text-muted-foreground">টাকায়</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4">
+                <p className="font-display text-2xl font-extrabold text-primary">৫</p>
+                <p className="text-sm text-muted-foreground">টি প্রডাক্ট</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4">
+                <p className="font-display text-2xl font-extrabold text-muted-foreground line-through">
+                  ৳১,৫০০
+                </p>
+                <p className="text-sm text-muted-foreground">রেগুলার দাম</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4">
+                <p className="font-display text-2xl font-extrabold text-primary">৳৫০০+</p>
+                <p className="text-sm text-muted-foreground">সেভ করুন</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4">
+                <p className="font-display text-2xl font-extrabold text-primary">
+                  <Truck className="mx-auto h-6 w-6" />
+                </p>
+                <p className="text-sm text-muted-foreground">ফ্রি ডেলিভারি</p>
+              </div>
+              <div className="rounded-xl border bg-card p-4">
+                <p className="font-display text-2xl font-extrabold text-primary">
+                  <Wallet className="mx-auto h-6 w-6" />
+                </p>
+                <p className="text-sm text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
+              </div>
+            </div>
+
+            <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" /> ১০০% এক্সপোর্ট কোয়ালিটি কটন
+              </li>
+              <li className="flex items-center gap-2">
+                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ফ্রি ডেলিভারি
+              </li>
+              <li className="flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন
+              </li>
+            </ul>
+
             <img
               src={comboImage}
               alt="৫ পিস প্রিমিয়াম পোলো শার্ট কম্বো"
               width={1200}
               height={912}
-              className="w-full rounded-xl border object-cover"
+              className="mt-8 w-full rounded-xl border object-cover"
             />
-            <div>
-              <h1 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">
-                ৫ পিস প্রিমিয়াম পোলো শার্ট <span className="text-primary">{price} টাকা</span>
-              </h1>
-              <p className="mt-3 text-muted-foreground">
-                নিজের পছন্দের সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৫ পিস বেছে নিন। সারা বাংলাদেশে ফ্রি
-                হোম ডেলিভারি, হাতে পেয়ে টাকা দিন।
-              </p>
-              <ul className="mt-5 grid gap-3 text-sm">
-                <li className="flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ফ্রি ডেলিভারি
-                </li>
-                <li className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-primary" /> ক্যাশ অন ডেলিভারি
-                </li>
-                <li className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-primary" /> ১০০% এক্সপোর্ট কোয়ালিটি কটন
-                </li>
-              </ul>
-              <a
-                href="#order"
-                className="mt-6 inline-flex rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground"
-              >
-                অর্ডার করুন
-              </a>
-            </div>
+
+            <a
+              href="#order"
+              className="mt-6 inline-flex rounded-md bg-primary px-8 py-3 font-semibold text-primary-foreground"
+            >
+              অর্ডার করুন
+            </a>
           </section>
 
           <section id="order" className="mx-auto max-w-3xl px-4 pb-16">
