@@ -144,7 +144,7 @@ function AbandonedCarts() {
           <button
             key={key}
             type="button"
-            onClick={() => setTab(key)}
+            onClick={() => setTab(key as string)}
             className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
               tab === key ? "border-primary bg-primary text-primary-foreground" : "bg-card"
             }`}
