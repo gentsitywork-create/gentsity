@@ -142,6 +142,38 @@ function AdminOrders() {
     }
   };
 
+  const runRatio = async (id: string, phone: string) => {
+    setRatioBusy(id);
+    try {
+      const r = await checkRatio({ data: { phone } });
+      setRatios((p) => ({
+        ...p,
+        [id]: { total: r.total, success: r.success, cancelled: r.cancelled, ratio: r.ratio },
+      }));
+      toast.success(`সাকসেস রেশিও ${r.ratio}% (মোট ${r.total}টি পার্সেল)`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "রেশিও চেক করা যায়নি।");
+    } finally {
+      setRatioBusy(null);
+    }
+  };
+
+  const blockIp = async (ip: string | null, name: string) => {
+    if (!ip) {
+      toast.error("এই অর্ডারে কাস্টমারের আইপি সেভ হয়নি।");
+      return;
+    }
+    const { error } = await supabase
+      .from("blocked_ips")
+      .insert({ ip, reason: `ভুয়া অর্ডার — ${name}` });
+    if (error) {
+      toast.error("ব্লক করা যায়নি (হয়তো আগেই ব্লক করা আছে)।");
+      return;
+    }
+    toast.success(`${ip} ব্লক করা হয়েছে।`);
+    qc.invalidateQueries({ queryKey: ["blocked-ips"] });
+  };
+
   const selectedRows = useMemo(
     () => rows.filter((o) => selected.includes(o.id)),
     [rows, selected],
@@ -362,6 +394,23 @@ function AdminOrders() {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {new Date(o.created_at).toLocaleString("bn-BD")}
                     </p>
+                    {o.customer_ip && (
+                      <p className="mt-1 text-xs text-muted-foreground">আইপি: {o.customer_ip}</p>
+                    )}
+                    {ratios[o.id] && (
+                      <p
+                        className={`mt-1 text-xs font-semibold ${
+                          ratios[o.id]!.ratio >= 70
+                            ? "text-emerald-700"
+                            : ratios[o.id]!.ratio >= 40
+                              ? "text-amber-700"
+                              : "text-rose-700"
+                        }`}
+                      >
+                        সাকসেস রেশিও: {ratios[o.id]!.ratio}% (মোট {ratios[o.id]!.total}, সফল{" "}
+                        {ratios[o.id]!.success}, বাতিল {ratios[o.id]!.cancelled})
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-wrap gap-1">
