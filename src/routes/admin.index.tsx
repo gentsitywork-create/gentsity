@@ -26,6 +26,7 @@ export const Route = createFileRoute("/admin/")({
 const STATUS: Record<string, string> = {
   pending: "নতুন",
   confirmed: "কনফার্ম",
+  hold: "হোল্ড",
   shipped: "কুরিয়ারে",
   delivered: "ডেলিভারি হয়েছে",
   cancelled: "বাতিল",
@@ -34,6 +35,7 @@ const STATUS: Record<string, string> = {
 const STATUS_CLASS: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   confirmed: "bg-blue-100 text-blue-800",
+  hold: "bg-slate-200 text-slate-800",
   shipped: "bg-violet-100 text-violet-800",
   delivered: "bg-emerald-100 text-emerald-800",
   cancelled: "bg-rose-100 text-rose-800",
