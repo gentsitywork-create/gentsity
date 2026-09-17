@@ -136,6 +136,57 @@ function AdminOrders() {
     }
   };
 
+  const selectedRows = useMemo(
+    () => rows.filter((o) => selected.includes(o.id)),
+    [rows, selected],
+  );
+
+  const toggleOne = (id: string) =>
+    setSelected((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+
+  const allChecked = rows.length > 0 && rows.every((o) => selected.includes(o.id));
+  const toggleAll = () => setSelected(allChecked ? [] : rows.map((o) => o.id));
+
+  const bulkStatus = async (status: string) => {
+    setBulkBusy(true);
+    const { error } = await supabase.from("orders").update({ status }).in("id", selected);
+    setBulkBusy(false);
+    if (error) {
+      toast.error("স্ট্যাটাস বদলানো যায়নি।");
+      return;
+    }
+    toast.success(`${selected.length}টি অর্ডারের স্ট্যাটাস আপডেট হয়েছে।`);
+    setSelected([]);
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+  };
+
+  const bulkCourier = async () => {
+    setBulkBusy(true);
+    let ok = 0;
+    let fail = 0;
+    for (const o of selectedRows) {
+      if (o.courier_consignment_id) continue;
+      try {
+        await send({ data: { order_id: o.id } });
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setBulkBusy(false);
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    if (ok) toast.success(`${ok}টি অর্ডার Steadfast এ পাঠানো হয়েছে।`);
+    if (fail) toast.error(`${fail}টি অর্ডার পাঠানো যায়নি।`);
+  };
+
+  const printLabels = async (list: OrderRow[]) => {
+    if (list.length === 0) {
+      toast.error("আগে অর্ডার সিলেক্ট করুন।");
+      return;
+    }
+    await printCourierLabels(list);
+  };
+
   const exportCsv = () => {
     const head = ["অর্ডার", "নাম", "মোবাইল", "ঠিকানা", "জেলা", "পণ্য", "টাকা", "স্ট্যাটাস", "তারিখ"];
     const lines = rows.map((o) =>
