@@ -114,11 +114,22 @@ function Home() {
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!size) return toast.error("আগে সাইজ বাছুন।");
-    if (totalPicked !== 5) return toast.error("ঠিক ৫ পিস সিলেক্ট করুন।");
-    if (!/^01[3-9]\d{8}$/.test(form.phone.trim()))
-      return toast.error("সঠিক মোবাইল নম্বর দিন (যেমন ০১৭xxxxxxxx)।");
-    if (form.address.trim().length < 10) return toast.error("সম্পূর্ণ ঠিকানা লিখুন।");
+    if (!size) {
+      toast.error("আগে সাইজ বাছুন।");
+      return;
+    }
+    if (totalPicked !== 5) {
+      toast.error("ঠিক ৫ পিস সিলেক্ট করুন।");
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(form.phone.trim())) {
+      toast.error("সঠিক মোবাইল নম্বর দিন (যেমন ০১৭xxxxxxxx)।");
+      return;
+    }
+    if (form.address.trim().length < 10) {
+      toast.error("সম্পূর্ণ ঠিকানা লিখুন।");
+      return;
+    }
 
     setSubmitting(true);
     try {
