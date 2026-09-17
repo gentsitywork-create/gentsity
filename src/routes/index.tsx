@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -47,7 +47,7 @@ type Variant = {
 
 
 function Home() {
-  const [size, setSize] = useState<Size | null>(null);
+  const [size, setSize] = useState<Size | null>("M");
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [form, setForm] = useState({ name: "", phone: "", address: "", district: "", note: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -102,6 +102,18 @@ function Home() {
     () => Object.values(picks).reduce((s, n) => s + n, 0),
     [picks],
   );
+
+  const prevPicked = useRef(0);
+  useEffect(() => {
+    if (totalPicked === 5 && prevPicked.current === 4) {
+      setTimeout(() => {
+        document
+          .getElementById("checkout")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+    prevPicked.current = totalPicked;
+  }, [totalPicked]);
 
   const chooseSize = (s: Size) => {
     setSize(s);
@@ -387,7 +399,7 @@ function Home() {
             )}
 
             {size && totalPicked === 5 && (
-              <form onSubmit={handleOrder} className="mt-5 rounded-xl border bg-card p-5">
+              <form id="checkout" onSubmit={handleOrder} className="mt-5 rounded-xl border bg-card p-5">
                 <h2 className="text-lg font-bold">৩. ঠিকানা দিন</h2>
                 <div className="mt-4 grid gap-4">
                   <div className="grid gap-2">
