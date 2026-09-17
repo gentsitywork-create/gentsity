@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { sendToCourier } from "@/lib/orders.functions";
+import { sendToCourier, checkCourierRatio } from "@/lib/orders.functions";
 import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
 import { printCourierLabels } from "@/components/admin/printLabels";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ type OrderRow = {
   status: string;
   courier_consignment_id: string | null;
   courier_tracking_code: string | null;
+  customer_ip: string | null;
   created_at: string;
   order_items: { variant_id: string | null; size: string; color_name: string; qty: number }[];
 };
@@ -58,6 +59,11 @@ type OrderRow = {
 function AdminOrders() {
   const qc = useQueryClient();
   const send = useServerFn(sendToCourier);
+  const checkRatio = useServerFn(checkCourierRatio);
+  const [ratioBusy, setRatioBusy] = useState<string | null>(null);
+  const [ratios, setRatios] = useState<
+    Record<string, { total: number; success: number; cancelled: number; ratio: number }>
+  >({});
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [from, setFrom] = useState("");
@@ -74,7 +80,7 @@ function AdminOrders() {
       const { data, error } = await supabase
         .from("orders")
         .select(
-          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, created_at, order_items(variant_id, size, color_name, qty)",
+          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, created_at, order_items(variant_id, size, color_name, qty)",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -134,6 +140,38 @@ function AdminOrders() {
     } finally {
       setBusyId(null);
     }
+  };
+
+  const runRatio = async (id: string, phone: string) => {
+    setRatioBusy(id);
+    try {
+      const r = await checkRatio({ data: { phone } });
+      setRatios((p) => ({
+        ...p,
+        [id]: { total: r.total, success: r.success, cancelled: r.cancelled, ratio: r.ratio },
+      }));
+      toast.success(`সাকসেস রেশিও ${r.ratio}% (মোট ${r.total}টি পার্সেল)`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "রেশিও চেক করা যায়নি।");
+    } finally {
+      setRatioBusy(null);
+    }
+  };
+
+  const blockIp = async (ip: string | null, name: string) => {
+    if (!ip) {
+      toast.error("এই অর্ডারে কাস্টমারের আইপি সেভ হয়নি।");
+      return;
+    }
+    const { error } = await supabase
+      .from("blocked_ips")
+      .insert({ ip, reason: `ভুয়া অর্ডার — ${name}` });
+    if (error) {
+      toast.error("ব্লক করা যায়নি (হয়তো আগেই ব্লক করা আছে)।");
+      return;
+    }
+    toast.success(`${ip} ব্লক করা হয়েছে।`);
+    qc.invalidateQueries({ queryKey: ["blocked-ips"] });
   };
 
   const selectedRows = useMemo(
@@ -356,6 +394,23 @@ function AdminOrders() {
                     <p className="mt-1 text-xs text-muted-foreground">
                       {new Date(o.created_at).toLocaleString("bn-BD")}
                     </p>
+                    {o.customer_ip && (
+                      <p className="mt-1 text-xs text-muted-foreground">আইপি: {o.customer_ip}</p>
+                    )}
+                    {ratios[o.id] && (
+                      <p
+                        className={`mt-1 text-xs font-semibold ${
+                          ratios[o.id]!.ratio >= 70
+                            ? "text-emerald-700"
+                            : ratios[o.id]!.ratio >= 40
+                              ? "text-amber-700"
+                              : "text-rose-700"
+                        }`}
+                      >
+                        সাকসেস রেশিও: {ratios[o.id]!.ratio}% (মোট {ratios[o.id]!.total}, সফল{" "}
+                        {ratios[o.id]!.success}, বাতিল {ratios[o.id]!.cancelled})
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-wrap gap-1">
@@ -427,6 +482,24 @@ function AdminOrders() {
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => printLabels([o])}>
                           🖨 লেবেল
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={ratioBusy === o.id}
+                          onClick={() => runRatio(o.id, o.phone)}
+                        >
+                          {ratioBusy === o.id ? "চেক হচ্ছে…" : "রেশিও চেক"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-rose-700"
+                          onClick={() => blockIp(o.customer_ip, o.customer_name)}
+                        >
+                          আইপি ব্লক
                         </Button>
                       </div>
                     </div>

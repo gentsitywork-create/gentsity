@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_ips: {
+        Row: {
+          created_at: string
+          id: string
+          ip: string
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip: string
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           color_name: string
@@ -66,6 +87,7 @@ export type Database = {
           courier_status: string | null
           courier_tracking_code: string | null
           created_at: string
+          customer_ip: string | null
           customer_name: string
           delivery_charge: number
           district: string | null
@@ -83,6 +105,7 @@ export type Database = {
           courier_status?: string | null
           courier_tracking_code?: string | null
           created_at?: string
+          customer_ip?: string | null
           customer_name: string
           delivery_charge?: number
           district?: string | null
@@ -100,6 +123,7 @@ export type Database = {
           courier_status?: string | null
           courier_tracking_code?: string | null
           created_at?: string
+          customer_ip?: string | null
           customer_name?: string
           delivery_charge?: number
           district?: string | null
