@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -102,6 +102,18 @@ function Home() {
     () => Object.values(picks).reduce((s, n) => s + n, 0),
     [picks],
   );
+
+  const prevPicked = useRef(0);
+  useEffect(() => {
+    if (totalPicked === 5 && prevPicked.current === 4) {
+      setTimeout(() => {
+        document
+          .getElementById("checkout")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+    prevPicked.current = totalPicked;
+  }, [totalPicked]);
 
   const chooseSize = (s: Size) => {
     setSize(s);
