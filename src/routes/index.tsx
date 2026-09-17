@@ -300,49 +300,70 @@ function Home() {
                     এই সাইজে এখন কোনো রঙ স্টকে নেই। অন্য সাইজ দেখুন।
                   </p>
                 ) : (
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {variants.map((v) => {
                       const qty = picks[v.id] ?? 0;
+                      const img = v.image_url ? images[v.image_url] : undefined;
                       return (
                         <div
                           key={v.id}
-                          className={`flex items-center gap-3 rounded-lg border p-3 ${
-                            qty > 0 ? "border-primary" : ""
+                          className={`overflow-hidden rounded-lg border ${
+                            qty > 0 ? "border-primary ring-2 ring-primary" : ""
                           }`}
                         >
-                          <span
-                            className="h-9 w-9 shrink-0 rounded-full border"
-                            style={{ backgroundColor: v.color_hex }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate font-semibold">{v.color_name}</p>
+                          <button
+                            type="button"
+                            onClick={() => change(v, 1)}
+                            className="relative block w-full"
+                          >
+                            {img ? (
+                              <img
+                                src={img}
+                                alt={v.color_name}
+                                className="aspect-square w-full object-cover"
+                              />
+                            ) : (
+                              <span
+                                className="block aspect-square w-full"
+                                style={{ backgroundColor: v.color_hex }}
+                              />
+                            )}
+                            {qty > 0 && (
+                              <span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                                {qty}
+                              </span>
+                            )}
+                          </button>
+                          <div className="p-2">
+                            <p className="truncate text-sm font-semibold">{v.color_name}</p>
                             <p className="text-xs text-muted-foreground">স্টক: {v.stock} পিস</p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="outline"
-                              onClick={() => change(v, -1)}
-                              disabled={qty === 0}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="w-6 text-center font-bold">{qty}</span>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="outline"
-                              onClick={() => change(v, 1)}
-                              disabled={totalPicked >= 5}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
+                            <div className="mt-2 flex items-center justify-between gap-1">
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                onClick={() => change(v, -1)}
+                                disabled={qty === 0}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="text-sm font-bold">{qty}</span>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                onClick={() => change(v, 1)}
+                                disabled={totalPicked >= 5}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
+
                 )}
               </div>
             )}
