@@ -1,6 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+function clientIp(): string {
+  const fwd = getRequestHeader("x-forwarded-for") ?? "";
+  const first = fwd.split(",")[0]?.trim();
+  return first || getRequestIP({ xForwardedFor: true }) || "";
+}
 
 const orderSchema = z.object({
   customer_name: z.string().trim().min(2).max(80),
@@ -22,6 +29,18 @@ export const placeOrder = createServerFn({ method: "POST" })
     if (totalQty !== 5) throw new Error("অনুগ্রহ করে ঠিক ৫ পিস সিলেক্ট করুন।");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const ip = clientIp();
+    if (ip) {
+      const { data: blocked } = await supabaseAdmin
+        .from("blocked_ips")
+        .select("id")
+        .eq("ip", ip)
+        .maybeSingle();
+      if (blocked) {
+        throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। সহায়তার জন্য যোগাযোগ করুন।");
+      }
+    }
 
     const ids = data.items.map((i) => i.variant_id);
     const { data: variants, error: vErr } = await supabaseAdmin
@@ -57,6 +76,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         note: data.note || null,
         total_amount: total,
         delivery_charge: 0,
+        customer_ip: clientIp() || null,
       })
       .select("id, order_no")
       .single();
