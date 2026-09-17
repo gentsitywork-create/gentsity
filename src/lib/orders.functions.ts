@@ -397,3 +397,136 @@ export const checkCourierRatio = createServerFn({ method: "POST" })
 
     return { phone: data.phone, total, success, cancelled, ratio, couriers };
   });
+
+/* ===================== অসম্পূর্ণ অর্ডার (Abandoned Cart) ===================== */
+
+const cartSchema = z.object({
+  session_key: z.string().trim().min(8).max(80),
+  customer_name: z.string().trim().max(80).optional().default(""),
+  phone: z.string().trim().max(20).optional().default(""),
+  address: z.string().trim().max(400).optional().default(""),
+  district: z.string().trim().max(60).optional().default(""),
+  note: z.string().trim().max(300).optional().default(""),
+  size: z.enum(["M", "L", "XL", "XXL"]),
+  items: z
+    .array(
+      z.object({
+        variant_id: z.string().uuid(),
+        color_name: z.string().trim().max(60).optional().default(""),
+        qty: z.number().int().min(1).max(5),
+      }),
+    )
+    .max(5),
+});
+
+/** কাস্টমার সিলেক্ট/তথ্য দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার না করলেও) */
+export const saveAbandonedCart = createServerFn({ method: "POST" })
+  .inputValidator((data) => cartSchema.parse(data))
+  .handler(async ({ data }) => {
+    if (!/^01[3-9]\d{8}$/.test(data.phone)) return { saved: false };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const total = Number((await getSetting(supabaseAdmin, "combo_price")) ?? 999) || 999;
+
+    const { error } = await supabaseAdmin.from("abandoned_carts").upsert(
+      {
+        session_key: data.session_key,
+        customer_name: data.customer_name || null,
+        phone: data.phone,
+        address: data.address || null,
+        district: data.district || null,
+        note: data.note || null,
+        size: data.size,
+        items: data.items,
+        total_amount: total,
+        customer_ip: clientIp() || null,
+      },
+      { onConflict: "session_key" },
+    );
+    if (error) return { saved: false };
+    return { saved: true };
+  });
+
+/** অর্ডার সফল হলে কার্টটি "অর্ডার হয়েছে" হিসেবে চিহ্নিত করা */
+export const markCartOrdered = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ session_key: z.string().trim().min(8).max(80) }).parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("abandoned_carts").delete().eq("session_key", data.session_key);
+    return { ok: true };
+  });
+
+/** অ্যাডমিন কল করে কনফার্ম করলে কার্ট থেকে সরাসরি অর্ডার তৈরি */
+export const confirmAbandonedCart = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ cart_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: cart, error } = await supabaseAdmin
+      .from("abandoned_carts")
+      .select("*")
+      .eq("id", data.cart_id)
+      .single();
+    if (error || !cart) throw new Error("কার্ট পাওয়া যায়নি।");
+    if (cart.order_id) throw new Error("এই কার্ট থেকে আগেই অর্ডার তৈরি হয়েছে।");
+    if (!cart.phone || !cart.address) {
+      throw new Error("মোবাইল ও ঠিকানা ছাড়া অর্ডার কনফার্ম করা যাবে না। আগে তথ্য এডিট করুন।");
+    }
+
+    const items = (cart.items as { variant_id: string; qty: number; color_name?: string }[]) ?? [];
+    if (items.length === 0) throw new Error("কার্টে কোনো পণ্য নেই।");
+
+    const ids = items.map((i) => i.variant_id);
+    const { data: variants } = await supabaseAdmin
+      .from("product_variants")
+      .select("id, size, color_name, stock")
+      .in("id", ids);
+
+    const { data: order, error: oErr } = await supabaseAdmin
+      .from("orders")
+      .insert({
+        customer_name: cart.customer_name || "কাস্টমার",
+        phone: cart.phone,
+        address: cart.address,
+        district: cart.district,
+        note: cart.note,
+        total_amount: cart.total_amount || 999,
+        delivery_charge: 0,
+        status: "confirmed",
+        customer_ip: cart.customer_ip,
+      })
+      .select("id, order_no")
+      .single();
+    if (oErr || !order) throw new Error("অর্ডার তৈরি হয়নি।");
+
+    await supabaseAdmin.from("order_items").insert(
+      items.map((it) => {
+        const v = variants?.find((x) => x.id === it.variant_id);
+        return {
+          order_id: order.id,
+          variant_id: v ? v.id : null,
+          size: v?.size ?? cart.size ?? "M",
+          color_name: v?.color_name ?? it.color_name ?? "—",
+          qty: it.qty,
+        };
+      }),
+    );
+
+    for (const it of items) {
+      const v = variants?.find((x) => x.id === it.variant_id);
+      if (!v) continue;
+      await supabaseAdmin
+        .from("product_variants")
+        .update({ stock: Math.max(0, v.stock - it.qty) })
+        .eq("id", v.id);
+    }
+
+    await supabaseAdmin
+      .from("abandoned_carts")
+      .update({ status: "converted", order_id: order.id })
+      .eq("id", cart.id);
+
+    return { order_no: order.order_no };
+  });

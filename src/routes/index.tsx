@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Check, Minus, Plus, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { placeOrder } from "@/lib/orders.functions";
+import { markCartOrdered, placeOrder, saveAbandonedCart } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,19 @@ function Home() {
   const [done, setDone] = useState<{ order_no: number; total: number } | null>(null);
 
   const submit = useServerFn(placeOrder);
+  const saveCart = useServerFn(saveAbandonedCart);
+  const clearCart = useServerFn(markCartOrdered);
+
+  /** ব্রাউজারে একটি স্থায়ী কী — একই ভিজিটরের অসম্পূর্ণ কার্ট একটাই থাকে */
+  const sessionKey = useRef<string>("");
+  if (!sessionKey.current && typeof window !== "undefined") {
+    let k = window.localStorage.getItem("gentsity_cart_key");
+    if (!k) {
+      k = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      window.localStorage.setItem("gentsity_cart_key", k);
+    }
+    sessionKey.current = k;
+  }
 
   const { data: settings } = useQuery({
     queryKey: ["settings"],
@@ -115,6 +128,33 @@ function Home() {
     prevPicked.current = totalPicked;
   }, [totalPicked]);
 
+  /** মোবাইল নম্বর দিলে অসম্পূর্ণ কার্ট ব্যাক-এন্ডে সেভ হয় (অর্ডার শেষ না করলেও) */
+  useEffect(() => {
+    if (done || !size) return;
+    const phone = form.phone.trim();
+    if (!/^01[3-9]\d{8}$/.test(phone)) return;
+    const timer = setTimeout(() => {
+      saveCart({
+        data: {
+          session_key: sessionKey.current,
+          customer_name: form.name.trim(),
+          phone,
+          address: form.address.trim(),
+          district: form.district.trim(),
+          note: form.note.trim(),
+          size,
+          items: Object.entries(picks).map(([variant_id, qty]) => ({
+            variant_id,
+            qty,
+            color_name: variants.find((v) => v.id === variant_id)?.color_name ?? "",
+          })),
+        },
+      }).catch(() => {});
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [form, picks, size, done, saveCart, variants]);
+
+
   const chooseSize = (s: Size) => {
     setSize(s);
     setPicks({});
@@ -175,6 +215,7 @@ function Home() {
         },
       });
       trackPixel("Purchase", { value: res.total, currency: "BDT" });
+      clearCart({ data: { session_key: sessionKey.current } }).catch(() => {});
       setDone(res);
       setPicks({});
       setForm({ name: "", phone: "", address: "", district: "", note: "" });

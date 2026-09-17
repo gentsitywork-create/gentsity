@@ -107,6 +107,16 @@ function AdminOrders() {
     });
   }, [orders, search, from, to]);
 
+  /** একই মোবাইল নম্বরে কতগুলো অর্ডার আছে — ডুপ্লিকেট ইন্ডিকেটরের জন্য */
+  const phoneCount = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const o of orders) {
+      if (o.status === "cancelled") continue;
+      map[o.phone] = (map[o.phone] ?? 0) + 1;
+    }
+    return map;
+  }, [orders]);
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: dateFiltered.length };
     for (const k of Object.keys(STATUS)) c[k] = 0;
@@ -407,7 +417,19 @@ function AdminOrders() {
 
                 {/* অর্ডার তথ্য */}
                 <div className="min-w-0">
-                  <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
+                    {(phoneCount[o.phone] ?? 0) > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch(o.phone)}
+                        title="এই নম্বরে একাধিক অর্ডার আছে — ক্লিক করে সব দেখুন"
+                        className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive"
+                      >
+                        ⚠ ডুপ্লিকেট ({phoneCount[o.phone]})
+                      </button>
+                    )}
+                  </div>
                   <p className="mt-0.5 font-bold">{o.customer_name}</p>
                   <div className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <a href={`tel:${o.phone}`} className="font-medium hover:underline">
