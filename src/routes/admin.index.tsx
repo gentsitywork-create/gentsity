@@ -224,9 +224,19 @@ function AdminOrders() {
             অর্ডার দেখুন, স্ট্যাটাস বদলান ও কুরিয়ারে পাঠান।
           </p>
         </div>
-        <Button onClick={exportCsv} disabled={rows.length === 0}>
-          ⬇ এক্সপোর্ট
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              setEditOrder(null);
+              setDialogOpen(true);
+            }}
+          >
+            + ম্যানুয়াল অর্ডার
+          </Button>
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
+            ⬇ এক্সপোর্ট
+          </Button>
+        </div>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
