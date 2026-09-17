@@ -41,8 +41,10 @@ type Variant = {
   size: string;
   color_name: string;
   color_hex: string;
+  image_url: string | null;
   stock: number;
 };
+
 
 function Home() {
   const [size, setSize] = useState<Size | null>(null);
