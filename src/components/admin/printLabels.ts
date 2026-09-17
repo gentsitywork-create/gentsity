@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import JsBarcode from "jsbarcode";
 
 export type LabelOrder = {
   order_no: number;
@@ -15,35 +16,87 @@ export type LabelOrder = {
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+function barcodeDataUrl(value: string) {
+  const canvas = document.createElement("canvas");
+  try {
+    JsBarcode(canvas, value, {
+      format: "CODE128",
+      displayValue: false,
+      height: 70,
+      width: 2,
+      margin: 0,
+      background: "#ffffff",
+      lineColor: "#000000",
+    });
+    return canvas.toDataURL("image/png");
+  } catch {
+    return "";
+  }
+}
+
+const digitsOf = (o: LabelOrder) => {
+  const raw = (o.courier_consignment_id || "").replace(/\D/g, "");
+  if (raw.length >= 6) return raw;
+  return String(100000000 + o.order_no * 7919).slice(0, 9);
+};
+
 export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity") {
   if (orders.length === 0) return;
 
+  const dateStr = new Date().toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   const labels = await Promise.all(
     orders.map(async (o) => {
-      const code = o.courier_tracking_code || o.courier_consignment_id || `GT-${o.order_no}`;
+      const code = o.courier_tracking_code || o.courier_consignment_id || `GT${o.order_no}`;
+      const invoice = code.toUpperCase();
+      const digits = digitsOf(o);
       const qrValue = o.courier_tracking_code
         ? `https://steadfast.com.bd/t/${o.courier_tracking_code}`
         : code;
-      const qr = await QRCode.toDataURL(qrValue, { margin: 1, width: 220 });
+      const qr = await QRCode.toDataURL(qrValue, { margin: 0, width: 260 });
+      const bars = barcodeDataUrl(digits);
+      const totalQty = o.order_items.reduce((s, i) => s + i.qty, 0);
       const items = o.order_items
-        .map((i) => `${esc(i.color_name)} (${esc(i.size)}) ×${i.qty}`)
+        .map((i) => `${esc(i.color_name)} (${esc(i.size)}) × ${i.qty}`)
         .join(", ");
       return `
         <div class="label">
-          <div class="top">
-            <div>
-              <div class="brand">${esc(brand)}</div>
-              <div class="courier">Steadfast Courier</div>
-            </div>
-            <img class="qr" src="${qr}" alt="QR" />
+          <div class="head">
+            <div class="brand">RTN &gt; ${esc(brand.toUpperCase())} - ${esc(invoice)}</div>
+            <div class="inv">Invoice: #${esc(invoice)}</div>
           </div>
-          <div class="code">${esc(code)}</div>
-          <div class="row"><b>প্রাপক:</b> ${esc(o.customer_name)}</div>
-          <div class="row"><b>মোবাইল:</b> ${esc(o.phone)}</div>
-          <div class="row addr"><b>ঠিকানা:</b> ${esc(o.address)}${o.district ? ", " + esc(o.district) : ""}</div>
-          <div class="row"><b>পণ্য:</b> ${items}</div>
-          <div class="cod">COD: ৳${o.total_amount}</div>
-          <div class="inv">Invoice #${o.order_no}</div>
+          <div class="barcode">
+            ${bars ? `<img src="${bars}" alt="barcode" />` : ""}
+            <div class="digits">${esc(digits)}</div>
+          </div>
+          <div class="box">
+            <img class="qr" src="${qr}" alt="QR" />
+            <div class="info">
+              <div class="ship">শিপিং টু</div>
+              <div class="name">${esc(o.customer_name)}</div>
+              <div class="phone">${esc(o.phone)}</div>
+              <div class="addr">${esc(o.address)}${o.district ? ", " + esc(o.district) : ""}</div>
+              <div class="cod"><span>COD Amount:</span><b>৳${o.total_amount}</b></div>
+            </div>
+          </div>
+          <div class="spacer"></div>
+          <div class="items">
+            <div class="items-title">ITEMS (${o.order_items.length}):</div>
+            <div class="items-row">
+              <span>• ${items}</span>
+              <span class="qty">Qty: ${totalQty}</span>
+            </div>
+          </div>
+          <div class="foot">
+            <span>Date: ${esc(dateStr)}</span>
+            <span>${esc(brand.toUpperCase())}</span>
+          </div>
         </div>`;
     }),
   );
@@ -53,22 +106,34 @@ export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
   *{box-sizing:border-box}
-  body{margin:0;padding:10px;font-family:'Hind Siliguri',system-ui,sans-serif;background:#fff;color:#111}
-  .sheet{display:flex;flex-wrap:wrap;gap:8px}
-  .label{width:340px;border:1.5px dashed #333;border-radius:8px;padding:10px;page-break-inside:avoid}
-  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-  .brand{font-size:20px;font-weight:700}
-  .courier{font-size:11px;color:#555}
-  .qr{width:88px;height:88px}
-  .code{margin-top:4px;font-size:13px;font-weight:700;letter-spacing:.5px}
-  .row{font-size:12px;margin-top:3px;line-height:1.35}
-  .addr{min-height:32px}
-  .cod{margin-top:6px;font-size:15px;font-weight:700;border-top:1px solid #ccc;padding-top:5px}
-  .inv{font-size:10px;color:#666}
-  @media print{ body{padding:0} .label{border-style:solid} }
+  body{margin:0;padding:10px;font-family:'Hind Siliguri',system-ui,sans-serif;background:#fff;color:#000}
+  .sheet{display:flex;flex-wrap:wrap;gap:10px}
+  .label{width:360px;border:1px solid #000;padding:10px 12px;page-break-inside:avoid;display:flex;flex-direction:column}
+  .head{text-align:center}
+  .brand{font-size:15px;font-weight:700;letter-spacing:.3px}
+  .inv{font-size:11px;margin-top:2px}
+  .barcode{text-align:center;margin-top:8px}
+  .barcode img{width:100%;height:62px;object-fit:fill}
+  .digits{font-size:12px;letter-spacing:3px;margin-top:2px}
+  .box{margin-top:10px;border:1px solid #000;padding:8px;display:flex;gap:10px;align-items:flex-start}
+  .qr{width:92px;height:92px}
+  .info{flex:1;min-width:0}
+  .ship{font-size:11px}
+  .name{font-size:17px;font-weight:700;line-height:1.2}
+  .phone{font-size:15px;font-weight:700}
+  .addr{font-size:11px;margin-top:2px;line-height:1.3}
+  .cod{margin-top:6px;border-top:1px solid #000;padding-top:4px;display:flex;justify-content:space-between;font-size:14px}
+  .cod b{font-size:16px}
+  .spacer{min-height:60px}
+  .items{border-top:1px solid #000;padding-top:5px}
+  .items-title{font-size:10px;font-weight:700;letter-spacing:.5px}
+  .items-row{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin-top:2px}
+  .qty{white-space:nowrap;font-weight:700}
+  .foot{display:flex;justify-content:space-between;font-size:10px;margin-top:6px}
+  @media print{ body{padding:0} }
 </style></head>
 <body><div class="sheet">${labels.join("")}</div>
-<script>window.onload=function(){setTimeout(function(){window.print()},400)}</script>
+<script>window.onload=function(){setTimeout(function(){window.print()},500)}</script>
 </body></html>`;
 
   const w = window.open("", "_blank", "width=900,height=800");
