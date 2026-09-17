@@ -86,6 +86,161 @@ export const placeOrder = createServerFn({ method: "POST" })
     return { order_no: order.order_no, total };
   });
 
+const adminItemSchema = z.object({
+  variant_id: z.string().uuid().nullable().optional(),
+  size: z.enum(["M", "L", "XL", "XXL"]),
+  color_name: z.string().trim().min(1).max(60),
+  qty: z.number().int().min(1).max(20),
+});
+
+const adminOrderSchema = z.object({
+  customer_name: z.string().trim().min(2).max(80),
+  phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
+  address: z.string().trim().min(5).max(400),
+  district: z.string().trim().max(60).optional().default(""),
+  note: z.string().trim().max(300).optional().default(""),
+  total_amount: z.number().int().min(0).max(1000000),
+  delivery_charge: z.number().int().min(0).max(10000).optional().default(0),
+  status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled"]).optional(),
+  items: z.array(adminItemSchema).min(1).max(20),
+});
+
+async function assertAdmin(context: { supabase: any; userId: string }) {
+  const { data: isAdmin } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
+  if (!isAdmin) throw new Error("অনুমতি নেই।");
+}
+
+export const adminCreateOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => adminOrderSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .insert({
+        customer_name: data.customer_name,
+        phone: data.phone,
+        address: data.address,
+        district: data.district || null,
+        note: data.note || null,
+        total_amount: data.total_amount,
+        delivery_charge: data.delivery_charge ?? 0,
+        status: data.status ?? "confirmed",
+      })
+      .select("id, order_no")
+      .single();
+    if (error || !order) throw new Error("অর্ডার তৈরি হয়নি।");
+
+    const { error: iErr } = await supabaseAdmin.from("order_items").insert(
+      data.items.map((it) => ({
+        order_id: order.id,
+        variant_id: it.variant_id ?? null,
+        size: it.size,
+        color_name: it.color_name,
+        qty: it.qty,
+      })),
+    );
+    if (iErr) throw new Error("অর্ডারের পণ্য সেভ হয়নি।");
+
+    for (const it of data.items) {
+      if (!it.variant_id) continue;
+      const { data: v } = await supabaseAdmin
+        .from("product_variants")
+        .select("stock")
+        .eq("id", it.variant_id)
+        .maybeSingle();
+      if (v) {
+        await supabaseAdmin
+          .from("product_variants")
+          .update({ stock: Math.max(0, v.stock - it.qty) })
+          .eq("id", it.variant_id);
+      }
+    }
+
+    return { order_no: order.order_no };
+  });
+
+export const adminUpdateOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    adminOrderSchema.extend({ order_id: z.string().uuid() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { error: uErr } = await supabaseAdmin
+      .from("orders")
+      .update({
+        customer_name: data.customer_name,
+        phone: data.phone,
+        address: data.address,
+        district: data.district || null,
+        note: data.note || null,
+        total_amount: data.total_amount,
+        delivery_charge: data.delivery_charge ?? 0,
+        ...(data.status ? { status: data.status } : {}),
+      })
+      .eq("id", data.order_id);
+    if (uErr) throw new Error("অর্ডার আপডেট হয়নি।");
+
+    // পুরনো পণ্যের স্টক ফেরত দিয়ে নতুন তালিকা বসানো হয়
+    const { data: oldItems } = await supabaseAdmin
+      .from("order_items")
+      .select("variant_id, qty")
+      .eq("order_id", data.order_id);
+
+    for (const it of oldItems ?? []) {
+      if (!it.variant_id) continue;
+      const { data: v } = await supabaseAdmin
+        .from("product_variants")
+        .select("stock")
+        .eq("id", it.variant_id)
+        .maybeSingle();
+      if (v) {
+        await supabaseAdmin
+          .from("product_variants")
+          .update({ stock: v.stock + it.qty })
+          .eq("id", it.variant_id);
+      }
+    }
+
+    await supabaseAdmin.from("order_items").delete().eq("order_id", data.order_id);
+
+    const { error: iErr } = await supabaseAdmin.from("order_items").insert(
+      data.items.map((it) => ({
+        order_id: data.order_id,
+        variant_id: it.variant_id ?? null,
+        size: it.size,
+        color_name: it.color_name,
+        qty: it.qty,
+      })),
+    );
+    if (iErr) throw new Error("অর্ডারের পণ্য আপডেট হয়নি।");
+
+    for (const it of data.items) {
+      if (!it.variant_id) continue;
+      const { data: v } = await supabaseAdmin
+        .from("product_variants")
+        .select("stock")
+        .eq("id", it.variant_id)
+        .maybeSingle();
+      if (v) {
+        await supabaseAdmin
+          .from("product_variants")
+          .update({ stock: Math.max(0, v.stock - it.qty) })
+          .eq("id", it.variant_id);
+      }
+    }
+
+    return { ok: true };
+  });
+
 export const claimAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
