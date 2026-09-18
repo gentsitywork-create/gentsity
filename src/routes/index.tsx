@@ -228,11 +228,19 @@ function Home() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <span className="font-display text-2xl font-extrabold tracking-tight text-primary">
-            Gentsity
-          </span>
-          <span className="rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
+        <div className="relative mx-auto flex max-w-5xl items-center justify-center px-4 py-4">
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="Gentsity"
+              className="h-10 max-w-[200px] object-contain"
+            />
+          ) : (
+            <span className="font-display text-2xl font-extrabold tracking-tight text-primary">
+              Gentsity
+            </span>
+          )}
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
             ফ্রি ডেলিভারি
           </span>
         </div>
