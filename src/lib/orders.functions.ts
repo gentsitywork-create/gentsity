@@ -113,6 +113,7 @@ const pajamaOrderSchema = z.object({
   phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
   address: z.string().trim().max(400).optional().default(""),
   size: z.enum(["M", "L", "XL", "XXL"]),
+  delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
   items: z
     .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
     .min(1)
@@ -163,12 +164,13 @@ export const placePajamaOrder = createServerFn({ method: "POST" })
       subtotal += product.price * item.qty;
     }
 
-    const { data: deliveryRow } = await supabaseAdmin
-      .from("settings")
-      .select("value")
-      .eq("key", "pajama_delivery_charge")
-      .maybeSingle();
-    const deliveryCharge = Math.max(0, Number(deliveryRow?.value ?? 100) || 0);
+    const [{ data: dhakaRow }, { data: outsideRow }] = await Promise.all([
+      supabaseAdmin.from("settings").select("value").eq("key", "pajama_delivery_charge_dhaka").maybeSingle(),
+      supabaseAdmin.from("settings").select("value").eq("key", "pajama_delivery_charge_outside").maybeSingle(),
+    ]);
+    const areaRate = data.delivery_area === "dhaka" ? dhakaRow?.value : outsideRow?.value;
+    const fallback = data.delivery_area === "dhaka" ? 70 : 120;
+    const deliveryCharge = Math.max(0, Number(areaRate ?? fallback) || fallback);
     const total = subtotal + deliveryCharge;
 
     const { data: order, error: oErr } = await supabaseAdmin

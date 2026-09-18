@@ -21,7 +21,8 @@ function AdminSettings() {
     steadfast_secret_key: "",
     bdcourier_api_key: "",
     logo_path: "",
-    pajama_delivery_charge: "100",
+    pajama_delivery_charge_dhaka: "70",
+    pajama_delivery_charge_outside: "120",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -47,7 +48,8 @@ function AdminSettings() {
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
         logo_path: data["logo_path"] ?? "",
-        pajama_delivery_charge: data["pajama_delivery_charge"] ?? "100",
+        pajama_delivery_charge_dhaka: data["pajama_delivery_charge_dhaka"] ?? "70",
+        pajama_delivery_charge_outside: data["pajama_delivery_charge_outside"] ?? "120",
       });
     }
   }, [data]);
@@ -127,13 +129,23 @@ function AdminSettings() {
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="pjdelivery">পায়জামার ডেলিভারি চার্জ (টাকা)</Label>
+          <Label htmlFor="pjdelivery-dhaka">পায়জামার ডেলিভারি চার্জ — ঢাকার ভিতরে (টাকা)</Label>
           <Input
-            id="pjdelivery"
+            id="pjdelivery-dhaka"
             type="number"
             min={0}
-            value={values.pajama_delivery_charge}
-            onChange={(e) => setValues({ ...values, pajama_delivery_charge: e.target.value })}
+            value={values.pajama_delivery_charge_dhaka}
+            onChange={(e) => setValues({ ...values, pajama_delivery_charge_dhaka: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="pjdelivery-outside">পায়জামার ডেলিভারি চার্জ — ঢাকার বাইরে (টাকা)</Label>
+          <Input
+            id="pjdelivery-outside"
+            type="number"
+            min={0}
+            value={values.pajama_delivery_charge_outside}
+            onChange={(e) => setValues({ ...values, pajama_delivery_charge_outside: e.target.value })}
           />
         </div>
         <div className="grid gap-2">

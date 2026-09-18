@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -44,6 +44,8 @@ type Product = {
 function PajamaPage() {
   const [size, setSize] = useState<Size | null>(null);
   const [picks, setPicks] = useState<Record<string, number>>({});
+  const [initialized, setInitialized] = useState(false);
+  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
@@ -56,7 +58,9 @@ function PajamaPage() {
       return Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""])) as Record<string, string>;
     },
   });
-  const deliveryCharge = Math.max(0, Number(settings?.["pajama_delivery_charge"] ?? 100) || 0);
+  const dhakaCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_dhaka"] ?? 70) || 70);
+  const outsideCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_outside"] ?? 120) || 120);
+  const deliveryCharge = deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
   const logoPath = settings?.["logo_path"];
   const { data: logoUrl } = useQuery({
     queryKey: ["site-logo", logoPath], enabled: Boolean(logoPath),
@@ -90,6 +94,15 @@ function PajamaPage() {
       return map;
     },
   });
+
+  useEffect(() => {
+    if (!initialized && products.length > 0) {
+      const defaults: Record<string, number> = {};
+      products.forEach((p) => { defaults[p.id] = 1; });
+      setPicks(defaults);
+      setInitialized(true);
+    }
+  }, [products, initialized]);
 
   const selected = useMemo(() => products.filter((p) => (picks[p.id] ?? 0) > 0), [products, picks]);
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
@@ -125,6 +138,11 @@ function PajamaPage() {
     trackPixel("ViewContent", { content_name: `Pajama ${nextSize}` });
   };
 
+  const orderProduct = (product: Product) => {
+    setPicks((current) => ({ ...current, [product.id]: Math.max(1, current[product.id] ?? 1) }));
+    document.getElementById("pajama-checkout")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleOrder = async (event: React.FormEvent) => {
     event.preventDefault();
     if (totalUnits < 1) {
@@ -143,10 +161,11 @@ function PajamaPage() {
     try {
       const result = await submit({ data: {
         customer_name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim(), size,
+        delivery_area: deliveryArea,
         items: Object.entries(picks).map(([product_id, qty]) => ({ product_id, qty })),
       } });
       trackPixel("Purchase", { value: result.total, currency: "BDT" });
-      setDone(result); setPicks({}); setSize(null); setForm({ name: "", phone: "", address: "" });
+      setDone(result); setPicks({}); setInitialized(false); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
@@ -238,6 +257,7 @@ function PajamaPage() {
                   <span className="text-center font-bold">{qty}</span>
                   <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, 1)} aria-label={`${product.name} বাড়ান`}><Plus className="h-4 w-4" /></Button>
                 </div>
+                <Button type="button" className="mt-3 w-full" onClick={() => orderProduct(product)}>অর্ডার করুন</Button>
               </div>
             </article>;
           })}</div>}
@@ -245,6 +265,10 @@ function PajamaPage() {
         {totalUnits > 0 && <form id="pajama-checkout" onSubmit={handleOrder} className="mx-auto mt-8 max-w-3xl rounded-lg border bg-card p-5 md:p-7">
           <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-bold">অর্ডার সম্পন্ন করুন</h2><span className="rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground">{totalUnits}টি</span></div>
           <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-4 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
+          <div className="mt-5"><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
+            <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
+            <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
+          </div></div>
           <div className="mt-5 grid gap-4">
             <div className="grid gap-2"><Label htmlFor="pj-name">আপনার নাম</Label><Input id="pj-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div className="grid gap-2"><Label htmlFor="pj-phone">মোবাইল নম্বর *</Label><Input id="pj-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
@@ -253,7 +277,7 @@ function PajamaPage() {
           <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
             {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}
             <div className="mt-2 flex justify-between border-t pt-2"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
-            <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ</span><span>{deliveryCharge} টাকা</span></div>
+            <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span><span>{deliveryCharge} টাকা</span></div>
             <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
           </div>
           <Button type="submit" className="mt-5 w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার করুন — ${total} টাকা`}</Button>
