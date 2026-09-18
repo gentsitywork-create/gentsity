@@ -20,8 +20,10 @@ function AdminSettings() {
     steadfast_api_key: "",
     steadfast_secret_key: "",
     bdcourier_api_key: "",
+    logo_path: "",
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["admin-settings"],
@@ -43,9 +45,47 @@ function AdminSettings() {
         steadfast_api_key: data["steadfast_api_key"] ?? "",
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
+        logo_path: data["logo_path"] ?? "",
       });
     }
   }, [data]);
+
+  const { data: logoUrl } = useQuery({
+    queryKey: ["admin-logo-url", values.logo_path],
+    enabled: Boolean(values.logo_path),
+    queryFn: async () => {
+      const { data } = await supabase.storage.from("products").createSignedUrl(values.logo_path, 3600);
+      return data?.signedUrl ?? "";
+    },
+  });
+
+  const handleLogoChange = async (file: File | null) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `site/logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("products").upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+      if (error) {
+        toast.error("লোগো আপলোড হয়নি।");
+        return;
+      }
+      setValues((prev) => ({ ...prev, logo_path: path }));
+      toast.success("লোগো আপলোড হয়েছে। সেভ করতে ভুলবেন না।");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const removeLogo = async () => {
+    if (values.logo_path) {
+      await supabase.storage.from("products").remove([values.logo_path]);
+    }
+    setValues((prev) => ({ ...prev, logo_path: "" }));
+  };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +176,29 @@ function AdminSettings() {
           />
           <p className="text-xs text-muted-foreground">
             কী বসালে অর্ডার প্যানেলে "রেশিও চেক" বোতাম দিয়ে কাস্টমারের ডেলিভারি সাকসেস রেশিও দেখা যাবে।
+          </p>
+        </div>
+
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">ওয়েবসাইট লোগো</h2>
+          <Label htmlFor="logo">হোম পেজ হেডারের লোগো</Label>
+          <Input
+            id="logo"
+            type="file"
+            accept="image/*"
+            disabled={uploadingLogo}
+            onChange={(e) => handleLogoChange(e.target.files?.[0] ?? null)}
+          />
+          {logoUrl && (
+            <div className="mt-2 flex items-center gap-3">
+              <img src={logoUrl} alt="লোগো প্রিভিউ" className="h-12 rounded border object-contain" />
+              <Button type="button" variant="outline" size="sm" onClick={removeLogo}>
+                লোগো সরান
+              </Button>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            ছবি আপলোড করলে হোম পেজের হেডারের মাঝখানে লোগোটি দেখা যাবে। কিছু না দিলে "Gentsity" লেখা থাকবে।
           </p>
         </div>
       </div>
