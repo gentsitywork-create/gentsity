@@ -106,8 +106,11 @@ export type Database = {
           created_at: string
           id: string
           order_id: string
+          pajama_product_id: string | null
+          pieces_per_unit: number
           qty: number
           size: string
+          unit_price: number | null
           variant_id: string | null
         }
         Insert: {
@@ -115,8 +118,11 @@ export type Database = {
           created_at?: string
           id?: string
           order_id: string
+          pajama_product_id?: string | null
+          pieces_per_unit?: number
           qty?: number
           size: string
+          unit_price?: number | null
           variant_id?: string | null
         }
         Update: {
@@ -124,8 +130,11 @@ export type Database = {
           created_at?: string
           id?: string
           order_id?: string
+          pajama_product_id?: string | null
+          pieces_per_unit?: number
           qty?: number
           size?: string
+          unit_price?: number | null
           variant_id?: string | null
         }
         Relationships: [
@@ -134,6 +143,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_pajama_product_id_fkey"
+            columns: ["pajama_product_id"]
+            isOneToOne: false
+            referencedRelation: "pajama_products"
             referencedColumns: ["id"]
           },
           {
@@ -201,6 +217,77 @@ export type Database = {
           product_type?: string
           status?: string
           total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pajama_product_stock: {
+        Row: {
+          id: string
+          product_id: string
+          size: string
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          size: string
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          size?: string
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pajama_product_stock_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "pajama_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pajama_products: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          pieces_per_unit: number
+          price: number
+          product_kind: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          pieces_per_unit?: number
+          price: number
+          product_kind?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          pieces_per_unit?: number
+          price?: number
+          product_kind?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
