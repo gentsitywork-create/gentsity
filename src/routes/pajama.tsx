@@ -171,13 +171,50 @@ function PajamaPage() {
     </section> : <>
       <section className="mx-auto max-w-4xl px-4 pb-6 pt-9 text-center">
         <p className="text-sm font-bold text-primary">GENTSITY PAJAMA COLLECTION</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl">চায়না মাইক্রো স্ট্রেচ পায়জামা</h1>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">পছন্দের কম্বো বা সিঙ্গেল পায়জামা বেছে নিন। পরিমাণ ঠিক করে নিচে সাইজ ও তথ্য দিয়ে অর্ডার করুন।</p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl">🔥 চায়না মাইক্রো স্টিচ ফেব্রিকের প্রিমিয়াম পায়জামা 🔥</h1>
+        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">আরাম, স্মার্ট লুক আর প্রিমিয়াম কোয়ালিটি—সবকিছু একসাথে! ✨</p>
+
+        <ul className="mx-auto mt-5 grid max-w-2xl gap-2 text-left text-sm text-muted-foreground md:grid-cols-2">
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম কোয়ালিটি চায়না মাইক্রো স্টিচ ফেব্রিক</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> সফট, আরামদায়ক ও টেকসই</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Semi Narrow Pant Cutting – স্মার্ট ও কমফোর্টেবল ফিট</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> পুরোপুরি স্কিনি নয়, তাই চলাফেরায় আরাম</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> অফিস, ক্যাজুয়াল ও ডেইলি ওয়্যারের জন্য পারফেক্ট</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> আয়রন করার ঝামেলা নেই – সবসময় স্মার্ট লুক</li>
+        </ul>
+
+        <div className="mt-6 rounded-lg bg-secondary p-4 text-left text-sm">
+          <h2 className="mb-2 font-bold text-foreground">🔑 Semi Narrow Cutting-এর বিশেষত্ব:</h2>
+          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+            <li>কোমর থেকে হাঁটু পর্যন্ত নরমাল ফিট</li>
+            <li>হাঁটু থেকে নিচে হালকা টেপার্ড</li>
+            <li>স্মার্ট লুকের সাথে সর্বোচ্চ কমফোর্ট</li>
+          </ul>
+        </div>
+
+        <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
+          <h2 className="mb-2 font-bold text-foreground">🔥 আমাদের পায়জামার বিশেষ বৈশিষ্ট্য</h2>
+          <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
+            <li><strong className="text-foreground">প্রিমিয়াম চায়না মাইক্রো স্টিচ ফেব্রিক:</strong> উন্নতমানের চায়না মাইক্রো স্টিচ ফেব্রিক দিয়ে তৈরি। কাপড়ে ভাঁজ কম পড়ে, তাই বারবার আয়রন করার ঝামেলা নেই।</li>
+            <li><strong className="text-foreground">প্রিমিয়াম মেটাল জিপার:</strong> গেট ও পিছনের পকেটে ব্যবহার করা হয়েছে মজবুত মেটাল জিপার, যা পায়জামাকে দিয়েছে প্রিমিয়াম লুক ও দীর্ঘস্থায়িত্ব।</li>
+            <li><strong className="text-foreground">পকেটেও একই ফেব্রিক:</strong> পকেটের জন্য আলাদা কোনো ফেব্রিক ব্যবহার করা হয়নি। পায়জামায় ব্যবহৃত মূল ফেব্রিকই পকেটেও ব্যবহার করা হয়েছে, ফলে কোয়ালিটি ও আরাম দুটোই বজায় থাকে।</li>
+            <li><strong className="text-foreground">মেটাল ড্রস্ট্রিং ও প্রিমিয়াম আইলেট:</strong> পায়জামায় ব্যবহার করা হয়েছে মজবুত মেটাল ড্রস্ট্রিং এবং ড্রস্ট্রিংয়ের জন্য প্রিমিয়াম আইলেট, যা পায়জামার ফিনিশিং ও স্থায়িত্ব আরও বাড়িয়ে দেয়।</li>
+          </ol>
+        </div>
+
+        <p className="mt-6 text-base font-bold">📏 সাইজ: M – 38 | L – 40 | XL – 42 | XXL – 44</p>
+
         <ul className="mt-5 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-          <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> প্রিমিয়াম ফ্যাব্রিক</li>
           <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ডেলিভারি</li>
           <li className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন</li>
         </ul>
+
+        <div className="mt-5 space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-left text-sm text-muted-foreground">
+          <p>🚚 সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা।</p>
+          <p>– কেয়ার নির্দেশনা: হালকা ডিটারজেন্টে ধোয়া, ব্লিচ ব্যবহার নয়।</p>
+          <p>প্রডাক্ট হাতে পাওয়ার পর ডেলিভারি রাইডার এর সামনে চেক করে নিবেন স্যার। 👎👎 কোন সমস্যা থাকলে আমাদের জানাবেন স্যার। রাইডার চলে যাওয়ার পর কোন অভিযোগ গ্রহণ করা হবে না স্যার।</p>
+          <p className="font-semibold text-destructive">🚫 বি: দ্র: অর্ডার করার সময় সাইজ শিওর হয়ে নিবেন। সাইজ নিয়ে সমস্যা জানালে কুরিয়ার চার্জ দিয়ে সাইজ এক্সচেঞ্জ করতে হবে। NB: কোন কারনে প্রডাক্ট রির্টান করলে ১০০ টাকা ডেলিভারি চার্জ দিয়ে রির্টান করতে হবে।</p>
+        </div>
       </section>
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
