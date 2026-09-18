@@ -68,7 +68,14 @@ function AdminLayout() {
               activeProps={{ className: "bg-secondary font-semibold" }}
               className="rounded-md px-3 py-2"
             >
-              স্টক
+              পোলো স্টক
+            </Link>
+            <Link
+              to="/admin/pajama-stock"
+              activeProps={{ className: "bg-secondary font-semibold" }}
+              className="rounded-md px-3 py-2"
+            >
+              পায়জামা স্টক
             </Link>
             <Link
               to="/admin/abandoned"

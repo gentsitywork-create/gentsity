@@ -73,6 +73,7 @@ function AdminStock() {
       const { data, error } = await supabase
         .from("product_variants")
         .select("id, size, color_name, color_hex, image_url, stock, is_active, sort_order")
+        .eq("product_type", "polo")
         .order("size")
         .order("sort_order");
       if (error) throw error;
@@ -114,6 +115,7 @@ function AdminStock() {
         return;
       }
       const { error } = await supabase.from("product_variants").insert({
+        product_type: "polo",
         size: form.size,
         color_name: form.color_name.trim(),
         color_hex: form.color_hex,
