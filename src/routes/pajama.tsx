@@ -139,7 +139,7 @@ function PajamaPage() {
   };
 
   const orderProduct = (product: Product) => {
-    setPicks((current) => ({ ...current, [product.id]: Math.max(1, current[product.id] ?? 1) }));
+    setPicks({ [product.id]: 1 });
     document.getElementById("pajama-checkout")?.scrollIntoView({ behavior: "smooth" });
   };
 
