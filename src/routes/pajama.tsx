@@ -58,7 +58,9 @@ function PajamaPage() {
       return Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""])) as Record<string, string>;
     },
   });
-  const deliveryCharge = Math.max(0, Number(settings?.["pajama_delivery_charge"] ?? 100) || 0);
+  const dhakaCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_dhaka"] ?? 70) || 70);
+  const outsideCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_outside"] ?? 120) || 120);
+  const deliveryCharge = deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
   const logoPath = settings?.["logo_path"];
   const { data: logoUrl } = useQuery({
     queryKey: ["site-logo", logoPath], enabled: Boolean(logoPath),
@@ -92,6 +94,15 @@ function PajamaPage() {
       return map;
     },
   });
+
+  useEffect(() => {
+    if (!initialized && products.length > 0) {
+      const defaults: Record<string, number> = {};
+      products.forEach((p) => { defaults[p.id] = 1; });
+      setPicks(defaults);
+      setInitialized(true);
+    }
+  }, [products, initialized]);
 
   const selected = useMemo(() => products.filter((p) => (picks[p.id] ?? 0) > 0), [products, picks]);
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
