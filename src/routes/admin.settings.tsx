@@ -21,6 +21,7 @@ function AdminSettings() {
     steadfast_secret_key: "",
     bdcourier_api_key: "",
     logo_path: "",
+    pajama_price: "350",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -46,6 +47,7 @@ function AdminSettings() {
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
         logo_path: data["logo_path"] ?? "",
+        pajama_price: data["pajama_price"] ?? "350",
       });
     }
   }, [data]);
@@ -122,6 +124,16 @@ function AdminSettings() {
             min={1}
             value={values.combo_qty}
             onChange={(e) => setValues({ ...values, combo_qty: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="pjprice">পায়জামার দাম (পিসপ্রতি, টাকা)</Label>
+          <Input
+            id="pjprice"
+            type="number"
+            min={1}
+            value={values.pajama_price}
+            onChange={(e) => setValues({ ...values, pajama_price: e.target.value })}
           />
         </div>
         <div className="grid gap-2">

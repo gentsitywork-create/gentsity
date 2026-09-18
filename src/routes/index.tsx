@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -97,6 +97,7 @@ function Home() {
       const { data, error } = await supabase
         .from("product_variants")
         .select("id, size, color_name, color_hex, image_url, stock")
+        .eq("product_type", "polo")
         .eq("size", size)
         .eq("is_active", true)
         .gt("stock", 0)
@@ -229,6 +230,12 @@ function Home() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="relative mx-auto flex max-w-5xl items-center justify-center px-4 py-4">
+          <Link
+            to="/pajama"
+            className="absolute left-4 rounded-md border px-3 py-1.5 text-sm font-semibold"
+          >
+            পায়জামা
+          </Link>
           {logoUrl ? (
             <img
               src={logoUrl}
