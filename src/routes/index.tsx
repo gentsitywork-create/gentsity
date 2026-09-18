@@ -78,6 +78,16 @@ function Home() {
     },
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
+  const logoPath = settings?.["logo_path"];
+
+  const { data: logoUrl } = useQuery({
+    queryKey: ["site-logo", logoPath],
+    enabled: Boolean(logoPath),
+    queryFn: async () => {
+      const { data } = await supabase.storage.from("products").createSignedUrl(logoPath!, 3600);
+      return data?.signedUrl ?? "";
+    },
+  });
 
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
