@@ -21,7 +21,8 @@ function AdminSettings() {
     steadfast_secret_key: "",
     bdcourier_api_key: "",
     logo_path: "",
-    pajama_delivery_charge: "100",
+    pajama_delivery_charge_dhaka: "70",
+    pajama_delivery_charge_outside: "120",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
