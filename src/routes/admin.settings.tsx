@@ -20,8 +20,10 @@ function AdminSettings() {
     steadfast_api_key: "",
     steadfast_secret_key: "",
     bdcourier_api_key: "",
+    logo_path: "",
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["admin-settings"],
@@ -43,9 +45,47 @@ function AdminSettings() {
         steadfast_api_key: data["steadfast_api_key"] ?? "",
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
+        logo_path: data["logo_path"] ?? "",
       });
     }
   }, [data]);
+
+  const { data: logoUrl } = useQuery({
+    queryKey: ["admin-logo-url", values.logo_path],
+    enabled: Boolean(values.logo_path),
+    queryFn: async () => {
+      const { data } = await supabase.storage.from("products").createSignedUrl(values.logo_path, 3600);
+      return data?.signedUrl ?? "";
+    },
+  });
+
+  const handleLogoChange = async (file: File | null) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `site/logo-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("products").upload(path, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+      if (error) {
+        toast.error("লোগো আপলোড হয়নি।");
+        return;
+      }
+      setValues((prev) => ({ ...prev, logo_path: path }));
+      toast.success("লোগো আপলোড হয়েছে। সেভ করতে ভুলবেন না।");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const removeLogo = async () => {
+    if (values.logo_path) {
+      await supabase.storage.from("products").remove([values.logo_path]);
+    }
+    setValues((prev) => ({ ...prev, logo_path: "" }));
+  };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
