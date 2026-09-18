@@ -113,6 +113,7 @@ const pajamaOrderSchema = z.object({
   phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
   address: z.string().trim().max(400).optional().default(""),
   size: z.enum(["M", "L", "XL", "XXL"]),
+  delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
   items: z
     .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
     .min(1)
