@@ -178,6 +178,29 @@ function AdminSettings() {
             কী বসালে অর্ডার প্যানেলে "রেশিও চেক" বোতাম দিয়ে কাস্টমারের ডেলিভারি সাকসেস রেশিও দেখা যাবে।
           </p>
         </div>
+
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">ওয়েবসাইট লোগো</h2>
+          <Label htmlFor="logo">হোম পেজ হেডারের লোগো</Label>
+          <Input
+            id="logo"
+            type="file"
+            accept="image/*"
+            disabled={uploadingLogo}
+            onChange={(e) => handleLogoChange(e.target.files?.[0] ?? null)}
+          />
+          {logoUrl && (
+            <div className="mt-2 flex items-center gap-3">
+              <img src={logoUrl} alt="লোগো প্রিভিউ" className="h-12 rounded border object-contain" />
+              <Button type="button" variant="outline" size="sm" onClick={removeLogo}>
+                লোগো সরান
+              </Button>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            ছবি আপলোড করলে হোম পেজের হেডারের মাঝখানে লোগোটি দেখা যাবে। কিছু না দিলে "Gentsity" লেখা থাকবে।
+          </p>
+        </div>
       </div>
       <Button type="submit" className="mt-5" disabled={saving}>
         {saving ? "সেভ হচ্ছে…" : "সেভ করুন"}
