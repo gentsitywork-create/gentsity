@@ -256,7 +256,8 @@ function Home() {
         <>
           <section className="mx-auto max-w-3xl px-4 pt-10 text-center">
             <h1 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">
-              ১০০% কটন কাপড়ের ৫ পিস পোলো শার্ট{" "}
+              ১০০% পিকে কটন কাপড়ের{" "}
+              ৫ পিস পোলো শার্ট{" "}
               <span className="text-primary">{price} টাকা</span>{" "}
               <span className="text-muted-foreground">(ফ্রী ডেলিভারি)</span>
             </h1>
