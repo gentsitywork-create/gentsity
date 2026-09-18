@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -44,7 +44,6 @@ type Product = {
 function PajamaPage() {
   const [size, setSize] = useState<Size | null>(null);
   const [picks, setPicks] = useState<Record<string, number>>({});
-  const [initialized, setInitialized] = useState(false);
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -95,14 +94,6 @@ function PajamaPage() {
     },
   });
 
-  useEffect(() => {
-    if (!initialized && products.length > 0) {
-      const defaults: Record<string, number> = {};
-      products.forEach((p) => { defaults[p.id] = 1; });
-      setPicks(defaults);
-      setInitialized(true);
-    }
-  }, [products, initialized]);
 
   const selected = useMemo(() => products.filter((p) => (picks[p.id] ?? 0) > 0), [products, picks]);
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
@@ -165,7 +156,7 @@ function PajamaPage() {
         items: Object.entries(picks).map(([product_id, qty]) => ({ product_id, qty })),
       } });
       trackPixel("Purchase", { value: result.total, currency: "BDT" });
-      setDone(result); setPicks({}); setInitialized(false); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
+      setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
@@ -255,7 +246,7 @@ function PajamaPage() {
                 <div className="mt-3 grid grid-cols-[40px_1fr_40px] items-center overflow-hidden rounded-md border">
                   <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, -1)} disabled={qty === 0} aria-label={`${product.name} কমান`}><Minus className="h-4 w-4" /></Button>
                   <span className="text-center font-bold">{qty}</span>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, 1)} aria-label={`${product.name} বাড়ান`}><Plus className="h-4 w-4" /></Button>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, 1)} disabled={qty === 0} aria-label={`${product.name} বাড়ান`}><Plus className="h-4 w-4" /></Button>
                 </div>
                 <Button type="button" className="mt-3 w-full" onClick={() => orderProduct(product)}>অর্ডার করুন</Button>
               </div>
