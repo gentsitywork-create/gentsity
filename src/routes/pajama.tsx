@@ -171,8 +171,8 @@ function PajamaPage() {
     </section> : <>
       <section className="mx-auto max-w-4xl px-4 pb-6 pt-9 text-center">
         <p className="text-sm font-bold text-primary">GENTSITY PAJAMA COLLECTION</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl">🔥 চায়না মাইক্রো স্টিচ ফেব্রিকের প্রিমিয়াম পায়জামা 🔥</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">আরাম, স্মার্ট লুক আর প্রিমিয়াম কোয়ালিটি—সবকিছু একসাথে! ✨</p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> চায়না মাইক্রো স্টিচ ফেব্রিকের প্রিমিয়াম পায়জামা <Flame className="inline h-7 w-7 text-destructive" /></h1>
+        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">আরাম, স্মার্ট লুক আর প্রিমিয়াম কোয়ালিটি—সবকিছু একসাথে! <Sparkles className="inline h-4 w-4 text-primary" /></p>
 
         <ul className="mx-auto mt-5 grid max-w-2xl gap-2 text-left text-sm text-muted-foreground md:grid-cols-2">
           <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম কোয়ালিটি চায়না মাইক্রো স্টিচ ফেব্রিক</li>
@@ -184,7 +184,7 @@ function PajamaPage() {
         </ul>
 
         <div className="mt-6 rounded-lg bg-secondary p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground">🔑 Semi Narrow Cutting-এর বিশেষত্ব:</h2>
+          <h2 className="mb-2 font-bold text-foreground"><KeyRound className="inline h-4 w-4" /> Semi Narrow Cutting-এর বিশেষত্ব:</h2>
           <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
             <li>কোমর থেকে হাঁটু পর্যন্ত নরমাল ফিট</li>
             <li>হাঁটু থেকে নিচে হালকা টেপার্ড</li>
@@ -193,7 +193,7 @@ function PajamaPage() {
         </div>
 
         <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground">🔥 আমাদের পায়জামার বিশেষ বৈশিষ্ট্য</h2>
+          <h2 className="mb-2 font-bold text-foreground"><Flame className="inline h-4 w-4 text-destructive" /> আমাদের পায়জামার বিশেষ বৈশিষ্ট্য</h2>
           <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
             <li><strong className="text-foreground">প্রিমিয়াম চায়না মাইক্রো স্টিচ ফেব্রিক:</strong> উন্নতমানের চায়না মাইক্রো স্টিচ ফেব্রিক দিয়ে তৈরি। কাপড়ে ভাঁজ কম পড়ে, তাই বারবার আয়রন করার ঝামেলা নেই।</li>
             <li><strong className="text-foreground">প্রিমিয়াম মেটাল জিপার:</strong> গেট ও পিছনের পকেটে ব্যবহার করা হয়েছে মজবুত মেটাল জিপার, যা পায়জামাকে দিয়েছে প্রিমিয়াম লুক ও দীর্ঘস্থায়িত্ব।</li>
@@ -202,7 +202,7 @@ function PajamaPage() {
           </ol>
         </div>
 
-        <p className="mt-6 text-base font-bold">📏 সাইজ: M – 38 | L – 40 | XL – 42 | XXL – 44</p>
+        <p className="mt-6 text-base font-bold"><Ruler className="inline h-4 w-4" /> সাইজ: M – 38 | L – 40 | XL – 42 | XXL – 44</p>
 
         <ul className="mt-5 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
           <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ডেলিভারি</li>
@@ -210,10 +210,10 @@ function PajamaPage() {
         </ul>
 
         <div className="mt-5 space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-left text-sm text-muted-foreground">
-          <p>🚚 সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা।</p>
+          <p>সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা।</p>
           <p>– কেয়ার নির্দেশনা: হালকা ডিটারজেন্টে ধোয়া, ব্লিচ ব্যবহার নয়।</p>
-          <p>প্রডাক্ট হাতে পাওয়ার পর ডেলিভারি রাইডার এর সামনে চেক করে নিবেন স্যার। 👎👎 কোন সমস্যা থাকলে আমাদের জানাবেন স্যার। রাইডার চলে যাওয়ার পর কোন অভিযোগ গ্রহণ করা হবে না স্যার।</p>
-          <p className="font-semibold text-destructive">🚫 বি: দ্র: অর্ডার করার সময় সাইজ শিওর হয়ে নিবেন। সাইজ নিয়ে সমস্যা জানালে কুরিয়ার চার্জ দিয়ে সাইজ এক্সচেঞ্জ করতে হবে। NB: কোন কারনে প্রডাক্ট রির্টান করলে ১০০ টাকা ডেলিভারি চার্জ দিয়ে রির্টান করতে হবে।</p>
+          <p>প্রডাক্ট হাতে পাওয়ার পর ডেলিভারি রাইডার এর সামনে চেক করে নিবেন স্যার। কোন সমস্যা থাকলে আমাদের জানাবেন স্যার। রাইডার চলে যাওয়ার পর কোন অভিযোগ গ্রহণ করা হবে না স্যার।</p>
+          <p className="font-semibold text-destructive">বি: দ্র: অর্ডার করার সময় সাইজ শিওর হয়ে নিবেন। সাইজ নিয়ে সমস্যা জানালে কুরিয়ার চার্জ দিয়ে সাইজ এক্সচেঞ্জ করতে হবে। NB: কোন কারনে প্রডাক্ট রির্টান করলে ১০০ টাকা ডেলিভারি চার্জ দিয়ে রির্টান করতে হবে।</p>
         </div>
       </section>
 
