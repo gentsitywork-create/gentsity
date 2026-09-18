@@ -49,7 +49,7 @@ type Variant = {
 function Home() {
   const [size, setSize] = useState<Size | null>("M");
   const [picks, setPicks] = useState<Record<string, number>>({});
-  const [form, setForm] = useState({ name: "", phone: "", address: "", district: "", note: "" });
+  const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number } | null>(null);
 
@@ -141,8 +141,6 @@ function Home() {
           customer_name: form.name.trim(),
           phone,
           address: form.address.trim(),
-          district: form.district.trim(),
-          note: form.note.trim(),
           size,
           items: Object.entries(picks).map(([variant_id, qty]) => ({
             variant_id,
@@ -192,10 +190,6 @@ function Home() {
       toast.error("সঠিক মোবাইল নম্বর দিন (যেমন ০১৭xxxxxxxx)।");
       return;
     }
-    if (form.address.trim().length < 10) {
-      toast.error("সম্পূর্ণ ঠিকানা লিখুন।");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -204,8 +198,6 @@ function Home() {
           customer_name: form.name.trim(),
           phone: form.phone.trim(),
           address: form.address.trim(),
-          district: form.district.trim(),
-          note: form.note.trim(),
           size,
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
@@ -214,7 +206,7 @@ function Home() {
       clearCart({ data: { session_key: sessionKey.current } }).catch(() => {});
       setDone(res);
       setPicks({});
-      setForm({ name: "", phone: "", address: "", district: "", note: "" });
+      setForm({ name: "", phone: "", address: "" });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
@@ -435,14 +427,13 @@ function Home() {
                     <Label htmlFor="name">আপনার নাম</Label>
                     <Input
                       id="name"
-                      required
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="যেমন: রাকিব হাসান"
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="phone">মোবাইল নম্বর</Label>
+                    <Label htmlFor="phone">মোবাইল নম্বর *</Label>
                     <Input
                       id="phone"
                       required
@@ -453,32 +444,13 @@ function Home() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="district">জেলা</Label>
-                    <Input
-                      id="district"
-                      value={form.district}
-                      onChange={(e) => setForm({ ...form, district: e.target.value })}
-                      placeholder="যেমন: ঢাকা"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="address">সম্পূর্ণ ঠিকানা</Label>
+                    <Label htmlFor="address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label>
                     <Textarea
                       id="address"
-                      required
                       rows={3}
                       value={form.address}
                       onChange={(e) => setForm({ ...form, address: e.target.value })}
                       placeholder="বাসা/রোড, থানা, জেলা"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="note">কিছু বলতে চান? (ইচ্ছা হলে)</Label>
-                    <Textarea
-                      id="note"
-                      rows={2}
-                      value={form.note}
-                      onChange={(e) => setForm({ ...form, note: e.target.value })}
                     />
                   </div>
                 </div>
