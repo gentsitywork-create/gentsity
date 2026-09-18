@@ -94,14 +94,6 @@ function PajamaPage() {
     },
   });
 
-  useEffect(() => {
-    if (!initialized && products.length > 0) {
-      const defaults: Record<string, number> = {};
-      products.forEach((p) => { defaults[p.id] = 1; });
-      setPicks(defaults);
-      setInitialized(true);
-    }
-  }, [products, initialized]);
 
   const selected = useMemo(() => products.filter((p) => (picks[p.id] ?? 0) > 0), [products, picks]);
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
