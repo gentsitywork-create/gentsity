@@ -138,6 +138,11 @@ function PajamaPage() {
     trackPixel("ViewContent", { content_name: `Pajama ${nextSize}` });
   };
 
+  const orderProduct = (product: Product) => {
+    setPicks((current) => ({ ...current, [product.id]: Math.max(1, current[product.id] ?? 1) }));
+    document.getElementById("pajama-checkout")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleOrder = async (event: React.FormEvent) => {
     event.preventDefault();
     if (totalUnits < 1) {
@@ -156,10 +161,11 @@ function PajamaPage() {
     try {
       const result = await submit({ data: {
         customer_name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim(), size,
+        delivery_area: deliveryArea,
         items: Object.entries(picks).map(([product_id, qty]) => ({ product_id, qty })),
       } });
       trackPixel("Purchase", { value: result.total, currency: "BDT" });
-      setDone(result); setPicks({}); setSize(null); setForm({ name: "", phone: "", address: "" });
+      setDone(result); setPicks({}); setInitialized(false); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
