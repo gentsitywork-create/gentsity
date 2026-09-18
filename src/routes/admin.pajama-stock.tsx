@@ -16,8 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/admin/stock")({
-  component: AdminStock,
+export const Route = createFileRoute("/admin/pajama-stock")({
+  component: AdminPajamaStock,
 });
 
 const SIZES = ["M", "L", "XL", "XXL"];
@@ -43,7 +43,7 @@ async function signedUrls(paths: string[]) {
   return map;
 }
 
-function AdminStock() {
+function AdminPajamaStock() {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
@@ -68,12 +68,12 @@ function AdminStock() {
   }, [file]);
 
   const { data: variants = [], isLoading } = useQuery({
-    queryKey: ["admin-variants"],
+    queryKey: ["admin-pajama-variants"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product_variants")
         .select("id, size, color_name, color_hex, image_url, stock, is_active, sort_order")
-        .eq("product_type", "polo")
+        .eq("product_type", "pajama")
         .order("size")
         .order("sort_order");
       if (error) throw error;
@@ -82,15 +82,15 @@ function AdminStock() {
   });
 
   const { data: images = {} } = useQuery({
-    queryKey: ["admin-variant-images", variants.map((v) => v.image_url).join(",")],
+    queryKey: ["admin-pajama-variant-images", variants.map((v) => v.image_url).join(",")],
     enabled: variants.length > 0,
     queryFn: () =>
       signedUrls(variants.map((v) => v.image_url).filter((p): p is string => Boolean(p))),
   });
 
   const refresh = () => {
-    qc.invalidateQueries({ queryKey: ["admin-variants"] });
-    qc.invalidateQueries({ queryKey: ["admin-variant-images"] });
+    qc.invalidateQueries({ queryKey: ["admin-pajama-variants"] });
+    qc.invalidateQueries({ queryKey: ["admin-pajama-variant-images"] });
   };
 
   const add = async (e: React.FormEvent) => {
@@ -100,13 +100,13 @@ function AdminStock() {
       return;
     }
     if (!file) {
-      toast.error("পোলো শার্টের ছবি আপলোড করুন।");
+      toast.error("পায়জামার ছবি আপলোড করুন।");
       return;
     }
     setSaving(true);
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${form.size}/${crypto.randomUUID()}.${ext}`;
+      const path = `pajama/${form.size}/${crypto.randomUUID()}.${ext}`;
       const up = await supabase.storage
         .from("products")
         .upload(path, file, { contentType: file.type, upsert: false });
@@ -115,7 +115,7 @@ function AdminStock() {
         return;
       }
       const { error } = await supabase.from("product_variants").insert({
-        product_type: "polo",
+        product_type: "pajama",
         size: form.size,
         color_name: form.color_name.trim(),
         color_hex: form.color_hex,
@@ -128,7 +128,7 @@ function AdminStock() {
         toast.error("যোগ করা যায়নি — একই সাইজে এই নাম হয়তো আছে।");
         return;
       }
-      toast.success("ডিজাইন যোগ হয়েছে।");
+      toast.success("পায়জামার ডিজাইন যোগ হয়েছে।");
       setForm({ ...form, color_name: "" });
       setFile(null);
       if (fileRef.current) fileRef.current.value = "";
@@ -149,7 +149,7 @@ function AdminStock() {
 
   const replaceImage = async (v: Variant, newFile: File) => {
     const ext = (newFile.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `${v.size}/${crypto.randomUUID()}.${ext}`;
+    const path = `pajama/${v.size}/${crypto.randomUUID()}.${ext}`;
     const up = await supabase.storage
       .from("products")
       .upload(path, newFile, { contentType: newFile.type });
@@ -178,7 +178,7 @@ function AdminStock() {
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
       <form onSubmit={add} className="rounded-xl border bg-card p-5">
-        <h2 className="font-bold">নতুন ডিজাইন (ছবি) ও স্টক যোগ করুন</h2>
+        <h2 className="font-bold">নতুন পায়জামা ডিজাইন (ছবি) ও স্টক যোগ করুন</h2>
         <div className="mt-4 grid gap-4">
           <div className="grid gap-2">
             <Label>সাইজ</Label>
@@ -196,9 +196,9 @@ function AdminStock() {
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="img">পোলো শার্টের ছবি</Label>
+            <Label htmlFor="pj-img">পায়জামার ছবি</Label>
             <Input
-              id="img"
+              id="pj-img"
               ref={fileRef}
               type="file"
               accept="image/*"
@@ -213,18 +213,18 @@ function AdminStock() {
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="cname">ডিজাইন / রঙের নাম</Label>
+            <Label htmlFor="pj-cname">ডিজাইন / রঙের নাম</Label>
             <Input
-              id="cname"
+              id="pj-cname"
               value={form.color_name}
               onChange={(e) => setForm({ ...form, color_name: e.target.value })}
-              placeholder="যেমন: কালো স্ট্রাইপ"
+              placeholder="যেমন: নেভি ব্লু"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="chex">রঙ (ইচ্ছা হলে)</Label>
+            <Label htmlFor="pj-chex">রঙ (ইচ্ছা হলে)</Label>
             <Input
-              id="chex"
+              id="pj-chex"
               type="color"
               className="h-11 p-1"
               value={form.color_hex}
@@ -232,9 +232,9 @@ function AdminStock() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="stk">স্টক (পিস)</Label>
+            <Label htmlFor="pj-stk">স্টক (পিস)</Label>
             <Input
-              id="stk"
+              id="pj-stk"
               type="number"
               min={0}
               value={form.stock}
@@ -249,7 +249,7 @@ function AdminStock() {
 
       <div className="rounded-xl border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-bold">স্টক তালিকা</h2>
+          <h2 className="font-bold">পায়জামার স্টক তালিকা</h2>
           <div className="flex gap-1">
             {SIZES.map((s) => (
               <button
@@ -269,7 +269,7 @@ function AdminStock() {
         {isLoading ? (
           <p className="mt-4 text-sm text-muted-foreground">লোড হচ্ছে…</p>
         ) : rows.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+          <p className="mt-4 text-sm text-muted-foreground">এই সাইজে কোনো পায়জামা ডিজাইন নেই।</p>
         ) : (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {rows.map((v) => (
