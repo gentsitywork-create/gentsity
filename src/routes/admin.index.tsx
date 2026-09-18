@@ -54,6 +54,7 @@ type OrderRow = {
   courier_consignment_id: string | null;
   courier_tracking_code: string | null;
   customer_ip: string | null;
+  product_type: string;
   created_at: string;
   order_items: { variant_id: string | null; size: string; color_name: string; qty: number }[];
 };
@@ -82,7 +83,7 @@ function AdminOrders() {
       const { data, error } = await supabase
         .from("orders")
         .select(
-          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, created_at, order_items(variant_id, size, color_name, qty)",
+          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, created_at, order_items(variant_id, size, color_name, qty)",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -421,6 +422,11 @@ function AdminOrders() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
+                    {o.product_type === "pajama" && (
+                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-800">
+                        পায়জামা
+                      </span>
+                    )}
                     {(phoneCount[o.phone] ?? 0) > 1 && (
                       <button
                         type="button"
