@@ -127,9 +127,18 @@ function PajamaPage() {
 
   const handleOrder = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (totalUnits < 1) return toast.error("কমপক্ষে একটি প্রোডাক্ট নিন।");
-    if (!size) return toast.error("অর্ডারের সাইজ বাছুন।");
-    if (!/^01[3-9]\d{8}$/.test(form.phone.trim())) return toast.error("সঠিক মোবাইল নম্বর দিন (যেমন ০১৭xxxxxxxx)।");
+    if (totalUnits < 1) {
+      toast.error("কমপক্ষে একটি প্রোডাক্ট নিন।");
+      return;
+    }
+    if (!size) {
+      toast.error("অর্ডারের সাইজ বাছুন।");
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(form.phone.trim())) {
+      toast.error("সঠিক মোবাইল নম্বর দিন (যেমন ০১৭xxxxxxxx)।");
+      return;
+    }
     setSubmitting(true);
     try {
       const result = await submit({ data: {

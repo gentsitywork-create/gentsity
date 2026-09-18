@@ -51,20 +51,36 @@ function AdminPajamaStock() {
 
   const add = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!form.name.trim() || Number(form.price) < 1) return toast.error("প্রোডাক্টের নাম ও সঠিক দাম দিন।");
-    if (!file) return toast.error("প্রোডাক্টের ছবি আপলোড করুন।");
+    if (!form.name.trim() || Number(form.price) < 1) {
+      toast.error("প্রোডাক্টের নাম ও সঠিক দাম দিন।");
+      return;
+    }
+    if (!file) {
+      toast.error("প্রোডাক্টের ছবি আপলোড করুন।");
+      return;
+    }
     setSaving(true);
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       const path = `pajama/products/${crypto.randomUUID()}.${ext}`;
       const uploaded = await supabase.storage.from("products").upload(path, file, { contentType: file.type });
-      if (uploaded.error) return toast.error("ছবি আপলোড হয়নি।");
+      if (uploaded.error) {
+        toast.error("ছবি আপলোড হয়নি।");
+        return;
+      }
       const kind = form.product_kind as "single" | "combo";
       const { data: product, error } = await supabase.from("pajama_products").insert({ name: form.name.trim(), product_kind: kind, pieces_per_unit: kind === "combo" ? 2 : 1, price: Number(form.price), image_url: path, sort_order: products.length + 1 }).select("id").single();
-      if (error || !product) { await supabase.storage.from("products").remove([path]); return toast.error("প্রোডাক্ট যোগ হয়নি।"); }
+      if (error || !product) {
+        await supabase.storage.from("products").remove([path]);
+        toast.error("প্রোডাক্ট যোগ হয়নি।");
+        return;
+      }
       const stockRows = SIZES.map((size) => ({ product_id: product.id, size, stock: Math.max(0, Number(form[size]) || 0) }));
       const { error: stockError } = await supabase.from("pajama_product_stock").insert(stockRows);
-      if (stockError) return toast.error("প্রোডাক্ট যোগ হয়েছে, কিন্তু স্টক সেভ হয়নি।");
+      if (stockError) {
+        toast.error("প্রোডাক্ট যোগ হয়েছে, কিন্তু স্টক সেভ হয়নি।");
+        return;
+      }
       toast.success("পায়জামার প্রোডাক্ট যোগ হয়েছে।");
       setForm({ name: "", product_kind: "combo", price: "", M: "0", L: "0", XL: "0", XXL: "0" }); setFile(null);
       if (fileRef.current) fileRef.current.value = "";
@@ -75,25 +91,37 @@ function AdminPajamaStock() {
   const updateProduct = async (id: string, patch: Partial<Product>) => {
     const { pajama_product_stock: _stock, ...safePatch } = patch;
     const { error } = await supabase.from("pajama_products").update(safePatch).eq("id", id);
-    if (error) return toast.error("আপডেট হয়নি।");
+    if (error) {
+      toast.error("আপডেট হয়নি।");
+      return;
+    }
     refresh();
   };
   const updateStock = async (productId: string, size: Size, stock: number) => {
     const { error } = await supabase.from("pajama_product_stock").upsert({ product_id: productId, size, stock: Math.max(0, stock) }, { onConflict: "product_id,size" });
-    if (error) return toast.error("স্টক আপডেট হয়নি।");
+    if (error) {
+      toast.error("স্টক আপডেট হয়নি।");
+      return;
+    }
     refresh();
   };
   const replaceImage = async (product: Product, nextFile: File) => {
     const ext = (nextFile.name.split(".").pop() || "jpg").toLowerCase();
     const path = `pajama/products/${crypto.randomUUID()}.${ext}`;
     const uploaded = await supabase.storage.from("products").upload(path, nextFile, { contentType: nextFile.type });
-    if (uploaded.error) return toast.error("ছবি বদলানো যায়নি।");
+    if (uploaded.error) {
+      toast.error("ছবি বদলানো যায়নি।");
+      return;
+    }
     await updateProduct(product.id, { image_url: path });
     if (product.image_url) await supabase.storage.from("products").remove([product.image_url]);
   };
   const remove = async (product: Product) => {
     const { error } = await supabase.from("pajama_products").delete().eq("id", product.id);
-    if (error) return toast.error("মুছে ফেলা যায়নি; প্রয়োজনে বন্ধ করে দিন।");
+    if (error) {
+      toast.error("মুছে ফেলা যায়নি; প্রয়োজনে বন্ধ করে দিন।");
+      return;
+    }
     if (product.image_url) await supabase.storage.from("products").remove([product.image_url]);
     refresh();
   };
