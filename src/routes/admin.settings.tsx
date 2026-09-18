@@ -48,7 +48,8 @@ function AdminSettings() {
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
         logo_path: data["logo_path"] ?? "",
-        pajama_delivery_charge: data["pajama_delivery_charge"] ?? "100",
+        pajama_delivery_charge_dhaka: data["pajama_delivery_charge_dhaka"] ?? "70",
+        pajama_delivery_charge_outside: data["pajama_delivery_charge_outside"] ?? "120",
       });
     }
   }, [data]);
