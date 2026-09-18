@@ -160,6 +160,7 @@ export type Database = {
           note: string | null
           order_no: number
           phone: string
+          product_type: string
           status: string
           total_amount: number
           updated_at: string
@@ -178,6 +179,7 @@ export type Database = {
           note?: string | null
           order_no?: number
           phone: string
+          product_type?: string
           status?: string
           total_amount?: number
           updated_at?: string
@@ -196,6 +198,7 @@ export type Database = {
           note?: string | null
           order_no?: number
           phone?: string
+          product_type?: string
           status?: string
           total_amount?: number
           updated_at?: string
@@ -210,6 +213,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          product_type: string
           size: string
           sort_order: number
           stock: number
@@ -222,6 +226,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          product_type?: string
           size: string
           sort_order?: number
           stock?: number
@@ -234,6 +239,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          product_type?: string
           size?: string
           sort_order?: number
           stock?: number
