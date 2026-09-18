@@ -10,9 +10,9 @@ function clientIp(): string {
 }
 
 const orderSchema = z.object({
-  customer_name: z.string().trim().min(2).max(80),
+  customer_name: z.string().trim().max(80).optional().default(""),
   phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
-  address: z.string().trim().min(10).max(400),
+  address: z.string().trim().max(400).optional().default(""),
   district: z.string().trim().max(60).optional().default(""),
   note: z.string().trim().max(300).optional().default(""),
   size: z.enum(["M", "L", "XL", "XXL"]),
