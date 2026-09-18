@@ -44,6 +44,8 @@ type Product = {
 function PajamaPage() {
   const [size, setSize] = useState<Size | null>(null);
   const [picks, setPicks] = useState<Record<string, number>>({});
+  const [initialized, setInitialized] = useState(false);
+  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
