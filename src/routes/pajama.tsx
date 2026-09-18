@@ -257,6 +257,7 @@ function PajamaPage() {
                   <span className="text-center font-bold">{qty}</span>
                   <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, 1)} aria-label={`${product.name} বাড়ান`}><Plus className="h-4 w-4" /></Button>
                 </div>
+                <Button type="button" className="mt-3 w-full" onClick={() => orderProduct(product)}>অর্ডার করুন</Button>
               </div>
             </article>;
           })}</div>}
