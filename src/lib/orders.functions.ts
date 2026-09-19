@@ -56,6 +56,8 @@ export const placeOrder = createServerFn({ method: "POST" })
       }
     }
 
+    await blockRecentOrder(supabaseAdmin, data.phone);
+
     const ids = data.items.map((i) => i.variant_id);
     const { data: variants, error: vErr } = await supabaseAdmin
       .from("product_variants")
