@@ -9,6 +9,20 @@ function clientIp(): string {
   return first || getRequestIP({ xForwardedFor: true }) || "";
 }
 
+/** একই মোবাইল নম্বর থেকে ৩০ মিনিটের মধ্যে দ্বিতীয় অর্ডার ব্লক করে। */
+async function blockRecentOrder(supabaseAdmin: any, phone: string) {
+  const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const { data: recent } = await supabaseAdmin
+    .from("orders")
+    .select("id")
+    .eq("phone", phone)
+    .gte("created_at", since)
+    .limit(1);
+  if (recent && recent.length > 0) {
+    throw new Error("আপনি ইতিমধ্যে অর্ডার করেছেন। ৩০ মিনিট পর আবার অর্ডার করতে পারবেন।");
+  }
+}
+
 const orderSchema = z.object({
   customer_name: z.string().trim().max(80).optional().default(""),
   phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
@@ -41,6 +55,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। সহায়তার জন্য যোগাযোগ করুন।");
       }
     }
+
+    await blockRecentOrder(supabaseAdmin, data.phone);
 
     const ids = data.items.map((i) => i.variant_id);
     const { data: variants, error: vErr } = await supabaseAdmin
@@ -136,6 +152,8 @@ export const placePajamaOrder = createServerFn({ method: "POST" })
         throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। সহায়তার জন্য যোগাযোগ করুন।");
       }
     }
+
+    await blockRecentOrder(supabaseAdmin, data.phone);
 
     const ids = data.items.map((i) => i.product_id);
     const [{ data: products, error: pErr }, { data: stocks, error: sErr }] = await Promise.all([
