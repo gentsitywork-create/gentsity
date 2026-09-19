@@ -153,6 +153,8 @@ export const placePajamaOrder = createServerFn({ method: "POST" })
       }
     }
 
+    await blockRecentOrder(supabaseAdmin, data.phone);
+
     const ids = data.items.map((i) => i.product_id);
     const [{ data: products, error: pErr }, { data: stocks, error: sErr }] = await Promise.all([
       supabaseAdmin
