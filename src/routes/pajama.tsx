@@ -243,11 +243,6 @@ function PajamaPage() {
                 <h2 className="min-h-10 text-sm font-bold leading-5 md:text-base">{product.name}</h2>
                 <p className="mt-1 text-lg font-extrabold text-primary">৳{product.price}</p>
                 {size && <p className="text-xs text-muted-foreground">{size} স্টক: {stock}</p>}
-                <div className="mt-3 grid grid-cols-[40px_1fr_40px] items-center overflow-hidden rounded-md border">
-                  <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, -1)} disabled={qty === 0} aria-label={`${product.name} কমান`}><Minus className="h-4 w-4" /></Button>
-                  <span className="text-center font-bold">{qty}</span>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => changeQty(product, 1)} disabled={qty === 0} aria-label={`${product.name} বাড়ান`}><Plus className="h-4 w-4" /></Button>
-                </div>
                 <Button type="button" className="mt-3 w-full" onClick={() => orderProduct(product)}>অর্ডার করুন</Button>
               </div>
             </article>;
