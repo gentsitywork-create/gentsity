@@ -230,12 +230,6 @@ function Home() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="relative mx-auto flex max-w-5xl items-center justify-center px-4 py-4">
-          <Link
-            to="/pajama"
-            className="absolute left-4 rounded-md border px-3 py-1.5 text-sm font-semibold"
-          >
-            পায়জামা
-          </Link>
           {logoUrl ? (
             <img
               src={logoUrl}
@@ -252,6 +246,14 @@ function Home() {
           </span>
         </div>
       </header>
+
+      <nav className="border-b bg-card">
+        <div className="mx-auto flex max-w-5xl items-center justify-center gap-2 overflow-x-auto px-4 py-2.5">
+          <Link to="/" activeOptions={{ exact: true }} className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পোলো শার্ট</Link>
+          <Link to="/pajama" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পায়জামা</Link>
+          <Link to="/sneakers" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>স্নিকার্স</Link>
+        </div>
+      </nav>
 
       {done ? (
         <section className="mx-auto max-w-3xl px-4 py-12">
