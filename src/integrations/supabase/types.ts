@@ -260,6 +260,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           name: string
+          page: string
           pieces_per_unit: number
           price: number
           product_kind: string
@@ -272,6 +273,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           name: string
+          page?: string
           pieces_per_unit?: number
           price: number
           product_kind?: string
@@ -284,6 +286,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           name?: string
+          page?: string
           pieces_per_unit?: number
           price?: number
           product_kind?: string
