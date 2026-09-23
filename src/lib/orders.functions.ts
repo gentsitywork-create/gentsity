@@ -122,19 +122,27 @@ export const placeOrder = createServerFn({ method: "POST" })
     return { order_no: order.order_no, total };
   });
 
-/* ===================== পায়জামা অর্ডার (পিস অনুযায়ী) ===================== */
+/* ===================== পায়জামা/স্নিকার্স অর্ডার (পিস অনুযায়ী) ===================== */
 
-const pajamaOrderSchema = z.object({
-  customer_name: z.string().trim().max(80).optional().default(""),
-  phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
-  address: z.string().trim().max(400).optional().default(""),
-  size: z.enum(["M", "L", "XL", "XXL"]),
-  delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
-  items: z
-    .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
-    .min(1)
-    .max(50),
-});
+function makeCatalogOrderFn(config: {
+  page: "pajama" | "sneakers";
+  sizes: [string, ...string[]];
+  dhakaKey: string;
+  outsideKey: string;
+  dhakaFallback: number;
+  outsideFallback: number;
+}) {
+  const schema = z.object({
+    customer_name: z.string().trim().max(80).optional().default(""),
+    phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
+    address: z.string().trim().max(400).optional().default(""),
+    size: z.enum(config.sizes),
+    delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
+    items: z
+      .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
+      .min(1)
+      .max(50),
+  });
 
 export const placePajamaOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => pajamaOrderSchema.parse(data))
