@@ -124,19 +124,20 @@ export const placeOrder = createServerFn({ method: "POST" })
 
 /* ===================== পায়জামা/স্নিকার্স অর্ডার (পিস অনুযায়ী) ===================== */
 
-function makeCatalogOrderFn(config: {
+type CatalogConfig = {
   page: "pajama" | "sneakers";
-  sizes: [string, ...string[]];
   dhakaKey: string;
   outsideKey: string;
   dhakaFallback: number;
   outsideFallback: number;
-}) {
-  const schema = z.object({
+};
+
+const catalogOrderSchema = (sizes: [string, ...string[]]) =>
+  z.object({
     customer_name: z.string().trim().max(80).optional().default(""),
     phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
     address: z.string().trim().max(400).optional().default(""),
-    size: z.enum(config.sizes),
+    size: z.enum(sizes),
     delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
     items: z
       .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
@@ -144,9 +145,9 @@ function makeCatalogOrderFn(config: {
       .max(50),
   });
 
-  return createServerFn({ method: "POST" })
-    .inputValidator((data) => schema.parse(data))
-    .handler(async ({ data }) => {
+type CatalogOrderData = z.infer<ReturnType<typeof catalogOrderSchema>>;
+
+async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
       const ip = clientIp();
