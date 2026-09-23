@@ -166,8 +166,8 @@ function PajamaPage() {
 
   return <div className="min-h-screen bg-background">
     <header className="border-b bg-card">
-      <div className="relative mx-auto flex max-w-6xl items-center justify-center px-4 py-4">
-        {logoUrl ? <img src={logoUrl} alt="Gentsity" className="h-10 max-w-[180px] object-contain" /> : <span className="font-display text-2xl font-extrabold text-primary">Gentsity</span>}
+      <div className="relative mx-auto flex min-h-20 max-w-6xl items-center justify-center px-4 py-3 sm:min-h-24">
+        {logoUrl ? <img src={logoUrl} alt="Gentsity" className="max-h-16 w-36 object-contain sm:max-h-20 sm:w-56" /> : <span className="font-display text-2xl font-extrabold text-primary">Gentsity</span>}
       </div>
     </header>
 
