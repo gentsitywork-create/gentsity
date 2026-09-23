@@ -23,6 +23,8 @@ function AdminSettings() {
     logo_path: "",
     pajama_delivery_charge_dhaka: "70",
     pajama_delivery_charge_outside: "120",
+    sneakers_delivery_charge_dhaka: "80",
+    sneakers_delivery_charge_outside: "130",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
