@@ -3,31 +3,31 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Flame, KeyRound, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
+import { Check, Flame, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { placePajamaOrder } from "@/lib/orders.functions";
+import { placeSneakersOrder } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-export const Route = createFileRoute("/pajama")({
+export const Route = createFileRoute("/sneakers")({
   head: () => ({
     meta: [
-      { title: "Gentsity — চায়না মাইক্রো স্ট্রেচ পায়জামা" },
-      { name: "description", content: "চায়না মাইক্রো স্ট্রেচ পায়জামার কম্বো ও সিঙ্গেল কালেকশন। পছন্দের প্রোডাক্ট ও পরিমাণ বেছে অর্ডার করুন।" },
-      { property: "og:title", content: "Gentsity — চায়না মাইক্রো স্ট্রেচ পায়জামা" },
-      { property: "og:description", content: "কম্বো ও সিঙ্গেল পায়জামা থেকে পছন্দের প্রোডাক্ট বেছে অর্ডার করুন।" },
+      { title: "Gentsity — প্রিমিয়াম স্নিকার্স" },
+      { name: "description", content: "প্রিমিয়াম ফিনিশিংয়ের স্নিকার্স — ডেইলি ইউজ, ক্যাজুয়াল আউটিং ও স্মার্ট লুকের জন্য পারফেক্ট। সাইজ ৪০–৪৪, ক্যাশ অন ডেলিভারি।" },
+      { property: "og:title", content: "Gentsity — প্রিমিয়াম স্নিকার্স" },
+      { property: "og:description", content: "পছন্দের স্নিকার্স বেছে নিন, ক্যাশ অন ডেলিভারিতে অর্ডার করুন।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: PajamaPage,
+  component: SneakersPage,
 });
 
-const SIZES = ["M", "L", "XL", "XXL"] as const;
+const SIZES = ["40", "41", "42", "43", "44"] as const;
 type Size = (typeof SIZES)[number];
 type StockRow = { size: string; stock: number };
 type Product = {
@@ -41,14 +41,14 @@ type Product = {
   pajama_product_stock: StockRow[];
 };
 
-function PajamaPage() {
+function SneakersPage() {
   const [size, setSize] = useState<Size | null>(null);
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
-  const submit = useServerFn(placePajamaOrder);
+  const submit = useServerFn(placeSneakersOrder);
 
   const { data: settings } = useQuery({
     queryKey: ["settings"],
@@ -57,8 +57,8 @@ function PajamaPage() {
       return Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""])) as Record<string, string>;
     },
   });
-  const dhakaCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_dhaka"] ?? 70) || 70);
-  const outsideCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_outside"] ?? 120) || 120);
+  const dhakaCharge = Math.max(0, Number(settings?.["sneakers_delivery_charge_dhaka"] ?? 80) || 80);
+  const outsideCharge = Math.max(0, Number(settings?.["sneakers_delivery_charge_outside"] ?? 130) || 130);
   const deliveryCharge = deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
   const logoPath = settings?.["logo_path"];
   const { data: logoUrl } = useQuery({
@@ -71,12 +71,12 @@ function PajamaPage() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["pajama-products"],
+    queryKey: ["sneakers-products"],
     queryFn: async () => {
       const { data, error } = await (supabase
         .from("pajama_products")
         .select("id, name, product_kind, pieces_per_unit, price, image_url, sort_order, pajama_product_stock(size, stock)") as any)
-        .eq("page", "pajama")
+        .eq("page", "sneakers")
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
@@ -84,7 +84,7 @@ function PajamaPage() {
     },
   });
   const { data: images = {} } = useQuery({
-    queryKey: ["pajama-product-images", products.map((p) => p.image_url).join(",")],
+    queryKey: ["sneakers-product-images", products.map((p) => p.image_url).join(",")],
     enabled: products.some((p) => Boolean(p.image_url)),
     queryFn: async () => {
       const paths = products.map((p) => p.image_url).filter((path): path is string => Boolean(path));
@@ -95,27 +95,10 @@ function PajamaPage() {
     },
   });
 
-
   const selected = useMemo(() => products.filter((p) => (picks[p.id] ?? 0) > 0), [products, picks]);
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
   const subtotal = selected.reduce((sum, p) => sum + p.price * (picks[p.id] ?? 0), 0);
   const total = subtotal + deliveryCharge;
-
-  const changeQty = (product: Product, delta: number) => {
-    setPicks((current) => {
-      const next = Math.max(0, Math.min(50, (current[product.id] ?? 0) + delta));
-      if (size) {
-        const available = product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0;
-        if (next > available) {
-          toast.error(`${product.name} প্রোডাক্টে ${size} সাইজের স্টক ${available}টি।`);
-          return current;
-        }
-      }
-      const updated = { ...current };
-      if (next === 0) delete updated[product.id]; else updated[product.id] = next;
-      return updated;
-    });
-  };
 
   const chooseSize = (nextSize: Size) => {
     const unavailable = selected.find((product) => {
@@ -127,12 +110,12 @@ function PajamaPage() {
       return;
     }
     setSize(nextSize);
-    trackPixel("ViewContent", { content_name: `Pajama ${nextSize}` });
+    trackPixel("ViewContent", { content_name: `Sneakers ${nextSize}` });
   };
 
   const orderProduct = (product: Product) => {
     setPicks({ [product.id]: 1 });
-    document.getElementById("pajama-checkout")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("sneakers-checkout")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleOrder = async (event: React.FormEvent) => {
@@ -181,39 +164,21 @@ function PajamaPage() {
       </div>
     </section> : <>
       <section className="mx-auto max-w-4xl px-4 pb-6 pt-9 text-center">
-        <p className="text-sm font-bold text-primary">GENTSITY PAJAMA COLLECTION</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> চায়না মাইক্রো স্টিচ ফেব্রিকের প্রিমিয়াম পায়জামা <Flame className="inline h-7 w-7 text-destructive" /></h1>
-        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">আরাম, স্মার্ট লুক আর প্রিমিয়াম কোয়ালিটি—সবকিছু একসাথে! <Sparkles className="inline h-4 w-4 text-primary" /></p>
+        <p className="text-sm font-bold text-primary">GENTSITY SNEAKERS COLLECTION</p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> প্রিমিয়াম স্নিকার্স <Flame className="inline h-7 w-7 text-destructive" /></h1>
+        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">দেখতে স্মার্ট, ব্যবহারে কমফোর্টেবল — প্রতিদিনের জন্য পারফেক্ট জুতা! <Sparkles className="inline h-4 w-4 text-primary" /></p>
 
-        <ul className="mx-auto mt-5 grid max-w-2xl gap-2 text-left text-sm text-muted-foreground md:grid-cols-2">
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম কোয়ালিটি চায়না মাইক্রো স্টিচ ফেব্রিক</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> সফট, আরামদায়ক ও টেকসই</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Semi Narrow Pant Cutting – স্মার্ট ও কমফোর্টেবল ফিট</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> পুরোপুরি স্কিনি নয়, তাই চলাফেরায় আরাম</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> অফিস, ক্যাজুয়াল ও ডেইলি ওয়্যারের জন্য পারফেক্ট</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> আয়রন করার ঝামেলা নেই – সবসময় স্মার্ট লুক</li>
-        </ul>
-
-        <div className="mt-6 rounded-lg bg-secondary p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground"><KeyRound className="inline h-4 w-4" /> Semi Narrow Cutting-এর বিশেষত্ব:</h2>
-          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-            <li>কোমর থেকে হাঁটু পর্যন্ত নরমাল ফিট</li>
-            <li>হাঁটু থেকে নিচে হালকা টেপার্ড</li>
-            <li>স্মার্ট লুকের সাথে সর্বোচ্চ কমফোর্ট</li>
+        <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
+          <h2 className="mb-2 font-bold text-foreground"><Flame className="inline h-4 w-4 text-destructive" /> কেন এই প্রোডাক্ট নিবেন?</h2>
+          <ul className="space-y-2 text-muted-foreground">
+            <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম ফিনিশিং — দেখতে smart, ব্যবহারেও comfortable</li>
+            <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Daily use, casual outing এবং smart look-এর জন্য perfect</li>
+            <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Available sizes: 40, 41, 42, 43, 44</li>
+            <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Cash on Delivery সুবিধা</li>
           </ul>
         </div>
 
-        <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground"><Flame className="inline h-4 w-4 text-destructive" /> আমাদের পায়জামার বিশেষ বৈশিষ্ট্য</h2>
-          <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
-            <li><strong className="text-foreground">প্রিমিয়াম চায়না মাইক্রো স্টিচ ফেব্রিক:</strong> উন্নতমানের চায়না মাইক্রো স্টিচ ফেব্রিক দিয়ে তৈরি। কাপড়ে ভাঁজ কম পড়ে, তাই বারবার আয়রন করার ঝামেলা নেই।</li>
-            <li><strong className="text-foreground">প্রিমিয়াম মেটাল জিপার:</strong> গেট ও পিছনের পকেটে ব্যবহার করা হয়েছে মজবুত মেটাল জিপার, যা পায়জামাকে দিয়েছে প্রিমিয়াম লুক ও দীর্ঘস্থায়িত্ব।</li>
-            <li><strong className="text-foreground">পকেটেও একই ফেব্রিক:</strong> পকেটের জন্য আলাদা কোনো ফেব্রিক ব্যবহার করা হয়নি। পায়জামায় ব্যবহৃত মূল ফেব্রিকই পকেটেও ব্যবহার করা হয়েছে, ফলে কোয়ালিটি ও আরাম দুটোই বজায় থাকে।</li>
-            <li><strong className="text-foreground">মেটাল ড্রস্ট্রিং ও প্রিমিয়াম আইলেট:</strong> পায়জামায় ব্যবহার করা হয়েছে মজবুত মেটাল ড্রস্ট্রিং এবং ড্রস্ট্রিংয়ের জন্য প্রিমিয়াম আইলেট, যা পায়জামার ফিনিশিং ও স্থায়িত্ব আরও বাড়িয়ে দেয়।</li>
-          </ol>
-        </div>
-
-        <p className="mt-6 text-base font-bold"><Ruler className="inline h-4 w-4" /> সাইজ: M – 38 | L – 40 | XL – 42 | XXL – 44</p>
+        <p className="mt-6 text-base font-bold"><Ruler className="inline h-4 w-4" /> সাইজ: 40 | 41 | 42 | 43 | 44</p>
 
         <ul className="mt-5 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
           <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ডেলিভারি</li>
@@ -221,15 +186,17 @@ function PajamaPage() {
         </ul>
 
         <div className="mt-5 space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-left text-sm text-muted-foreground">
-          <p>সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা।</p>
-          <p>– কেয়ার নির্দেশনা: হালকা ডিটারজেন্টে ধোয়া, ব্লিচ ব্যবহার নয়।</p>
-          <p>প্রডাক্ট হাতে পাওয়ার পর ডেলিভারি রাইডার এর সামনে চেক করে নিবেন স্যার। কোন সমস্যা থাকলে আমাদের জানাবেন স্যার। রাইডার চলে যাওয়ার পর কোন অভিযোগ গ্রহণ করা হবে না স্যার।</p>
-          <p className="font-semibold text-destructive">বি: দ্র: অর্ডার করার সময় সাইজ শিওর হয়ে নিবেন। সাইজ নিয়ে সমস্যা জানালে কুরিয়ার চার্জ দিয়ে সাইজ এক্সচেঞ্জ করতে হবে। NB: কোন কারনে প্রডাক্ট রির্টান করলে ১০০ টাকা ডেলিভারি চার্জ দিয়ে রির্টান করতে হবে।</p>
+          <p>Product পছন্দ না হলে delivery man-কে delivery charge pay করে return করতে হবে। Product-এ ফাটা, দাগ, damage, নষ্ট অথবা ভুল product হলে return করার সময় delivery charge লাগবে না।</p>
+          <h3 className="pt-2 font-bold text-foreground">রিটার্ন ও রিফান্ড নীতিমালা</h3>
+          <p>রিটার্ন/এক্সচেঞ্জের জন্য পণ্যটি ব্যবহার না করা, পরিষ্কার এবং সম্ভব হলে original box/packaging-সহ থাকতে হবে।</p>
+          <p>ভুল, ক্ষতিগ্রস্ত বা ত্রুটিপূর্ণ পণ্য পেলে যত দ্রুত সম্ভব আমাদের ফোন/WhatsApp-এ যোগাযোগ করুন। যাচাই সাপেক্ষে replacement বা return ব্যবস্থা করা হবে।</p>
+          <p>Size change, পছন্দ পরিবর্তন বা personal preference-এর কারণে return/exchange হলে delivery/courier charge গ্রাহক বহন করবেন।</p>
+          <p className="font-semibold text-destructive">ব্যবহৃত, নোংরা, ইচ্ছাকৃতভাবে ক্ষতিগ্রস্ত বা resale condition-এ নেই — এমন পণ্য return/refund-এর জন্য গ্রহণযোগ্য নাও হতে পারে।</p>
         </div>
       </section>
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
-        {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">পায়জামার প্রোডাক্ট শিগগিরই আসছে।</p> :
+        {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">স্নিকার্স শিগগিরই আসছে।</p> :
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">{products.map((product) => {
             const qty = picks[product.id] ?? 0;
             const image = product.image_url ? images[product.image_url] : undefined;
@@ -237,7 +204,7 @@ function PajamaPage() {
             return <article key={product.id} className={`overflow-hidden rounded-lg border bg-card transition ${qty > 0 ? "border-primary ring-2 ring-primary" : "border-border"}`}>
               <div className="relative aspect-[4/5] bg-secondary">
                 {image ? <img src={image} alt={product.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center px-3 text-center text-sm text-muted-foreground">ছবি আপলোড করা হয়নি</div>}
-                <span className="absolute left-2 top-2 rounded-md bg-card px-2 py-1 text-xs font-bold shadow-sm">{product.product_kind === "combo" ? "২ পিস কম্বো" : "সিঙ্গেল পিস"}</span>
+                <span className="absolute left-2 top-2 rounded-md bg-card px-2 py-1 text-xs font-bold shadow-sm">স্নিকার্স</span>
                 {qty > 0 && <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-5 w-5" /></span>}
               </div>
               <div className="p-3">
@@ -249,17 +216,17 @@ function PajamaPage() {
             </article>;
           })}</div>}
 
-        {totalUnits > 0 && <form id="pajama-checkout" onSubmit={handleOrder} className="mx-auto mt-8 max-w-3xl rounded-lg border bg-card p-5 md:p-7">
+        {totalUnits > 0 && <form id="sneakers-checkout" onSubmit={handleOrder} className="mx-auto mt-8 max-w-3xl rounded-lg border bg-card p-5 md:p-7">
           <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-bold">অর্ডার সম্পন্ন করুন</h2><span className="rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground">{totalUnits}টি</span></div>
-          <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-4 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
+          <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-5 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
           <div className="mt-5"><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
             <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
             <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
           </div></div>
           <div className="mt-5 grid gap-4">
-            <div className="grid gap-2"><Label htmlFor="pj-name">আপনার নাম</Label><Input id="pj-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-            <div className="grid gap-2"><Label htmlFor="pj-phone">মোবাইল নম্বর *</Label><Input id="pj-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
-            <div className="grid gap-2"><Label htmlFor="pj-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="pj-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+            <div className="grid gap-2"><Label htmlFor="sn-name">আপনার নাম</Label><Input id="sn-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div className="grid gap-2"><Label htmlFor="sn-phone">মোবাইল নম্বর *</Label><Input id="sn-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
+            <div className="grid gap-2"><Label htmlFor="sn-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="sn-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
           </div>
           <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
             {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}

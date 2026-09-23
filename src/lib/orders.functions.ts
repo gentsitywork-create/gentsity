@@ -122,119 +122,153 @@ export const placeOrder = createServerFn({ method: "POST" })
     return { order_no: order.order_no, total };
   });
 
-/* ===================== পায়জামা অর্ডার (পিস অনুযায়ী) ===================== */
+/* ===================== পায়জামা/স্নিকার্স অর্ডার (পিস অনুযায়ী) ===================== */
 
-const pajamaOrderSchema = z.object({
-  customer_name: z.string().trim().max(80).optional().default(""),
-  phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
-  address: z.string().trim().max(400).optional().default(""),
-  size: z.enum(["M", "L", "XL", "XXL"]),
-  delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
-  items: z
-    .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
-    .min(1)
-    .max(50),
-});
+type CatalogConfig = {
+  page: "pajama" | "sneakers";
+  dhakaKey: string;
+  outsideKey: string;
+  dhakaFallback: number;
+  outsideFallback: number;
+};
+
+const catalogOrderSchema = (sizes: [string, ...string[]]) =>
+  z.object({
+    customer_name: z.string().trim().max(80).optional().default(""),
+    phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
+    address: z.string().trim().max(400).optional().default(""),
+    size: z.enum(sizes),
+    delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
+    items: z
+      .array(z.object({ product_id: z.string().uuid(), qty: z.number().int().min(1).max(50) }))
+      .min(1)
+      .max(50),
+  });
+
+type CatalogOrderData = z.infer<ReturnType<typeof catalogOrderSchema>>;
+
+async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+      const ip = clientIp();
+      if (ip) {
+        const { data: blocked } = await supabaseAdmin
+          .from("blocked_ips")
+          .select("id")
+          .eq("ip", ip)
+          .maybeSingle();
+        if (blocked) {
+          throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। সহায়তার জন্য যোগাযোগ করুন।");
+        }
+      }
+
+      await blockRecentOrder(supabaseAdmin, data.phone);
+
+      const ids = data.items.map((i) => i.product_id);
+      const [{ data: rawProducts, error: pErr }, { data: stocks, error: sErr }] = await Promise.all([
+        (supabaseAdmin
+          .from("pajama_products")
+          .select("id, name, product_kind, pieces_per_unit, price, is_active") as any)
+          .eq("page", config.page)
+          .in("id", ids),
+        supabaseAdmin
+          .from("pajama_product_stock")
+          .select("product_id, size, stock")
+          .in("product_id", ids)
+          .eq("size", data.size),
+      ]);
+      if (pErr || sErr) throw new Error("স্টক যাচাই করা যায়নি, আবার চেষ্টা করুন।");
+      const products = rawProducts as
+        | { id: string; name: string; product_kind: string; pieces_per_unit: number; price: number; is_active: boolean }[]
+        | null;
+
+      let subtotal = 0;
+      for (const item of data.items) {
+        const product = products?.find((x) => x.id === item.product_id);
+        const stock = stocks?.find((x) => x.product_id === item.product_id);
+        if (!product || !product.is_active) {
+          throw new Error("নির্বাচিত ডিজাইন এখন আর পাওয়া যাচ্ছে না।");
+        }
+        if (!stock || stock.stock < item.qty) {
+          throw new Error(`${product.name} প্রোডাক্টে নির্বাচিত সাইজের পর্যাপ্ত স্টক নেই।`);
+        }
+        subtotal += product.price * item.qty;
+      }
+
+      const [{ data: dhakaRow }, { data: outsideRow }] = await Promise.all([
+        supabaseAdmin.from("settings").select("value").eq("key", config.dhakaKey).maybeSingle(),
+        supabaseAdmin.from("settings").select("value").eq("key", config.outsideKey).maybeSingle(),
+      ]);
+      const areaRate = data.delivery_area === "dhaka" ? dhakaRow?.value : outsideRow?.value;
+      const fallback = data.delivery_area === "dhaka" ? config.dhakaFallback : config.outsideFallback;
+      const deliveryCharge = Math.max(0, Number(areaRate ?? fallback) || fallback);
+      const total = subtotal + deliveryCharge;
+
+      const { data: order, error: oErr } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          customer_name: data.customer_name,
+          phone: data.phone,
+          address: data.address,
+          total_amount: total,
+          delivery_charge: deliveryCharge,
+          product_type: config.page,
+          customer_ip: ip || null,
+        })
+        .select("id, order_no")
+        .single();
+      if (oErr || !order) throw new Error("অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
+
+      const rows = data.items.map((item) => {
+        const product = products?.find((x) => x.id === item.product_id);
+        if (!product) throw new Error("নির্বাচিত প্রোডাক্ট পাওয়া যায়নি।");
+        return {
+          order_id: order.id,
+          variant_id: null,
+          pajama_product_id: product.id,
+          size: data.size,
+          color_name: `${product.name} (${product.product_kind === "combo" ? "২ পিস কম্বো" : "সিঙ্গেল পিস"})`,
+          qty: item.qty,
+          unit_price: product.price,
+          pieces_per_unit: product.pieces_per_unit,
+        };
+      });
+      const { error: iErr } = await supabaseAdmin.from("order_items").insert(rows);
+      if (iErr) throw new Error("অর্ডারের তথ্য সেভ হয়নি, আবার চেষ্টা করুন।");
+
+      for (const item of data.items) {
+        const stock = stocks?.find((x) => x.product_id === item.product_id);
+        if (!stock) continue;
+        await supabaseAdmin
+          .from("pajama_product_stock")
+          .update({ stock: stock.stock - item.qty })
+          .eq("product_id", item.product_id)
+          .eq("size", data.size);
+      }
+
+      return { order_no: order.order_no, total, delivery_charge: deliveryCharge };
+}
+
+const pajamaSchema = catalogOrderSchema(["M", "L", "XL", "XXL"]);
+const sneakersSchema = catalogOrderSchema(["40", "41", "42", "43", "44"]);
 
 export const placePajamaOrder = createServerFn({ method: "POST" })
-  .inputValidator((data) => pajamaOrderSchema.parse(data))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  .inputValidator((data) => pajamaSchema.parse(data))
+  .handler(async ({ data }) =>
+    handleCatalogOrder(
+      { page: "pajama", dhakaKey: "pajama_delivery_charge_dhaka", outsideKey: "pajama_delivery_charge_outside", dhakaFallback: 70, outsideFallback: 120 },
+      data as CatalogOrderData,
+    ),
+  );
 
-    const ip = clientIp();
-    if (ip) {
-      const { data: blocked } = await supabaseAdmin
-        .from("blocked_ips")
-        .select("id")
-        .eq("ip", ip)
-        .maybeSingle();
-      if (blocked) {
-        throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। সহায়তার জন্য যোগাযোগ করুন।");
-      }
-    }
-
-    await blockRecentOrder(supabaseAdmin, data.phone);
-
-    const ids = data.items.map((i) => i.product_id);
-    const [{ data: products, error: pErr }, { data: stocks, error: sErr }] = await Promise.all([
-      supabaseAdmin
-        .from("pajama_products")
-        .select("id, name, product_kind, pieces_per_unit, price, is_active")
-        .in("id", ids),
-      supabaseAdmin
-        .from("pajama_product_stock")
-        .select("product_id, size, stock")
-        .in("product_id", ids)
-        .eq("size", data.size),
-    ]);
-    if (pErr || sErr) throw new Error("স্টক যাচাই করা যায়নি, আবার চেষ্টা করুন।");
-
-    let subtotal = 0;
-    for (const item of data.items) {
-      const product = products?.find((x) => x.id === item.product_id);
-      const stock = stocks?.find((x) => x.product_id === item.product_id);
-      if (!product || !product.is_active) {
-        throw new Error("নির্বাচিত ডিজাইন এখন আর পাওয়া যাচ্ছে না।");
-      }
-      if (!stock || stock.stock < item.qty) {
-        throw new Error(`${product.name} প্রোডাক্টে নির্বাচিত সাইজের পর্যাপ্ত স্টক নেই।`);
-      }
-      subtotal += product.price * item.qty;
-    }
-
-    const [{ data: dhakaRow }, { data: outsideRow }] = await Promise.all([
-      supabaseAdmin.from("settings").select("value").eq("key", "pajama_delivery_charge_dhaka").maybeSingle(),
-      supabaseAdmin.from("settings").select("value").eq("key", "pajama_delivery_charge_outside").maybeSingle(),
-    ]);
-    const areaRate = data.delivery_area === "dhaka" ? dhakaRow?.value : outsideRow?.value;
-    const fallback = data.delivery_area === "dhaka" ? 70 : 120;
-    const deliveryCharge = Math.max(0, Number(areaRate ?? fallback) || fallback);
-    const total = subtotal + deliveryCharge;
-
-    const { data: order, error: oErr } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        customer_name: data.customer_name,
-        phone: data.phone,
-        address: data.address,
-        total_amount: total,
-        delivery_charge: deliveryCharge,
-        product_type: "pajama",
-        customer_ip: ip || null,
-      })
-      .select("id, order_no")
-      .single();
-    if (oErr || !order) throw new Error("অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
-
-    const rows = data.items.map((item) => {
-      const product = products?.find((x) => x.id === item.product_id);
-      if (!product) throw new Error("নির্বাচিত প্রোডাক্ট পাওয়া যায়নি।");
-      return {
-        order_id: order.id,
-        variant_id: null,
-        pajama_product_id: product.id,
-        size: data.size,
-        color_name: `${product.name} (${product.product_kind === "combo" ? "২ পিস কম্বো" : "সিঙ্গেল পিস"})`,
-        qty: item.qty,
-        unit_price: product.price,
-        pieces_per_unit: product.pieces_per_unit,
-      };
-    });
-    const { error: iErr } = await supabaseAdmin.from("order_items").insert(rows);
-    if (iErr) throw new Error("অর্ডারের তথ্য সেভ হয়নি, আবার চেষ্টা করুন।");
-
-    for (const item of data.items) {
-      const stock = stocks?.find((x) => x.product_id === item.product_id);
-      if (!stock) continue;
-      await supabaseAdmin
-        .from("pajama_product_stock")
-        .update({ stock: stock.stock - item.qty })
-        .eq("product_id", item.product_id)
-        .eq("size", data.size);
-    }
-
-    return { order_no: order.order_no, total, delivery_charge: deliveryCharge };
-  });
+export const placeSneakersOrder = createServerFn({ method: "POST" })
+  .inputValidator((data) => sneakersSchema.parse(data))
+  .handler(async ({ data }) =>
+    handleCatalogOrder(
+      { page: "sneakers", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
+      data as CatalogOrderData,
+    ),
+  );
 
 const adminItemSchema = z.object({
   variant_id: z.string().uuid().nullable().optional(),
