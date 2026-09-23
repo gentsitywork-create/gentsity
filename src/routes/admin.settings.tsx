@@ -25,6 +25,8 @@ function AdminSettings() {
     pajama_delivery_charge_outside: "120",
     sneakers_delivery_charge_dhaka: "80",
     sneakers_delivery_charge_outside: "130",
+    whatsapp_number: "",
+    whatsapp_message: "",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -54,6 +56,8 @@ function AdminSettings() {
         pajama_delivery_charge_outside: data["pajama_delivery_charge_outside"] ?? "120",
         sneakers_delivery_charge_dhaka: data["sneakers_delivery_charge_dhaka"] ?? "80",
         sneakers_delivery_charge_outside: data["sneakers_delivery_charge_outside"] ?? "130",
+        whatsapp_number: data["whatsapp_number"] ?? "",
+        whatsapp_message: data["whatsapp_message"] ?? "",
       });
     }
   }, [data]);
@@ -171,6 +175,26 @@ function AdminSettings() {
             value={values.sneakers_delivery_charge_outside}
             onChange={(e) => setValues({ ...values, sneakers_delivery_charge_outside: e.target.value })}
           />
+        </div>
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">WhatsApp চ্যাট বোতাম</h2>
+          <Label htmlFor="wa-number">WhatsApp নম্বর</Label>
+          <Input
+            id="wa-number"
+            value={values.whatsapp_number}
+            onChange={(e) => setValues({ ...values, whatsapp_number: e.target.value })}
+            placeholder="যেমন: 01712345678"
+          />
+          <Label htmlFor="wa-msg">শুরুর মেসেজ (ঐচ্ছিক)</Label>
+          <Input
+            id="wa-msg"
+            value={values.whatsapp_message}
+            onChange={(e) => setValues({ ...values, whatsapp_message: e.target.value })}
+            placeholder="হ্যালো Gentsity, আমি একটি প্রোডাক্ট সম্পর্কে জানতে চাই।"
+          />
+          <p className="text-xs text-muted-foreground">
+            নম্বর বসালে সব পেজের নিচে ডানদিকে সবুজ WhatsApp বোতাম দেখা যাবে। খালি রাখলে বোতাম লুকানো থাকবে।
+          </p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="pixel">Facebook Pixel ID</Label>

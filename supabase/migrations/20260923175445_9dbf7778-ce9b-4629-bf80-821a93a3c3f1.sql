@@ -1,0 +1,3 @@
+drop policy "settings public read" on public.settings;
+create policy "settings public read" on public.settings for select to anon, authenticated
+using (has_role(auth.uid(), 'admin'::app_role) OR key = ANY (ARRAY['combo_price','combo_qty','fb_pixel_id','logo_path','pajama_delivery_charge_dhaka','pajama_delivery_charge_outside','sneakers_delivery_charge_dhaka','sneakers_delivery_charge_outside','whatsapp_number','whatsapp_message']));
