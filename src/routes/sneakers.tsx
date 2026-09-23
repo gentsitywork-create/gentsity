@@ -150,10 +150,17 @@ function SneakersPage() {
   return <div className="min-h-screen bg-background">
     <header className="border-b bg-card">
       <div className="relative mx-auto flex max-w-6xl items-center justify-center px-4 py-4">
-        <Button asChild variant="outline" size="sm" className="absolute left-4"><Link to="/">পোলো শার্ট</Link></Button>
         {logoUrl ? <img src={logoUrl} alt="Gentsity" className="h-10 max-w-[180px] object-contain" /> : <span className="font-display text-2xl font-extrabold text-primary">Gentsity</span>}
       </div>
     </header>
+
+    <nav className="border-b bg-card">
+      <div className="mx-auto flex max-w-6xl items-center justify-center gap-2 overflow-x-auto px-4 py-2.5">
+        <Link to="/" activeOptions={{ exact: true }} className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পোলো শার্ট</Link>
+        <Link to="/pajama" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পায়জামা</Link>
+        <Link to="/sneakers" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>স্নিকার্স</Link>
+      </div>
+    </nav>
 
     {done ? <section className="mx-auto max-w-3xl px-4 py-12 text-center">
       <div className="rounded-lg border bg-card p-8">
