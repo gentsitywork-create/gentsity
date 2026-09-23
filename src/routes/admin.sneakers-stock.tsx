@@ -131,8 +131,8 @@ function AdminSneakersStock() {
       <h1 className="font-bold">নতুন স্নিকার্স প্রোডাক্ট যোগ করুন</h1>
       <div className="mt-4 grid gap-4">
         <div className="grid gap-2"><Label htmlFor="pj-image">ছবি</Label><Input id="pj-image" ref={fileRef} type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />{preview && <img src={preview} alt="প্রিভিউ" className="aspect-[4/5] w-full rounded-md border object-cover" />}</div>
-        <div className="grid gap-2"><Label htmlFor="pj-name">প্রোডাক্টের নাম</Label><Input id="pj-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="যেমন: ব্ল্যাক কম্বো" /></div>
-        <div className="grid gap-2"><Label>ধরন</Label><Select value={form.product_kind} onValueChange={(value) => setForm({ ...form, product_kind: value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="combo">২ পিস কম্বো</SelectItem><SelectItem value="single">সিঙ্গেল পিস</SelectItem></SelectContent></Select></div>
+        <div className="grid gap-2"><Label htmlFor="pj-name">প্রোডাক্টের নাম</Label><Input id="pj-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="যেমন: হোয়াইট স্নিকার্স" /></div>
+        <div className="grid gap-2"><Label>ধরন</Label><Input value="সিঙ্গেল জোড়া" disabled /></div>
         <div className="grid gap-2"><Label htmlFor="pj-price">দাম (টাকা)</Label><Input id="pj-price" type="number" min={1} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></div>
         <div><Label>সাইজ অনুযায়ী স্টক</Label><div className="mt-2 grid grid-cols-2 gap-2">{SIZES.map((size) => <div key={size}><Label htmlFor={`new-${size}`} className="text-xs">{size}</Label><Input id={`new-${size}`} type="number" min={0} value={form[size]} onChange={(e) => setForm({ ...form, [size]: e.target.value })} /></div>)}</div></div>
         <Button type="submit" disabled={saving}>{saving ? "যোগ হচ্ছে…" : "প্রোডাক্ট যোগ করুন"}</Button>
@@ -150,7 +150,7 @@ function AdminSneakersStock() {
             <Button type="button" size="sm" variant={product.is_active ? "outline" : "default"} onClick={() => updateProduct(product.id, { is_active: !product.is_active })}>{product.is_active ? "চালু" : "বন্ধ"}</Button>
             <label className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-md border px-3 text-sm font-medium"><Upload className="h-4 w-4" /> ছবি বদল<input type="file" accept="image/*" className="hidden" onChange={(e) => { const nextFile = e.target.files?.[0]; if (nextFile) replaceImage(product, nextFile); }} /></label>
             <Button type="button" variant="ghost" size="icon" onClick={() => remove(product)} aria-label={`${product.name} মুছুন`}><Trash2 className="h-4 w-4" /></Button>
-            <span className="ml-auto text-xs font-semibold text-muted-foreground">{product.product_kind === "combo" ? "২ পিস কম্বো" : "সিঙ্গেল পিস"}</span>
+            <span className="ml-auto text-xs font-semibold text-muted-foreground">১ জোড়া</span>
           </div>
         </div>
       </article>)}</div>}

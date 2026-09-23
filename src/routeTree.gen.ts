@@ -19,6 +19,7 @@ import { Route as AdminAbandonedRouteImport } from './routes/admin.abandoned'
 import { Route as AdminBlockedRouteImport } from './routes/admin.blocked'
 import { Route as AdminPajamaStockRouteImport } from './routes/admin.pajama-stock'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSneakersStockRouteImport } from './routes/admin.sneakers-stock'
 import { Route as AdminStockRouteImport } from './routes/admin.stock'
 
 const IndexRoute = IndexRouteImport.update({
@@ -71,6 +72,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSneakersStockRoute = AdminSneakersStockRouteImport.update({
+  id: '/sneakers-stock',
+  path: '/sneakers-stock',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminStockRoute = AdminStockRouteImport.update({
   id: '/stock',
   path: '/stock',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sneakers-stock': typeof AdminSneakersStockRoute
   '/admin/stock': typeof AdminStockRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sneakers-stock': typeof AdminSneakersStockRoute
   '/admin/stock': typeof AdminStockRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sneakers-stock': typeof AdminSneakersStockRoute
   '/admin/stock': typeof AdminStockRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/admin/blocked'
     | '/admin/pajama-stock'
     | '/admin/settings'
+    | '/admin/sneakers-stock'
     | '/admin/stock'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/admin/blocked'
     | '/admin/pajama-stock'
     | '/admin/settings'
+    | '/admin/sneakers-stock'
     | '/admin/stock'
     | '/admin'
   id:
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/admin/blocked'
     | '/admin/pajama-stock'
     | '/admin/settings'
+    | '/admin/sneakers-stock'
     | '/admin/stock'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sneakers-stock': {
+      id: '/admin/sneakers-stock'
+      path: '/sneakers-stock'
+      fullPath: '/admin/sneakers-stock'
+      preLoaderRoute: typeof AdminSneakersStockRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/stock': {
       id: '/admin/stock'
       path: '/stock'
@@ -252,6 +271,7 @@ interface AdminRouteChildren {
   AdminBlockedRoute: typeof AdminBlockedRoute
   AdminPajamaStockRoute: typeof AdminPajamaStockRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSneakersStockRoute: typeof AdminSneakersStockRoute
   AdminStockRoute: typeof AdminStockRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -261,6 +281,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBlockedRoute: AdminBlockedRoute,
   AdminPajamaStockRoute: AdminPajamaStockRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSneakersStockRoute: AdminSneakersStockRoute,
   AdminStockRoute: AdminStockRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
