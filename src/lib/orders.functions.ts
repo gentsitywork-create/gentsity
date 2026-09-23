@@ -247,26 +247,28 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
       }
 
       return { order_no: order.order_no, total, delivery_charge: deliveryCharge };
-    });
 }
 
-export const placePajamaOrder = makeCatalogOrderFn({
-  page: "pajama",
-  sizes: ["M", "L", "XL", "XXL"],
-  dhakaKey: "pajama_delivery_charge_dhaka",
-  outsideKey: "pajama_delivery_charge_outside",
-  dhakaFallback: 70,
-  outsideFallback: 120,
-});
+const pajamaSchema = catalogOrderSchema(["M", "L", "XL", "XXL"]);
+const sneakersSchema = catalogOrderSchema(["40", "41", "42", "43", "44"]);
 
-export const placeSneakersOrder = makeCatalogOrderFn({
-  page: "sneakers",
-  sizes: ["40", "41", "42", "43", "44"],
-  dhakaKey: "sneakers_delivery_charge_dhaka",
-  outsideKey: "sneakers_delivery_charge_outside",
-  dhakaFallback: 80,
-  outsideFallback: 130,
-});
+export const placePajamaOrder = createServerFn({ method: "POST" })
+  .inputValidator((data) => pajamaSchema.parse(data))
+  .handler(async ({ data }) =>
+    handleCatalogOrder(
+      { page: "pajama", dhakaKey: "pajama_delivery_charge_dhaka", outsideKey: "pajama_delivery_charge_outside", dhakaFallback: 70, outsideFallback: 120 },
+      data as CatalogOrderData,
+    ),
+  );
+
+export const placeSneakersOrder = createServerFn({ method: "POST" })
+  .inputValidator((data) => sneakersSchema.parse(data))
+  .handler(async ({ data }) =>
+    handleCatalogOrder(
+      { page: "sneakers", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
+      data as CatalogOrderData,
+    ),
+  );
 
 const adminItemSchema = z.object({
   variant_id: z.string().uuid().nullable().optional(),
