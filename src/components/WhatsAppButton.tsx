@@ -19,10 +19,10 @@ export default function WhatsAppButton() {
   });
 
   if (path.startsWith("/admin") || path.startsWith("/auth")) return null;
-  let num = (data?.whatsapp_number ?? "").replace(/\D/g, "");
+  let num = (data?.["whatsapp_number"] ?? "").replace(/\D/g, "");
   if (!num) return null;
   if (num.startsWith("01")) num = "88" + num;
-  const msg = data?.whatsapp_message || "হ্যালো Gentsity, আমি একটি প্রোডাক্ট সম্পর্কে জানতে চাই।";
+  const msg = data?.["whatsapp_message"] || "হ্যালো Gentsity, আমি একটি প্রোডাক্ট সম্পর্কে জানতে চাই।";
   const href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
 
   return (
