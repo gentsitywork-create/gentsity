@@ -32,7 +32,7 @@ function AdminPajamaStock() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin-pajama-products"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("pajama_products").select("id, name, product_kind, pieces_per_unit, price, image_url, is_active, sort_order, pajama_product_stock(size, stock)").order("sort_order");
+      const { data, error } = await (supabase.from("pajama_products").select("id, name, product_kind, pieces_per_unit, price, image_url, is_active, sort_order, pajama_product_stock(size, stock)") as any).eq("page", "pajama").order("sort_order");
       if (error) throw error;
       return (data ?? []) as Product[];
     },

@@ -73,9 +73,10 @@ function PajamaPage() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["pajama-products"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from("pajama_products")
-        .select("id, name, product_kind, pieces_per_unit, price, image_url, sort_order, pajama_product_stock(size, stock)")
+        .select("id, name, product_kind, pieces_per_unit, price, image_url, sort_order, pajama_product_stock(size, stock)") as any)
+        .eq("page", "pajama")
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
