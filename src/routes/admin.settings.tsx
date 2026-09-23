@@ -52,6 +52,8 @@ function AdminSettings() {
         logo_path: data["logo_path"] ?? "",
         pajama_delivery_charge_dhaka: data["pajama_delivery_charge_dhaka"] ?? "70",
         pajama_delivery_charge_outside: data["pajama_delivery_charge_outside"] ?? "120",
+        sneakers_delivery_charge_dhaka: data["sneakers_delivery_charge_dhaka"] ?? "80",
+        sneakers_delivery_charge_outside: data["sneakers_delivery_charge_outside"] ?? "130",
       });
     }
   }, [data]);
@@ -148,6 +150,26 @@ function AdminSettings() {
             min={0}
             value={values.pajama_delivery_charge_outside}
             onChange={(e) => setValues({ ...values, pajama_delivery_charge_outside: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="sndelivery-dhaka">স্নিকার্সের ডেলিভারি চার্জ — ঢাকার ভিতরে (টাকা)</Label>
+          <Input
+            id="sndelivery-dhaka"
+            type="number"
+            min={0}
+            value={values.sneakers_delivery_charge_dhaka}
+            onChange={(e) => setValues({ ...values, sneakers_delivery_charge_dhaka: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="sndelivery-outside">স্নিকার্সের ডেলিভারি চার্জ — ঢাকার বাইরে (টাকা)</Label>
+          <Input
+            id="sndelivery-outside"
+            type="number"
+            min={0}
+            value={values.sneakers_delivery_charge_outside}
+            onChange={(e) => setValues({ ...values, sneakers_delivery_charge_outside: e.target.value })}
           />
         </div>
         <div className="grid gap-2">

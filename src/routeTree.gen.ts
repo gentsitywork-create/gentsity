@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PajamaRouteImport } from './routes/pajama'
+import { Route as SneakersRouteImport } from './routes/sneakers'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAbandonedRouteImport } from './routes/admin.abandoned'
 import { Route as AdminBlockedRouteImport } from './routes/admin.blocked'
@@ -38,6 +39,11 @@ const AuthRoute = AuthRouteImport.update({
 const PajamaRoute = PajamaRouteImport.update({
   id: '/pajama',
   path: '/pajama',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SneakersRoute = SneakersRouteImport.update({
+  id: '/sneakers',
+  path: '/sneakers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/pajama': typeof PajamaRoute
+  '/sneakers': typeof SneakersRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/pajama': typeof PajamaRoute
+  '/sneakers': typeof SneakersRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/pajama': typeof PajamaRoute
+  '/sneakers': typeof SneakersRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/pajama'
+    | '/sneakers'
     | '/admin/abandoned'
     | '/admin/blocked'
     | '/admin/pajama-stock'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/pajama'
+    | '/sneakers'
     | '/admin/abandoned'
     | '/admin/blocked'
     | '/admin/pajama-stock'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/pajama'
+    | '/sneakers'
     | '/admin/abandoned'
     | '/admin/blocked'
     | '/admin/pajama-stock'
@@ -150,6 +162,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   PajamaRoute: typeof PajamaRoute
+  SneakersRoute: typeof SneakersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/pajama'
       fullPath: '/pajama'
       preLoaderRoute: typeof PajamaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sneakers': {
+      id: '/sneakers'
+      path: '/sneakers'
+      fullPath: '/sneakers'
+      preLoaderRoute: typeof SneakersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -252,6 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   PajamaRoute: PajamaRoute,
+  SneakersRoute: SneakersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
