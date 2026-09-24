@@ -49,6 +49,7 @@ function PajamaPage() {
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
   const submit = useServerFn(placePajamaOrder);
 
