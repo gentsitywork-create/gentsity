@@ -198,7 +198,7 @@ function SneakersPage() {
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
         {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">স্নিকার্স শিগগিরই আসছে।</p> :
-<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
+<div className="mx-auto grid w-full max-w-64 grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
             const qty = picks[product.id] ?? 0;
             const image = product.image_url ? images[product.image_url] : undefined;
             const stock = size ? product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0 : null;
