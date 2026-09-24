@@ -292,20 +292,45 @@ export function OrderDialog({
         </div>
 
         <div className="mt-2">
-          <p className="text-sm font-semibold">কালার যোগ করুন ({size})</p>
+          <p className="text-sm font-semibold">
+            {order?.product_type === "sneakers" ? `স্নিকার্স ডিজাইন যোগ করুন (${size})` : order?.product_type === "pajama" ? `পায়জামা ডিজাইন যোগ করুন (${size})` : `কালার যোগ করুন (${size})`}
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {sizeVariants.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => addColor(v)}
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:bg-secondary"
-              >
-                {v.color_name} <span className="text-muted-foreground">({v.stock})</span>
-              </button>
-            ))}
-            {sizeVariants.length === 0 && (
-              <p className="text-xs text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+            {order?.product_type === "pajama" || order?.product_type === "sneakers" ? (
+              <>
+                {sizeCatalogProducts.map((product) => (
+                  <Button
+                    key={product.id}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => addCatalogProduct(product)}
+                    disabled={product.stock < 1}
+                  >
+                    {product.name} <span className="text-muted-foreground">({product.stock})</span>
+                  </Button>
+                ))}
+                {sizeCatalogProducts.length === 0 && (
+                  <p className="text-xs text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+                )}
+              </>
+            ) : (
+              <>
+                {sizeVariants.map((v) => (
+                  <Button
+                    key={v.id}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => addColor(v)}
+                  >
+                    {v.color_name} <span className="text-muted-foreground">({v.stock})</span>
+                  </Button>
+                ))}
+                {sizeVariants.length === 0 && (
+                  <p className="text-xs text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+                )}
+              </>
             )}
           </div>
         </div>
