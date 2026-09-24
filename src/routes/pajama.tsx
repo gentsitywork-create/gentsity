@@ -125,7 +125,7 @@ function PajamaPage() {
 
   const orderProduct = (product: Product) => {
     setPicks({ [product.id]: 1 });
-    document.getElementById("pajama-checkout")?.scrollIntoView({ behavior: "smooth" });
+    setCheckoutOpen(true);
   };
 
   const handleOrder = async (event: React.FormEvent) => {
