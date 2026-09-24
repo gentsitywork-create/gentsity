@@ -17,6 +17,7 @@ function AdminSettings() {
     combo_price: "999",
     combo_qty: "5",
     fb_pixel_id: "",
+    fb_access_token: "",
     steadfast_api_key: "",
     steadfast_secret_key: "",
     bdcourier_api_key: "",
@@ -48,6 +49,7 @@ function AdminSettings() {
         combo_price: data["combo_price"] ?? "999",
         combo_qty: data["combo_qty"] ?? "5",
         fb_pixel_id: data["fb_pixel_id"] ?? "",
+        fb_access_token: data["fb_access_token"] ?? "",
         steadfast_api_key: data["steadfast_api_key"] ?? "",
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
@@ -196,16 +198,25 @@ function AdminSettings() {
             নম্বর বসালে সব পেজের নিচে ডানদিকে সবুজ WhatsApp বোতাম দেখা যাবে। খালি রাখলে বোতাম লুকানো থাকবে।
           </p>
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="pixel">Facebook Pixel ID</Label>
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">Facebook Pixel</h2>
+          <Label htmlFor="pixel">Pixel ID</Label>
           <Input
             id="pixel"
             value={values.fb_pixel_id}
             onChange={(e) => setValues({ ...values, fb_pixel_id: e.target.value })}
             placeholder="যেমন: 1234567890"
           />
+          <Label htmlFor="pixel-token">Conversions API Access Token</Label>
+          <Input
+            id="pixel-token"
+            type="password"
+            value={values.fb_access_token}
+            onChange={(e) => setValues({ ...values, fb_access_token: e.target.value })}
+            placeholder="Facebook Events Manager থেকে Access Token বসান"
+          />
           <p className="text-xs text-muted-foreground">
-            আইডি বসালেই ওয়েবসাইটে পিক্সেল চালু হয়ে যাবে (PageView, ViewContent, Purchase)।
+            Pixel ID বসালেই ব্রাউজার পিক্সেল চালু হবে (PageView, ViewContent, Purchase)। Access Token বসালে অর্ডার হলে সার্ভার থেকেও Purchase ইভেন্ট যাবে (Conversions API) — iOS ব্লক করলেও ইভেন্ট হারাবে না। টোকেনটি গোপন থাকে, কাস্টমার দেখতে পায় না।
           </p>
         </div>
 
