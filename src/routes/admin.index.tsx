@@ -211,6 +211,23 @@ function AdminOrders() {
     qc.invalidateQueries({ queryKey: ["admin-orders"] });
   };
 
+  const deleteOrders = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    if (!window.confirm(`${ids.length}টি অর্ডার স্থায়ীভাবে ডিলিট করবেন?`)) return;
+    setBulkBusy(true);
+    await supabase.from("abandoned_carts").update({ order_id: null }).in("order_id", ids);
+    const r1 = await supabase.from("order_items").delete().in("order_id", ids);
+    const r2 = r1.error ? r1 : await supabase.from("orders").delete().in("id", ids);
+    setBulkBusy(false);
+    if (r2.error) {
+      toast.error("ডিলিট করা যায়নি।");
+      return;
+    }
+    toast.success(`${ids.length}টি অর্ডার ডিলিট হয়েছে।`);
+    setSelected((p) => p.filter((x) => !ids.includes(x)));
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+  };
+
   const bulkCourier = async () => {
     setBulkBusy(true);
     let ok = 0;
