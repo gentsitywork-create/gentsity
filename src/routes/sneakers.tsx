@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { placeSneakersOrder } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -48,6 +49,7 @@ function SneakersPage() {
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
   const submit = useServerFn(placeSneakersOrder);
 
@@ -106,7 +108,7 @@ function SneakersPage() {
 
   const orderProduct = (product: Product) => {
     setPicks({ [product.id]: 1 });
-    document.getElementById("sneakers-checkout")?.scrollIntoView({ behavior: "smooth" });
+    setCheckoutOpen(true);
   };
 
   const handleOrder = async (event: React.FormEvent) => {
@@ -132,6 +134,7 @@ function SneakersPage() {
       } });
       trackPixel("Purchase", { value: result.total, currency: "BDT" });
       setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
+      setCheckoutOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
@@ -195,7 +198,7 @@ function SneakersPage() {
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
         {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">স্নিকার্স শিগগিরই আসছে।</p> :
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">{products.map((product) => {
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
             const qty = picks[product.id] ?? 0;
             const image = product.image_url ? images[product.image_url] : undefined;
             const stock = size ? product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0 : null;
@@ -214,26 +217,39 @@ function SneakersPage() {
             </article>;
           })}</div>}
 
-        {totalUnits > 0 && <form id="sneakers-checkout" onSubmit={handleOrder} className="mx-auto mt-8 max-w-3xl rounded-lg border bg-card p-5 md:p-7">
-          <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-bold">অর্ডার সম্পন্ন করুন</h2><span className="rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground">{totalUnits}টি</span></div>
-          <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-5 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
-          <div className="mt-5"><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
-            <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
-            <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
-          </div></div>
-          <div className="mt-5 grid gap-4">
-            <div className="grid gap-2"><Label htmlFor="sn-name">আপনার নাম</Label><Input id="sn-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-            <div className="grid gap-2"><Label htmlFor="sn-phone">মোবাইল নম্বর *</Label><Input id="sn-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
-            <div className="grid gap-2"><Label htmlFor="sn-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="sn-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-          </div>
-          <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
-            {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}
-            <div className="mt-2 flex justify-between border-t pt-2"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
-            <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span><span>{deliveryCharge} টাকা</span></div>
-            <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
-          </div>
-          <Button type="submit" className="mt-5 w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${total} টাকা`}</Button>
-        </form>}
+        <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+          <DialogContent className="max-h-[92vh] w-[calc(100%-1.5rem)] max-w-2xl overflow-y-auto rounded-lg p-4 sm:p-6">
+            <DialogHeader className="pr-8 text-left">
+              <DialogTitle className="text-xl">অর্ডার সম্পন্ন করুন</DialogTitle>
+              <DialogDescription>সাইজ ও ঠিকানা দিয়ে অর্ডারটি কনফার্ম করুন।</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleOrder}>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg bg-secondary p-3">
+                <div className="min-w-0">
+                  {selected.map((product) => <p key={product.id} className="truncate font-bold">{product.name}</p>)}
+                  <p className="text-sm text-muted-foreground">{totalUnits}টি প্রোডাক্ট</p>
+                </div>
+                <span className="shrink-0 text-lg font-extrabold text-primary">৳{subtotal}</span>
+              </div>
+              <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-5 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="px-1 text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
+              <div className="mt-5"><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
+                <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="h-auto min-h-10 whitespace-normal px-2 text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
+                <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="h-auto min-h-10 whitespace-normal px-2 text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
+              </div></div>
+              <div className="mt-5 grid gap-4">
+                <div className="grid gap-2"><Label htmlFor="sn-name">আপনার নাম</Label><Input id="sn-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+                <div className="grid gap-2"><Label htmlFor="sn-phone">মোবাইল নম্বর *</Label><Input id="sn-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
+                <div className="grid gap-2"><Label htmlFor="sn-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="sn-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+              </div>
+              <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
+                <div className="flex justify-between gap-3"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
+                <div className="mt-1 flex justify-between gap-3"><span>ডেলিভারি চার্জ</span><span>{deliveryCharge} টাকা</span></div>
+                <div className="mt-2 flex justify-between gap-3 border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
+              </div>
+              <Button type="submit" className="mt-5 w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${total} টাকা`}</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </main>
     </>}
     <footer className="border-t bg-card py-6 text-center text-sm text-muted-foreground">© Gentsity — সারা বাংলাদেশে ক্যাশ অন ডেলিভারি</footer>
