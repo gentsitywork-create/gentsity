@@ -1,0 +1,1 @@
+insert into public.settings (key, value) values ('fb_access_token', '') on conflict (key) do nothing;

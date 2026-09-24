@@ -23,6 +23,53 @@ async function blockRecentOrder(supabaseAdmin: any, phone: string) {
   }
 }
 
+/** Facebook Conversions API-তে সার্ভার থেকে Purchase ইভেন্ট পাঠায় (টোকেন সেট থাকলে)। */
+async function sendPurchaseCapi(
+  supabaseAdmin: any,
+  opts: { orderNo: number | string; total: number; phone: string },
+) {
+  try {
+    const { data: rows } = await supabaseAdmin
+      .from("settings")
+      .select("key, value")
+      .in("key", ["fb_pixel_id", "fb_access_token"]);
+    const map: Record<string, string> = {};
+    (rows ?? []).forEach((r: any) => (map[r.key] = r.value ?? ""));
+    const pixelId = map["fb_pixel_id"];
+    const token = map["fb_access_token"];
+    if (!pixelId || !token) return;
+
+    const normalized = `88${opts.phone.replace(/\D/g, "")}`;
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
+    const ph = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    await fetch(`https://graph.facebook.com/v21.0/${pixelId}/events?access_token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data: [
+          {
+            event_name: "Purchase",
+            event_time: Math.floor(Date.now() / 1000),
+            event_id: `order-${opts.orderNo}`,
+            action_source: "website",
+            user_data: {
+              ph: [ph],
+              client_ip_address: clientIp() || undefined,
+              client_user_agent: getRequestHeader("user-agent") ?? undefined,
+            },
+            custom_data: { value: opts.total, currency: "BDT" },
+          },
+        ],
+      }),
+    });
+  } catch {
+    // পিক্সেল ইভেন্ট ব্যর্থ হলেও অর্ডার আটকাবে না
+  }
+}
+
 const orderSchema = z.object({
   customer_name: z.string().trim().max(80).optional().default(""),
   phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
