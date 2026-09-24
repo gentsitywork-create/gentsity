@@ -74,6 +74,7 @@ export function OrderDialog({
   const [status, setStatus] = useState("confirmed");
   const [size, setSize] = useState<Size>("M");
   const [items, setItems] = useState<Item[]>([]);
+  const [productType, setProductType] = useState<"polo" | "pajama" | "sneakers">("polo");
   const [saving, setSaving] = useState(false);
 
   const { data: variants = [] } = useQuery({
@@ -89,13 +90,13 @@ export function OrderDialog({
   });
 
   const { data: catalogProducts = [] } = useQuery({
-    queryKey: ["admin-order-catalog-products", order?.product_type],
-    enabled: open && (order?.product_type === "pajama" || order?.product_type === "sneakers"),
+    queryKey: ["admin-order-catalog-products", productType],
+    enabled: open && (productType === "pajama" || productType === "sneakers"),
     queryFn: async () => {
       const { data: products, error: productsError } = await supabase
         .from("pajama_products")
         .select("id, name, page, is_active")
-        .eq("page", order?.product_type ?? "pajama")
+        .eq("page", productType)
         .eq("is_active", true)
         .order("sort_order");
       if (productsError) throw productsError;
@@ -125,6 +126,7 @@ export function OrderDialog({
       setNote(order.note ?? "");
       setPrice(String(order.total_amount));
       setStatus(order.status);
+      setProductType(order.product_type === "pajama" || order.product_type === "sneakers" ? order.product_type : "polo");
       const first = (order.order_items[0]?.size ?? "M") as Size;
       setSize(SIZES.includes(first) ? first : "M");
       setItems(
@@ -146,6 +148,7 @@ export function OrderDialog({
       setStatus("confirmed");
       setSize("M");
       setItems([]);
+      setProductType("polo");
     }
   }, [open, order]);
 
@@ -211,7 +214,7 @@ export function OrderDialog({
       total_amount: Number(price) || 0,
       delivery_charge: 0,
       status: status as "pending" | "confirmed" | "shipped" | "delivered" | "cancelled",
-      product_type: (order?.product_type === "pajama" || order?.product_type === "sneakers") ? order.product_type : "polo",
+      product_type: productType,
       items,
     };
     setSaving(true);
@@ -240,6 +243,26 @@ export function OrderDialog({
             {editing ? `অর্ডার এডিট #${order?.order_no}` : "ম্যানুয়াল অর্ডার এন্ট্রি"}
           </DialogTitle>
         </DialogHeader>
+
+        {!editing && (
+          <div className="flex flex-wrap gap-2">
+            {([["polo", "পোলো শার্ট"], ["pajama", "পায়জামা"], ["sneakers", "স্নিকার্স"]] as const).map(([k, label]) => (
+              <Button
+                key={k}
+                type="button"
+                size="sm"
+                variant={productType === k ? "default" : "outline"}
+                onClick={() => {
+                  setProductType(k);
+                  setItems([]);
+                  setSize(k === "sneakers" ? "40" : "M");
+                }}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -289,7 +312,7 @@ export function OrderDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {SIZES.map((s) => (
+                {SIZES.filter((s) => (productType === "sneakers" ? /^\d/.test(s) : !/^\d/.test(s))).map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
                   </SelectItem>
@@ -305,10 +328,10 @@ export function OrderDialog({
 
         <div className="mt-2">
           <p className="text-sm font-semibold">
-            {order?.product_type === "sneakers" ? `স্নিকার্স ডিজাইন যোগ করুন (${size})` : order?.product_type === "pajama" ? `পায়জামা ডিজাইন যোগ করুন (${size})` : `কালার যোগ করুন (${size})`}
+            {productType === "sneakers" ? `স্নিকার্স ডিজাইন যোগ করুন (${size})` : productType === "pajama" ? `পায়জামা ডিজাইন যোগ করুন (${size})` : `কালার যোগ করুন (${size})`}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {order?.product_type === "pajama" || order?.product_type === "sneakers" ? (
+            {productType === "pajama" || productType === "sneakers" ? (
               <>
                 {sizeCatalogProducts.map((product) => (
                   <Button
