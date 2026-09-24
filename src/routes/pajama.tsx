@@ -150,7 +150,7 @@ function PajamaPage() {
         items: Object.entries(picks).map(([product_id, qty]) => ({ product_id, qty })),
       } });
       trackPixel("Purchase", { value: result.total, currency: "BDT" });
-      setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
+      setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" }); setCheckoutOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
