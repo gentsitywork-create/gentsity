@@ -106,31 +106,32 @@ export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
   *{box-sizing:border-box}
-  body{margin:0;padding:10px;font-family:'Hind Siliguri',system-ui,sans-serif;background:#fff;color:#000}
-  .sheet{display:flex;flex-wrap:wrap;gap:10px}
-  .label{width:360px;border:1px solid #000;padding:10px 12px;page-break-inside:avoid;display:flex;flex-direction:column}
+  @page{size:75mm 75mm;margin:0}
+  body{margin:0;padding:6px;font-family:'Hind Siliguri',system-ui,sans-serif;background:#fff;color:#000}
+  .sheet{display:flex;flex-wrap:wrap;gap:6px}
+  .label{width:75mm;height:75mm;border:1px solid #000;padding:1.5mm 2mm;page-break-inside:avoid;page-break-after:always;display:flex;flex-direction:column;overflow:hidden}
   .head{text-align:center}
-  .brand{font-size:15px;font-weight:700;letter-spacing:.3px}
-  .inv{font-size:11px;margin-top:2px}
-  .barcode{text-align:center;margin-top:8px}
-  .barcode img{width:100%;height:62px;object-fit:fill}
-  .digits{font-size:12px;letter-spacing:3px;margin-top:2px}
-  .box{margin-top:10px;border:1px solid #000;padding:8px;display:flex;gap:10px;align-items:flex-start}
-  .qr{width:92px;height:92px}
+  .brand{font-size:8.5px;font-weight:700;letter-spacing:.2px}
+  .inv{font-size:7px;margin-top:1px}
+  .barcode{text-align:center;margin-top:2px}
+  .barcode img{width:100%;height:9mm;object-fit:fill}
+  .digits{font-size:7.5px;letter-spacing:1.5px;margin-top:1px}
+  .box{margin-top:2mm;border:1px solid #000;padding:1.5mm;display:flex;gap:1.5mm;align-items:flex-start}
+  .qr{width:11mm;height:11mm}
   .info{flex:1;min-width:0}
-  .ship{font-size:11px}
-  .name{font-size:17px;font-weight:700;line-height:1.2}
-  .phone{font-size:15px;font-weight:700}
-  .addr{font-size:11px;margin-top:2px;line-height:1.3}
-  .cod{margin-top:6px;border-top:1px solid #000;padding-top:4px;display:flex;justify-content:space-between;font-size:14px}
-  .cod b{font-size:16px}
-  .spacer{min-height:60px}
-  .items{border-top:1px solid #000;padding-top:5px}
-  .items-title{font-size:10px;font-weight:700;letter-spacing:.5px}
-  .items-row{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin-top:2px}
+  .ship{font-size:7px}
+  .name{font-size:10px;font-weight:700;line-height:1.15}
+  .phone{font-size:9px;font-weight:700}
+  .addr{font-size:7px;margin-top:1px;line-height:1.25}
+  .cod{margin-top:1mm;border-top:1px solid #000;padding-top:2px;display:flex;justify-content:space-between;font-size:8.5px}
+  .cod b{font-size:10px}
+  .spacer{min-height:2mm;flex:1}
+  .items{border-top:1px solid #000;padding-top:2px}
+  .items-title{font-size:6.5px;font-weight:700;letter-spacing:.3px}
+  .items-row{display:flex;justify-content:space-between;gap:4px;font-size:7px;margin-top:1px}
   .qty{white-space:nowrap;font-weight:700}
-  .foot{display:flex;justify-content:space-between;font-size:10px;margin-top:6px}
-  @media print{ body{padding:0} }
+  .foot{display:flex;justify-content:space-between;font-size:6.5px;margin-top:2px}
+  @media print{ body{padding:0} .sheet{gap:0} .label{border:1px solid #000} }
 </style></head>
 <body><div class="sheet">${labels.join("")}</div>
 <script>window.onload=function(){setTimeout(function(){window.print()},500)}</script>
