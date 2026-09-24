@@ -198,13 +198,13 @@ function SneakersPage() {
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
         {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">স্নিকার্স শিগগিরই আসছে।</p> :
-<div className="mx-auto grid w-full max-w-72 grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
+<div className="mx-auto grid w-full max-w-64 grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
             const qty = picks[product.id] ?? 0;
             const image = product.image_url ? images[product.image_url] : undefined;
             const stock = size ? product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0 : null;
             return <article key={product.id} className={`overflow-hidden rounded-lg border bg-card transition ${qty > 0 ? "border-primary ring-2 ring-primary" : "border-border"}`}>
-              <div className="relative aspect-[4/5] bg-secondary">
-                {image ? <img src={image} alt={product.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center px-3 text-center text-sm text-muted-foreground">ছবি আপলোড করা হয়নি</div>}
+<div className="relative aspect-[4/5] bg-secondary">
+                {image ? <img src={image} alt={product.name} className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center px-3 text-center text-sm text-muted-foreground">ছবি আপলোড করা হয়নি</div>}
                 <span className="absolute left-2 top-2 rounded-md bg-card px-2 py-1 text-xs font-bold shadow-sm">স্নিকার্স</span>
                 {qty > 0 && <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-5 w-5" /></span>}
               </div>
