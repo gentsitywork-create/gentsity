@@ -92,14 +92,26 @@ export function OrderDialog({
     queryKey: ["admin-order-catalog-products", order?.product_type],
     enabled: open && (order?.product_type === "pajama" || order?.product_type === "sneakers"),
     queryFn: async () => {
-      const { data, error } = await (supabase
+      const { data: products, error: productsError } = await supabase
         .from("pajama_products")
-        .select("id, name, page, is_active, pajama_product_stock(size, stock)") as any)
+        .select("id, name, page, is_active")
         .eq("page", order?.product_type ?? "pajama")
         .eq("is_active", true)
         .order("sort_order");
-      if (error) throw error;
-      return (data ?? []) as CatalogProduct[];
+      if (productsError) throw productsError;
+      const productIds = (products ?? []).map((product) => product.id);
+      if (productIds.length === 0) return [];
+      const { data: stocks, error: stocksError } = await supabase
+        .from("pajama_product_stock")
+        .select("product_id, size, stock")
+        .in("product_id", productIds);
+      if (stocksError) throw stocksError;
+      return (products ?? []).map((product) => ({
+        ...product,
+        pajama_product_stock: (stocks ?? [])
+          .filter((stock) => stock.product_id === product.id)
+          .map(({ size: stockSize, stock }) => ({ size: stockSize, stock })),
+      })) as CatalogProduct[];
     },
   });
 
