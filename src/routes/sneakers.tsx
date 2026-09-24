@@ -217,6 +217,25 @@ function SneakersPage() {
             </article>;
           })}</div>}
 
+        <section className="mx-auto mt-10 max-w-3xl space-y-4 text-left text-sm">
+          <div className="rounded-lg border bg-card p-4">
+            <h2 className="mb-2 font-bold text-foreground">রিটার্ন শর্তাবলী</h2>
+            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+              <li>Product পছন্দ না হলে delivery man-কে delivery charge pay করে return করতে হবে।</li>
+              <li>Product-এ ফাটা, দাগ, damage, নষ্ট অথবা ভুল product হলে return করার সময় delivery charge লাগবে না।</li>
+            </ul>
+          </div>
+          <div className="rounded-lg border bg-card p-4">
+            <h2 className="mb-2 font-bold text-foreground">রিটার্ন ও রিফান্ড নীতিমালা</h2>
+            <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+              <li>রিটার্ন/এক্সচেঞ্জের জন্য পণ্যটি ব্যবহার না করা, পরিষ্কার এবং সম্ভব হলে original box/packaging-সহ থাকতে হবে।</li>
+              <li>ভুল, ক্ষতিগ্রস্ত বা ত্রুটিপূর্ণ পণ্য পেলে যত দ্রুত সম্ভব আমাদের ফোন/WhatsApp-এ যোগাযোগ করুন। যাচাই সাপেক্ষে replacement বা return ব্যবস্থা করা হবে।</li>
+              <li>Size change, পছন্দ পরিবর্তন বা personal preference-এর কারণে return/exchange হলে delivery/courier charge গ্রাহক বহন করবেন।</li>
+              <li>ব্যবহৃত, নোংরা, ইচ্ছাকৃতভাবে ক্ষতিগ্রস্ত বা resale condition-এ নেই — এমন পণ্য return/refund-এর জন্য গ্রহণযোগ্য নাও হতে পারে।</li>
+            </ul>
+          </div>
+        </section>
+
         <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
           <DialogContent className="max-h-[92vh] w-[calc(100%-1.5rem)] max-w-2xl overflow-y-auto rounded-lg p-4 sm:p-6">
             <DialogHeader className="pr-8 text-left">
