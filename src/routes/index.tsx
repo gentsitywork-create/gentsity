@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import comboImage from "@/assets/polo-combo.jpg";
+import gentsityLogo from "@/assets/gentsity-header-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -78,17 +79,6 @@ function Home() {
     },
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
-  const logoPath = settings?.["logo_path"];
-
-  const { data: logoUrl } = useQuery({
-    queryKey: ["site-logo", logoPath],
-    enabled: Boolean(logoPath),
-    queryFn: async () => {
-      const { data } = await supabase.storage.from("products").createSignedUrl(logoPath!, 3600);
-      return data?.signedUrl ?? "";
-    },
-  });
-
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
     enabled: Boolean(size),
@@ -230,17 +220,11 @@ function Home() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="relative mx-auto flex min-h-20 max-w-5xl items-center justify-center px-4 py-3 sm:min-h-24">
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt="Gentsity"
-              className="max-h-16 w-36 object-contain sm:max-h-20 sm:w-56"
-            />
-          ) : (
-            <span className="font-display text-2xl font-extrabold tracking-tight text-primary">
-              Gentsity
-            </span>
-          )}
+          <img
+            src={gentsityLogo}
+            alt="Gentsity"
+            className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72"
+          />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
             ফ্রি ডেলিভারি
           </span>

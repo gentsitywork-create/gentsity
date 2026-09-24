@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import gentsityLogo from "@/assets/gentsity-header-logo.png";
 
 export const Route = createFileRoute("/pajama")({
   head: () => ({
@@ -60,16 +61,6 @@ function PajamaPage() {
   const dhakaCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_dhaka"] ?? 70) || 70);
   const outsideCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_outside"] ?? 120) || 120);
   const deliveryCharge = deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
-  const logoPath = settings?.["logo_path"];
-  const { data: logoUrl } = useQuery({
-    queryKey: ["site-logo", logoPath], enabled: Boolean(logoPath),
-    queryFn: async () => {
-      if (!logoPath) return "";
-      const { data } = await supabase.storage.from("products").createSignedUrl(logoPath, 3600);
-      return data?.signedUrl ?? "";
-    },
-  });
-
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["pajama-products"],
     queryFn: async () => {
@@ -167,7 +158,7 @@ function PajamaPage() {
   return <div className="min-h-screen bg-background">
     <header className="border-b bg-card">
       <div className="relative mx-auto flex min-h-20 max-w-6xl items-center justify-center px-4 py-3 sm:min-h-24">
-        {logoUrl ? <img src={logoUrl} alt="Gentsity" className="max-h-16 w-36 object-contain sm:max-h-20 sm:w-56" /> : <span className="font-display text-2xl font-extrabold text-primary">Gentsity</span>}
+        <img src={gentsityLogo} alt="Gentsity" className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72" />
       </div>
     </header>
 
