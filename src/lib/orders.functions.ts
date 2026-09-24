@@ -272,7 +272,8 @@ export const placeSneakersOrder = createServerFn({ method: "POST" })
 
 const adminItemSchema = z.object({
   variant_id: z.string().uuid().nullable().optional(),
-  size: z.enum(["M", "L", "XL", "XXL"]),
+  pajama_product_id: z.string().uuid().nullable().optional(),
+  size: z.enum(["M", "L", "XL", "XXL", "40", "41", "42", "43", "44"]),
   color_name: z.string().trim().min(1).max(60),
   qty: z.number().int().min(1).max(20),
 });
@@ -285,7 +286,8 @@ const adminOrderSchema = z.object({
   note: z.string().trim().max(300).optional().default(""),
   total_amount: z.number().int().min(0).max(1000000),
   delivery_charge: z.number().int().min(0).max(10000).optional().default(0),
-  status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled"]).optional(),
+  status: z.enum(["pending", "confirmed", "hold", "shipped", "delivered", "cancelled"]).optional(),
+  product_type: z.enum(["polo", "pajama", "sneakers"]).optional().default("polo"),
   items: z.array(adminItemSchema).min(1).max(20),
 });
 
@@ -315,6 +317,7 @@ export const adminCreateOrder = createServerFn({ method: "POST" })
         total_amount: data.total_amount,
         delivery_charge: data.delivery_charge ?? 0,
         status: data.status ?? "confirmed",
+        product_type: data.product_type,
       })
       .select("id, order_no")
       .single();
@@ -324,6 +327,7 @@ export const adminCreateOrder = createServerFn({ method: "POST" })
       data.items.map((it) => ({
         order_id: order.id,
         variant_id: it.variant_id ?? null,
+        pajama_product_id: it.pajama_product_id ?? null,
         size: it.size,
         color_name: it.color_name,
         qty: it.qty,
@@ -332,6 +336,22 @@ export const adminCreateOrder = createServerFn({ method: "POST" })
     if (iErr) throw new Error("অর্ডারের পণ্য সেভ হয়নি।");
 
     for (const it of data.items) {
+      if (it.pajama_product_id) {
+        const { data: stockRow } = await supabaseAdmin
+          .from("pajama_product_stock")
+          .select("stock")
+          .eq("product_id", it.pajama_product_id)
+          .eq("size", it.size)
+          .maybeSingle();
+        if (stockRow) {
+          await supabaseAdmin
+            .from("pajama_product_stock")
+            .update({ stock: Math.max(0, stockRow.stock - it.qty) })
+            .eq("product_id", it.pajama_product_id)
+            .eq("size", it.size);
+        }
+        continue;
+      }
       if (!it.variant_id) continue;
       const { data: v } = await supabaseAdmin
         .from("product_variants")
@@ -368,6 +388,7 @@ export const adminUpdateOrder = createServerFn({ method: "POST" })
         note: data.note || null,
         total_amount: data.total_amount,
         delivery_charge: data.delivery_charge ?? 0,
+        product_type: data.product_type,
         ...(data.status ? { status: data.status } : {}),
       })
       .eq("id", data.order_id);
@@ -376,10 +397,26 @@ export const adminUpdateOrder = createServerFn({ method: "POST" })
     // পুরনো পণ্যের স্টক ফেরত দিয়ে নতুন তালিকা বসানো হয়
     const { data: oldItems } = await supabaseAdmin
       .from("order_items")
-      .select("variant_id, qty")
+      .select("variant_id, pajama_product_id, size, qty")
       .eq("order_id", data.order_id);
 
     for (const it of oldItems ?? []) {
+      if (it.pajama_product_id) {
+        const { data: stockRow } = await supabaseAdmin
+          .from("pajama_product_stock")
+          .select("stock")
+          .eq("product_id", it.pajama_product_id)
+          .eq("size", it.size)
+          .maybeSingle();
+        if (stockRow) {
+          await supabaseAdmin
+            .from("pajama_product_stock")
+            .update({ stock: stockRow.stock + it.qty })
+            .eq("product_id", it.pajama_product_id)
+            .eq("size", it.size);
+        }
+        continue;
+      }
       if (!it.variant_id) continue;
       const { data: v } = await supabaseAdmin
         .from("product_variants")
@@ -400,6 +437,7 @@ export const adminUpdateOrder = createServerFn({ method: "POST" })
       data.items.map((it) => ({
         order_id: data.order_id,
         variant_id: it.variant_id ?? null,
+        pajama_product_id: it.pajama_product_id ?? null,
         size: it.size,
         color_name: it.color_name,
         qty: it.qty,
@@ -408,6 +446,22 @@ export const adminUpdateOrder = createServerFn({ method: "POST" })
     if (iErr) throw new Error("অর্ডারের পণ্য আপডেট হয়নি।");
 
     for (const it of data.items) {
+      if (it.pajama_product_id) {
+        const { data: stockRow } = await supabaseAdmin
+          .from("pajama_product_stock")
+          .select("stock")
+          .eq("product_id", it.pajama_product_id)
+          .eq("size", it.size)
+          .maybeSingle();
+        if (stockRow) {
+          await supabaseAdmin
+            .from("pajama_product_stock")
+            .update({ stock: Math.max(0, stockRow.stock - it.qty) })
+            .eq("product_id", it.pajama_product_id)
+            .eq("size", it.size);
+        }
+        continue;
+      }
       if (!it.variant_id) continue;
       const { data: v } = await supabaseAdmin
         .from("product_variants")

@@ -37,10 +37,18 @@ export type EditableOrder = {
   note: string | null;
   total_amount: number;
   status: string;
-  order_items: { variant_id?: string | null; size: string; color_name: string; qty: number }[];
+  product_type: string;
+  order_items: { variant_id?: string | null; pajama_product_id?: string | null; size: string; color_name: string; qty: number }[];
 };
 
-type Item = { variant_id: string | null; size: Size; color_name: string; qty: number };
+type Item = { variant_id: string | null; pajama_product_id: string | null; size: Size; color_name: string; qty: number };
+type CatalogProduct = {
+  id: string;
+  name: string;
+  page: string;
+  is_active: boolean;
+  pajama_product_stock: { size: string; stock: number }[];
+};
 
 export function OrderDialog({
   open,
@@ -80,6 +88,33 @@ export function OrderDialog({
     },
   });
 
+  const { data: catalogProducts = [] } = useQuery({
+    queryKey: ["admin-order-catalog-products", order?.product_type],
+    enabled: open && (order?.product_type === "pajama" || order?.product_type === "sneakers"),
+    queryFn: async () => {
+      const { data: products, error: productsError } = await supabase
+        .from("pajama_products")
+        .select("id, name, page, is_active")
+        .eq("page", order?.product_type ?? "pajama")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (productsError) throw productsError;
+      const productIds = (products ?? []).map((product) => product.id);
+      if (productIds.length === 0) return [];
+      const { data: stocks, error: stocksError } = await supabase
+        .from("pajama_product_stock")
+        .select("product_id, size, stock")
+        .in("product_id", productIds);
+      if (stocksError) throw stocksError;
+      return (products ?? []).map((product) => ({
+        ...product,
+        pajama_product_stock: (stocks ?? [])
+          .filter((stock) => stock.product_id === product.id)
+          .map(({ size: stockSize, stock }) => ({ size: stockSize, stock })),
+      })) as CatalogProduct[];
+    },
+  });
+
   useEffect(() => {
     if (!open) return;
     if (order) {
@@ -95,6 +130,7 @@ export function OrderDialog({
       setItems(
         order.order_items.map((it) => ({
           variant_id: it.variant_id ?? null,
+          pajama_product_id: it.pajama_product_id ?? null,
           size: (SIZES.includes(it.size as Size) ? it.size : "M") as Size,
           color_name: it.color_name,
           qty: it.qty,
@@ -117,6 +153,14 @@ export function OrderDialog({
     () => variants.filter((v) => v.size === size),
     [variants, size],
   );
+  const sizeCatalogProducts = useMemo(
+    () =>
+      catalogProducts.map((product) => ({
+        ...product,
+        stock: product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0,
+      })),
+    [catalogProducts, size],
+  );
 
   const totalQty = items.reduce((s, i) => s + i.qty, 0);
 
@@ -128,7 +172,20 @@ export function OrderDialog({
         next[i] = { ...next[i]!, qty: next[i]!.qty + 1 };
         return next;
       }
-      return [...prev, { variant_id: v.id, size: v.size as Size, color_name: v.color_name, qty: 1 }];
+      return [...prev, { variant_id: v.id, pajama_product_id: null, size: v.size as Size, color_name: v.color_name, qty: 1 }];
+    });
+  };
+
+  const addCatalogProduct = (product: CatalogProduct) => {
+    setItems((prev) => {
+      const index = prev.findIndex((item) => item.pajama_product_id === product.id && item.size === size);
+      if (index >= 0) {
+        const next = [...prev];
+        const current = next[index];
+        if (current) next[index] = { ...current, qty: current.qty + 1 };
+        return next;
+      }
+      return [...prev, { variant_id: null, pajama_product_id: product.id, size, color_name: product.name, qty: 1 }];
     });
   };
 
@@ -154,6 +211,7 @@ export function OrderDialog({
       total_amount: Number(price) || 0,
       delivery_charge: 0,
       status: status as "pending" | "confirmed" | "shipped" | "delivered" | "cancelled",
+      product_type: (order?.product_type === "pajama" || order?.product_type === "sneakers") ? order.product_type : "polo",
       items,
     };
     setSaving(true);
@@ -246,20 +304,45 @@ export function OrderDialog({
         </div>
 
         <div className="mt-2">
-          <p className="text-sm font-semibold">কালার যোগ করুন ({size})</p>
+          <p className="text-sm font-semibold">
+            {order?.product_type === "sneakers" ? `স্নিকার্স ডিজাইন যোগ করুন (${size})` : order?.product_type === "pajama" ? `পায়জামা ডিজাইন যোগ করুন (${size})` : `কালার যোগ করুন (${size})`}
+          </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {sizeVariants.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                onClick={() => addColor(v)}
-                className="rounded-full border px-3 py-1 text-xs font-medium hover:bg-secondary"
-              >
-                {v.color_name} <span className="text-muted-foreground">({v.stock})</span>
-              </button>
-            ))}
-            {sizeVariants.length === 0 && (
-              <p className="text-xs text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+            {order?.product_type === "pajama" || order?.product_type === "sneakers" ? (
+              <>
+                {sizeCatalogProducts.map((product) => (
+                  <Button
+                    key={product.id}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => addCatalogProduct(product)}
+                    disabled={product.stock < 1}
+                  >
+                    {product.name} <span className="text-muted-foreground">({product.stock})</span>
+                  </Button>
+                ))}
+                {sizeCatalogProducts.length === 0 && (
+                  <p className="text-xs text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+                )}
+              </>
+            ) : (
+              <>
+                {sizeVariants.map((v) => (
+                  <Button
+                    key={v.id}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => addColor(v)}
+                  >
+                    {v.color_name} <span className="text-muted-foreground">({v.stock})</span>
+                  </Button>
+                ))}
+                {sizeVariants.length === 0 && (
+                  <p className="text-xs text-muted-foreground">এই সাইজে কোনো ডিজাইন নেই।</p>
+                )}
+              </>
             )}
           </div>
         </div>
