@@ -220,12 +220,6 @@ function PajamaPage() {
           <li className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন</li>
         </ul>
 
-        <div className="mt-5 space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-left text-sm text-muted-foreground">
-          <p>সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা।</p>
-          <p>– কেয়ার নির্দেশনা: হালকা ডিটারজেন্টে ধোয়া, ব্লিচ ব্যবহার নয়।</p>
-          <p>প্রডাক্ট হাতে পাওয়ার পর ডেলিভারি রাইডার এর সামনে চেক করে নিবেন স্যার। কোন সমস্যা থাকলে আমাদের জানাবেন স্যার। রাইডার চলে যাওয়ার পর কোন অভিযোগ গ্রহণ করা হবে না স্যার।</p>
-          <p className="font-semibold text-destructive">বি: দ্র: অর্ডার করার সময় সাইজ শিওর হয়ে নিবেন। সাইজ নিয়ে সমস্যা জানালে কুরিয়ার চার্জ দিয়ে সাইজ এক্সচেঞ্জ করতে হবে। NB: কোন কারনে প্রডাক্ট রির্টান করলে ১০০ টাকা ডেলিভারি চার্জ দিয়ে রির্টান করতে হবে।</p>
-        </div>
       </section>
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
@@ -249,6 +243,12 @@ function PajamaPage() {
             </article>;
           })}</div>}
 
+        <div className="mx-auto mt-8 max-w-3xl space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-left text-sm text-muted-foreground">
+          <p>সারা বাংলাদেশে ক্যাশ অন ডেলিভারি সুবিধা।</p>
+          <p>– কেয়ার নির্দেশনা: হালকা ডিটারজেন্টে ধোয়া, ব্লিচ ব্যবহার নয়।</p>
+          <p>প্রডাক্ট হাতে পাওয়ার পর ডেলিভারি রাইডার এর সামনে চেক করে নিবেন স্যার। কোন সমস্যা থাকলে আমাদের জানাবেন স্যার। রাইডার চলে যাওয়ার পর কোন অভিযোগ গ্রহণ করা হবে না স্যার।</p>
+          <p className="font-semibold text-destructive">বি: দ্র: অর্ডার করার সময় সাইজ শিওর হয়ে নিবেন। সাইজ নিয়ে সমস্যা জানালে কুরিয়ার চার্জ দিয়ে সাইজ এক্সচেঞ্জ করতে হবে। NB: কোন কারনে প্রডাক্ট রির্টান করলে ১০০ টাকা ডেলিভারি চার্জ দিয়ে রির্টান করতে হবে।</p>
+        </div>
       </main>
 
       <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
