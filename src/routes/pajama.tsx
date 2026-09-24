@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
 
 export const Route = createFileRoute("/pajama")({
@@ -48,6 +49,7 @@ function PajamaPage() {
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
   const submit = useServerFn(placePajamaOrder);
 
@@ -123,7 +125,7 @@ function PajamaPage() {
 
   const orderProduct = (product: Product) => {
     setPicks({ [product.id]: 1 });
-    document.getElementById("pajama-checkout")?.scrollIntoView({ behavior: "smooth" });
+    setCheckoutOpen(true);
   };
 
   const handleOrder = async (event: React.FormEvent) => {
@@ -148,7 +150,7 @@ function PajamaPage() {
         items: Object.entries(picks).map(([product_id, qty]) => ({ product_id, qty })),
       } });
       trackPixel("Purchase", { value: result.total, currency: "BDT" });
-      setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
+      setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" }); setCheckoutOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
@@ -228,13 +230,13 @@ function PajamaPage() {
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
         {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">পায়জামার প্রোডাক্ট শিগগিরই আসছে।</p> :
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">{products.map((product) => {
+          <div className="mx-auto grid w-full max-w-64 grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
             const qty = picks[product.id] ?? 0;
             const image = product.image_url ? images[product.image_url] : undefined;
             const stock = size ? product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0 : null;
             return <article key={product.id} className={`overflow-hidden rounded-lg border bg-card transition ${qty > 0 ? "border-primary ring-2 ring-primary" : "border-border"}`}>
               <div className="relative aspect-[4/5] bg-secondary">
-                {image ? <img src={image} alt={product.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center px-3 text-center text-sm text-muted-foreground">ছবি আপলোড করা হয়নি</div>}
+                {image ? <img src={image} alt={product.name} className="h-full w-full object-contain" /> : <div className="flex h-full items-center justify-center px-3 text-center text-sm text-muted-foreground">ছবি আপলোড করা হয়নি</div>}
                 <span className="absolute left-2 top-2 rounded-md bg-card px-2 py-1 text-xs font-bold shadow-sm">{product.product_kind === "combo" ? "২ পিস কম্বো" : "সিঙ্গেল পিস"}</span>
                 {qty > 0 && <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-5 w-5" /></span>}
               </div>
@@ -247,27 +249,33 @@ function PajamaPage() {
             </article>;
           })}</div>}
 
-        {totalUnits > 0 && <form id="pajama-checkout" onSubmit={handleOrder} className="mx-auto mt-8 max-w-3xl rounded-lg border bg-card p-5 md:p-7">
-          <div className="flex items-center justify-between gap-3"><h2 className="text-xl font-bold">অর্ডার সম্পন্ন করুন</h2><span className="rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground">{totalUnits}টি</span></div>
-          <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-4 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
-          <div className="mt-5"><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
-            <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
-            <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
-          </div></div>
-          <div className="mt-5 grid gap-4">
+      </main>
+
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">অর্ডার সম্পন্ন করুন</DialogTitle>
+            <DialogDescription>সাইজ, ঠিকানা ও মোবাইল নম্বর দিয়ে অর্ডারটি কনফার্ম করুন।</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleOrder} className="space-y-4">
+            <div><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-4 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
+            <div><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
+              <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
+              <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
+            </div></div>
             <div className="grid gap-2"><Label htmlFor="pj-name">আপনার নাম</Label><Input id="pj-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div className="grid gap-2"><Label htmlFor="pj-phone">মোবাইল নম্বর *</Label><Input id="pj-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
             <div className="grid gap-2"><Label htmlFor="pj-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="pj-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-          </div>
-          <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
-            {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}
-            <div className="mt-2 flex justify-between border-t pt-2"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
-            <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span><span>{deliveryCharge} টাকা</span></div>
-            <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
-          </div>
-          <Button type="submit" className="mt-5 w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${total} টাকা`}</Button>
-        </form>}
-      </main>
+            <div className="rounded-lg bg-secondary p-4 text-sm">
+              {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}
+              <div className="mt-2 flex justify-between border-t pt-2"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
+              <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span><span>{deliveryCharge} টাকা</span></div>
+              <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
+            </div>
+            <Button type="submit" className="w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${total} টাকা`}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>}
     <footer className="border-t bg-card py-6 text-center text-sm text-muted-foreground">© Gentsity — সারা বাংলাদেশে ক্যাশ অন ডেলিভারি</footer>
   </div>;
