@@ -211,6 +211,23 @@ function AdminOrders() {
     qc.invalidateQueries({ queryKey: ["admin-orders"] });
   };
 
+  const deleteOrders = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    if (!window.confirm(`${ids.length}টি অর্ডার স্থায়ীভাবে ডিলিট করবেন?`)) return;
+    setBulkBusy(true);
+    await supabase.from("abandoned_carts").update({ order_id: null }).in("order_id", ids);
+    const r1 = await supabase.from("order_items").delete().in("order_id", ids);
+    const r2 = r1.error ? r1 : await supabase.from("orders").delete().in("id", ids);
+    setBulkBusy(false);
+    if (r2.error) {
+      toast.error("ডিলিট করা যায়নি।");
+      return;
+    }
+    toast.success(`${ids.length}টি অর্ডার ডিলিট হয়েছে।`);
+    setSelected((p) => p.filter((x) => !ids.includes(x)));
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+  };
+
   const bulkCourier = async () => {
     setBulkBusy(true);
     let ok = 0;
@@ -365,6 +382,9 @@ function AdminOrders() {
               onClick={() => printLabels(selectedRows)}
             >
               🖨 লেবেল প্রিন্ট (QR)
+            </Button>
+            <Button size="sm" variant="destructive" onClick={() => deleteOrders(selected)} disabled={bulkBusy}>
+              🗑 ডিলিট
             </Button>
             <Button size="sm" variant="secondary" onClick={bulkCourier} disabled={bulkBusy}>
               {bulkBusy ? "কাজ চলছে…" : "🚚 Steadfast এ পাঠাও"}
@@ -609,6 +629,14 @@ function AdminOrders() {
                     onClick={() => setStatus(o.id, o.status === "hold" ? "pending" : "hold")}
                   >
                     {o.status === "hold" ? "▶ হোল্ড সরান" : "⏸ হোল্ড"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="h-8 text-xs"
+                    onClick={() => deleteOrders([o.id])}
+                  >
+                    🗑 ডিলিট
                   </Button>
                   <Button
                     size="sm"
