@@ -366,6 +366,9 @@ function AdminOrders() {
             >
               🖨 লেবেল প্রিন্ট (QR)
             </Button>
+            <Button size="sm" variant="destructive" onClick={() => deleteOrders(selected)} disabled={bulkBusy}>
+              🗑 ডিলিট
+            </Button>
             <Button size="sm" variant="secondary" onClick={bulkCourier} disabled={bulkBusy}>
               {bulkBusy ? "কাজ চলছে…" : "🚚 Steadfast এ পাঠাও"}
             </Button>
@@ -609,6 +612,14 @@ function AdminOrders() {
                     onClick={() => setStatus(o.id, o.status === "hold" ? "pending" : "hold")}
                   >
                     {o.status === "hold" ? "▶ হোল্ড সরান" : "⏸ হোল্ড"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="h-8 text-xs"
+                    onClick={() => deleteOrders([o.id])}
+                  >
+                    🗑 ডিলিট
                   </Button>
                   <Button
                     size="sm"
