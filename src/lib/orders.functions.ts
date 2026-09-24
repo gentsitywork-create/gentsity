@@ -166,6 +166,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         .eq("id", v.id);
     }
 
+    await sendPurchaseCapi(supabaseAdmin, { orderNo: order.order_no, total, phone: data.phone });
+
     return { order_no: order.order_no, total };
   });
 
@@ -292,6 +294,8 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
           .eq("product_id", item.product_id)
           .eq("size", data.size);
       }
+
+      await sendPurchaseCapi(supabaseAdmin, { orderNo: order.order_no, total, phone: data.phone });
 
       return { order_no: order.order_no, total, delivery_charge: deliveryCharge };
 }
