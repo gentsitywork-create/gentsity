@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const SIZES = ["M", "L", "XL", "XXL"] as const;
+const SIZES = ["M", "L", "XL", "XXL", "40", "41", "42", "43", "44"] as const;
 type Size = (typeof SIZES)[number];
 
 export type EditableOrder = {
