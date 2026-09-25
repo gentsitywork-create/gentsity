@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "পছন্দের সাইজ ও রঙ থেকে ৫ পিস পোলো শার্ট নিন মাত্র ৯৯৯ টাকায়। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
+          "পছন্দের সাইজ ও রঙ থেকে ৫ পিস পোলো শার্ট নিন মাত্র ৯৯৯ টাকায়। সারা বাংলাদেশে ফ্রি ডেলিভারি।",
       },
       { property: "og:title", content: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
       {
@@ -296,7 +296,7 @@ function Home() {
                 <p className="font-display text-2xl font-extrabold text-primary">
                   <Wallet className="mx-auto h-6 w-6" />
                 </p>
-                <p className="text-sm text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
+                <p className="text-sm text-muted-foreground">ফ্রি ডেলিভারি</p>
               </div>
             </div>
 
@@ -305,7 +305,7 @@ function Home() {
                 <ShieldCheck className="h-4 w-4 text-primary" /> ১০০% এক্সপোর্ট কোয়ালিটি কটন
               </li>
               <li className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
+                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ফ্রি ডেলিভারি
               </li>
               <li className="flex items-center gap-2">
                 <Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন
@@ -517,7 +517,7 @@ function Home() {
       )}
 
       <footer className="border-t bg-card py-6 text-center text-sm text-muted-foreground">
-        © Gentsity — সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
+        © Gentsity — সারা বাংলাদেশে ফ্রি ডেলিভারি
       </footer>
     </div>
   );
