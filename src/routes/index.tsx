@@ -227,7 +227,7 @@ function Home() {
             className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-            ক্যাশ অন ডেলিভারি
+            ফ্রি ডেলিভারি
           </span>
         </div>
       </header>
@@ -463,33 +463,6 @@ function Home() {
                       placeholder="বাসা/রোড, থানা, জেলা"
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label>ডেলিভারি এরিয়া *</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryArea("dhaka")}
-                        className={`rounded-lg border py-3 text-sm font-bold transition ${
-                          deliveryArea === "dhaka"
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "bg-background hover:border-primary"
-                        }`}
-                      >
-                        ঢাকার ভিতরে (৮০ টাকা)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryArea("outside")}
-                        className={`rounded-lg border py-3 text-sm font-bold transition ${
-                          deliveryArea === "outside"
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "bg-background hover:border-primary"
-                        }`}
-                      >
-                        ঢাকার বাইরে (১৫০ টাকা)
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
@@ -498,12 +471,12 @@ function Home() {
                     <span className="font-semibold">{price} টাকা</span>
                   </div>
                   <div className="mt-1 flex justify-between">
-                    <span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span>
-                    <span className="font-semibold">{deliveryCharge} টাকা</span>
+                    <span>ডেলিভারি চার্জ</span>
+                    <span className="font-semibold text-primary">ফ্রি</span>
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold">
                     <span>মোট</span>
-                    <span>{price + deliveryCharge} টাকা</span>
+                    <span>{price} টাকা</span>
                   </div>
                 </div>
 
