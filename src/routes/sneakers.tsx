@@ -170,6 +170,8 @@ function SneakersPage() {
         <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> প্রিমিয়াম স্নিকার্স <Flame className="inline h-7 w-7 text-destructive" /></h1>
         <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">দেখতে স্মার্ট, ব্যবহারে কমফোর্টেবল — প্রতিদিনের জন্য পারফেক্ট জুতা! <Sparkles className="inline h-4 w-4 text-primary" /></p>
 
+        <img src={sneakersHeroBanner.url} alt="Gentsity স্নিকার্স — স্টাইল আর কমফোর্টের গ্যারেন্টি, সাদা/কালা/বেজ/প্রিন্টেড কালার" className="mt-6 w-full rounded-lg border" loading="lazy" />
+
         <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
           <h2 className="mb-2 font-bold text-foreground"><Flame className="inline h-4 w-4 text-destructive" /> কেন এই প্রোডাক্ট নিবেন?</h2>
           <ul className="space-y-2 text-muted-foreground">
