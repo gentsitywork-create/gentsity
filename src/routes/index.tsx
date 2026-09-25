@@ -18,16 +18,16 @@ import gentsityLogo from "@/assets/gentsity-header-logo.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
+      { title: "Gentsity — ৬ পিস পোলো শার্ট ৯৯৯ টাকা" },
       {
         name: "description",
         content:
-          "পছন্দের সাইজ ও রঙ থেকে ৫ পিস পোলো শার্ট নিন মাত্র ৯৯৯ টাকায়। সারা বাংলাদেশে ফ্রি ডেলিভারি, ক্যাশ অন ডেলিভারি।",
+          "পছন্দের সাইজ ও রঙ থেকে ৬ পিস পোলো শার্ট নিন মাত্র ৯৯৯ টাকায়। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
       },
-      { property: "og:title", content: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
+      { property: "og:title", content: "Gentsity — ৬ পিস পোলো শার্ট ৯৯৯ টাকা" },
       {
         property: "og:description",
-        content: "সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৫ পিস নিন। ফ্রি ডেলিভারি সারা বাংলাদেশে।",
+        content: "সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৬ পিস নিন। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
       },
     ],
   }),
@@ -266,11 +266,11 @@ function Home() {
         <>
           <section className="mx-auto max-w-3xl px-4 pt-10 text-center">
             <h1 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">
-              <span>১০০% পিকে কটন কাপড়ের ৫ পিস পোলো শার্ট </span>
+              <span>১০০% পিকে কটন কাপড়ের ৬ পিস পোলো শার্ট </span>
               <span className="text-primary">{price} টাকা </span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন। ডেলিভারি চার্জ: ঢাকার ভিতরে ৮০ টাকা, ঢাকার বাইরে ১৫০ টাকা।
+                ১০০% কটন কাপড়ের ছেলেদের ৬ পিস পোলো টি-শার্ট মাত্র {price} টাকা। ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন। ডেলিভারি চার্জ: ঢাকার ভিতরে ৮০ টাকা, ঢাকার বাইরে ১৫০ টাকা।
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -320,7 +320,7 @@ function Home() {
 
             <img
               src={comboImage}
-              alt="৫ পিস প্রিমিয়াম পোলো শার্ট কম্বো"
+              alt="৬ পিস প্রিমিয়াম পোলো শার্ট কম্বো"
               width={1200}
               height={912}
               className="mt-8 w-full rounded-xl border object-cover"
@@ -358,13 +358,13 @@ function Home() {
             {size && (
               <div className="mt-5 rounded-xl border bg-card p-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold">২. পছন্দের ৫টি ডিজাইন বাছুন</h2>
+                  <h2 className="text-lg font-bold">২. পছন্দের ৬টি ডিজাইন বাছুন</h2>
                   <span className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
                     {totalPicked} / ৫
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  নিচের ছবিগুলো থেকে আপনার পছন্দের ৫টি {size} সাইজ এর পোলো শার্ট সিলেক্ট করুন (ছবিতে ট্যাপ করুন) 👇
+                  নিচের ছবিগুলো থেকে আপনার পছন্দের ৬টি {size} সাইজ এর পোলো শার্ট সিলেক্ট করুন (ছবিতে ট্যাপ করুন) 👇
                 </p>
 
                 {isLoading ? (
@@ -500,7 +500,7 @@ function Home() {
 
                 <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
                   <div className="flex justify-between">
-                    <span>৫ পিস পোলো শার্ট ({size})</span>
+                    <span>৬ পিস পোলো শার্ট ({size})</span>
                     <span className="font-semibold">{price} টাকা</span>
                   </div>
                   <div className="mt-1 flex justify-between">
