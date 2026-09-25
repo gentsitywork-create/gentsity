@@ -77,6 +77,7 @@ const orderSchema = z.object({
   district: z.string().trim().max(60).optional().default(""),
   note: z.string().trim().max(300).optional().default(""),
   size: z.enum(["M", "L", "XL", "XXL"]),
+  delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
   items: z
     .array(z.object({ variant_id: z.string().uuid(), qty: z.number().int().min(1).max(5) }))
     .min(1)
@@ -122,12 +123,18 @@ export const placeOrder = createServerFn({ method: "POST" })
       }
     }
 
-    const { data: priceRow } = await supabaseAdmin
+    const { data: priceRows } = await supabaseAdmin
       .from("settings")
-      .select("value")
-      .eq("key", "combo_price")
-      .maybeSingle();
-    const total = Number(priceRow?.value ?? 999) || 999;
+      .select("key, value")
+      .in("key", ["combo_price", "polo_delivery_charge_dhaka", "polo_delivery_charge_outside"]);
+    const sMap: Record<string, string> = {};
+    (priceRows ?? []).forEach((r: any) => (sMap[r.key] = r.value ?? ""));
+    const comboPrice = Number(sMap["combo_price"] ?? 999) || 999;
+    const deliveryCharge =
+      data.delivery_area === "dhaka"
+        ? Number(sMap["polo_delivery_charge_dhaka"] ?? 80) || 80
+        : Number(sMap["polo_delivery_charge_outside"] ?? 150) || 150;
+    const total = comboPrice + deliveryCharge;
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
@@ -138,7 +145,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         district: data.district || null,
         note: data.note || null,
         total_amount: total,
-        delivery_charge: 0,
+        delivery_charge: deliveryCharge,
+        product_type: "polo",
         customer_ip: clientIp() || null,
       })
       .select("id, order_no")
@@ -168,7 +176,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     await sendPurchaseCapi(supabaseAdmin, { orderNo: order.order_no, total, phone: data.phone });
 
-    return { order_no: order.order_no, total };
+    return { order_no: order.order_no, total, delivery_charge: deliveryCharge };
   });
 
 /* ===================== পায়জামা/স্নিকার্স অর্ডার (পিস অনুযায়ী) ===================== */

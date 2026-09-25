@@ -442,6 +442,11 @@ function AdminOrders() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
+                    {(o.product_type === "polo" || !o.product_type) && (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
+                        পোলো শার্ট
+                      </span>
+                    )}
                     {o.product_type === "pajama" && (
                       <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-800">
                         পায়জামা

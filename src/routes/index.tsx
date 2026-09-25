@@ -51,6 +51,7 @@ function Home() {
   const [size, setSize] = useState<Size | null>("M");
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
+  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("dhaka");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number } | null>(null);
 
@@ -79,6 +80,10 @@ function Home() {
     },
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
+  const deliveryCharge =
+    deliveryArea === "dhaka"
+      ? Number(settings?.["polo_delivery_charge_dhaka"] ?? 80) || 80
+      : Number(settings?.["polo_delivery_charge_outside"] ?? 150) || 150;
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
     enabled: Boolean(size),
@@ -200,6 +205,7 @@ function Home() {
           phone: form.phone.trim(),
           address: form.address.trim(),
           size,
+          delivery_area: deliveryArea,
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
       });
@@ -226,7 +232,7 @@ function Home() {
             className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-            ফ্রি ডেলিভারি
+            ক্যাশ অন ডেলিভারি
           </span>
         </div>
       </header>
@@ -247,8 +253,8 @@ function Home() {
             </div>
             <h1 className="mt-5 text-2xl font-bold">অর্ডার সফল হয়েছে!</h1>
             <p className="mt-2 text-muted-foreground">
-              আপনার অর্ডার নম্বর <strong>#{done.order_no}</strong>। মোট {done.total} টাকা, ডেলিভারি
-              চার্জ ফ্রি। আমরা শীঘ্রই কল দিয়ে অর্ডার কনফার্ম করব।
+              আপনার অর্ডার নম্বর <strong>#{done.order_no}</strong>। মোট {done.total} টাকা (ডেলিভারি
+              চার্জসহ)। আমরা শীঘ্রই কল দিয়ে অর্ডার কনফার্ম করব।
             </p>
             <Button className="mt-6" onClick={() => setDone(null)}>
               আরেকটি অর্ডার করুন
@@ -261,11 +267,9 @@ function Home() {
             <h1 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">
               <span>১০০% পিকে কটন কাপড়ের ৫ পিস পোলো শার্ট </span>
               <span className="text-primary">{price} টাকা </span>
-              <span className="text-muted-foreground">(ফ্রী ডেলিভারি)</span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। সাথে ডেলিভারি চার্জ
-                সম্পূর্ণ ফ্রি এবং ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন।
+                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন। ডেলিভারি চার্জ: ঢাকার ভিতরে ৮০ টাকা, ঢাকার বাইরে ১৫০ টাকা।
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -291,7 +295,7 @@ function Home() {
                 <p className="font-display text-2xl font-extrabold text-primary">
                   <Truck className="mx-auto h-6 w-6" />
                 </p>
-                <p className="text-sm text-muted-foreground">ফ্রি ডেলিভারি</p>
+                <p className="text-sm text-muted-foreground">সারা বাংলাদেশে ডেলিভারি</p>
               </div>
               <div className="rounded-xl border bg-card p-4">
                 <p className="font-display text-2xl font-extrabold text-primary">
@@ -306,7 +310,7 @@ function Home() {
                 <ShieldCheck className="h-4 w-4 text-primary" /> ১০০% এক্সপোর্ট কোয়ালিটি কটন
               </li>
               <li className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ফ্রি ডেলিভারি
+                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
               </li>
               <li className="flex items-center gap-2">
                 <Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন
@@ -464,6 +468,33 @@ function Home() {
                       placeholder="বাসা/রোড, থানা, জেলা"
                     />
                   </div>
+                  <div className="grid gap-2">
+                    <Label>ডেলিভারি এরিয়া *</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryArea("dhaka")}
+                        className={`rounded-lg border py-3 text-sm font-bold transition ${
+                          deliveryArea === "dhaka"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "bg-background hover:border-primary"
+                        }`}
+                      >
+                        ঢাকার ভিতরে (৮০ টাকা)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryArea("outside")}
+                        className={`rounded-lg border py-3 text-sm font-bold transition ${
+                          deliveryArea === "outside"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "bg-background hover:border-primary"
+                        }`}
+                      >
+                        ঢাকার বাইরে (১৫০ টাকা)
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
@@ -472,12 +503,12 @@ function Home() {
                     <span className="font-semibold">{price} টাকা</span>
                   </div>
                   <div className="mt-1 flex justify-between">
-                    <span>ডেলিভারি চার্জ</span>
-                    <span className="font-semibold">ফ্রি</span>
+                    <span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span>
+                    <span className="font-semibold">{deliveryCharge} টাকা</span>
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold">
                     <span>মোট</span>
-                    <span>{price} টাকা</span>
+                    <span>{price + deliveryCharge} টাকা</span>
                   </div>
                 </div>
 
@@ -491,7 +522,7 @@ function Home() {
       )}
 
       <footer className="border-t bg-card py-6 text-center text-sm text-muted-foreground">
-        © Gentsity — সারা বাংলাদেশে ফ্রি ডেলিভারি
+        © Gentsity — সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
       </footer>
     </div>
   );
