@@ -690,10 +690,10 @@ const cartSchema = z.object({
       z.object({
         variant_id: z.string().uuid(),
         color_name: z.string().trim().max(60).optional().default(""),
-        qty: z.number().int().min(1).max(5),
+        qty: z.number().int().min(1).max(6),
       }),
     )
-    .max(5),
+    .max(6),
 });
 
 /** কাস্টমার সিলেক্ট/তথ্য দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার না করলেও) */

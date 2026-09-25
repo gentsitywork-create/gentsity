@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin/settings")({
 function AdminSettings() {
   const [values, setValues] = useState({
     combo_price: "999",
-    combo_qty: "5",
+    combo_qty: "6",
     fb_pixel_id: "",
     fb_access_token: "",
     steadfast_api_key: "",
@@ -49,7 +49,7 @@ function AdminSettings() {
     if (data) {
       setValues({
         combo_price: data["combo_price"] ?? "999",
-        combo_qty: data["combo_qty"] ?? "5",
+        combo_qty: data["combo_qty"] ?? "6",
         fb_pixel_id: data["fb_pixel_id"] ?? "",
         fb_access_token: data["fb_access_token"] ?? "",
         steadfast_api_key: data["steadfast_api_key"] ?? "",
