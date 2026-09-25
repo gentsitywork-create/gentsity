@@ -176,7 +176,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     await sendPurchaseCapi(supabaseAdmin, { orderNo: order.order_no, total, phone: data.phone });
 
-    return { order_no: order.order_no, total };
+    return { order_no: order.order_no, total, delivery_charge: deliveryCharge };
   });
 
 /* ===================== পায়জামা/স্নিকার্স অর্ডার (পিস অনুযায়ী) ===================== */
