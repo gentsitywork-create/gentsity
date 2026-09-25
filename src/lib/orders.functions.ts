@@ -79,16 +79,16 @@ const orderSchema = z.object({
   size: z.enum(["M", "L", "XL", "XXL"]),
   delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
   items: z
-    .array(z.object({ variant_id: z.string().uuid(), qty: z.number().int().min(1).max(6) }))
+    .array(z.object({ variant_id: z.string().uuid(), qty: z.number().int().min(1).max(5) }))
     .min(1)
-    .max(6),
+    .max(5),
 });
 
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => orderSchema.parse(data))
   .handler(async ({ data }) => {
     const totalQty = data.items.reduce((s, i) => s + i.qty, 0);
-    if (totalQty !== 6) throw new Error("অনুগ্রহ করে ঠিক ৬ পিস সিলেক্ট করুন।");
+    if (totalQty !== 5) throw new Error("অনুগ্রহ করে ঠিক ৫ পিস সিলেক্ট করুন।");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -126,15 +126,12 @@ export const placeOrder = createServerFn({ method: "POST" })
     const { data: priceRows } = await supabaseAdmin
       .from("settings")
       .select("key, value")
-      .in("key", ["combo_price", "polo_delivery_charge_dhaka", "polo_delivery_charge_outside"]);
+      .in("key", ["combo_price"]);
     const sMap: Record<string, string> = {};
     (priceRows ?? []).forEach((r: any) => (sMap[r.key] = r.value ?? ""));
     const comboPrice = Number(sMap["combo_price"] ?? 999) || 999;
-    const deliveryCharge =
-      data.delivery_area === "dhaka"
-        ? Number(sMap["polo_delivery_charge_dhaka"] ?? 80) || 80
-        : Number(sMap["polo_delivery_charge_outside"] ?? 150) || 150;
-    const total = comboPrice + deliveryCharge;
+    const deliveryCharge = 0;
+    const total = comboPrice;
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")

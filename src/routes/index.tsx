@@ -18,16 +18,16 @@ import gentsityLogo from "@/assets/gentsity-header-logo.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Gentsity — ৬ পিস পোলো শার্ট ৯৯৯ টাকা" },
+      { title: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
       {
         name: "description",
         content:
-          "পছন্দের সাইজ ও রঙ থেকে ৬ পিস পোলো শার্ট নিন মাত্র ৯৯৯ টাকায়। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
+          "পছন্দের সাইজ ও রঙ থেকে ৫ পিস পোলো শার্ট নিন মাত্র ৯৯৯ টাকায়। সারা বাংলাদেশে ফ্রি ডেলিভারি।",
       },
-      { property: "og:title", content: "Gentsity — ৬ পিস পোলো শার্ট ৯৯৯ টাকা" },
+      { property: "og:title", content: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
       {
         property: "og:description",
-        content: "সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৬ পিস নিন। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
+        content: "সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৫ পিস নিন। সারা বাংলাদেশে ফ্রি ডেলিভারি।",
       },
     ],
   }),
@@ -51,7 +51,6 @@ function Home() {
   const [size, setSize] = useState<Size | null>("M");
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
-  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("dhaka");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number } | null>(null);
 
@@ -80,11 +79,7 @@ function Home() {
     },
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
-  const comboQty = Number(settings?.["combo_qty"] ?? 6) || 6;
-  const deliveryCharge =
-    deliveryArea === "dhaka"
-      ? Number(settings?.["polo_delivery_charge_dhaka"] ?? 80) || 80
-      : Number(settings?.["polo_delivery_charge_outside"] ?? 150) || 150;
+  const comboQty = Number(settings?.["combo_qty"] ?? 5) || 5;
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
     enabled: Boolean(size),
@@ -206,7 +201,6 @@ function Home() {
           phone: form.phone.trim(),
           address: form.address.trim(),
           size,
-          delivery_area: deliveryArea,
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
       });
@@ -233,7 +227,7 @@ function Home() {
             className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-            ক্যাশ অন ডেলিভারি
+            ফ্রি ডেলিভারি
           </span>
         </div>
       </header>
@@ -266,11 +260,11 @@ function Home() {
         <>
           <section className="mx-auto max-w-3xl px-4 pt-10 text-center">
             <h1 className="font-display text-3xl font-extrabold leading-tight md:text-4xl">
-              <span>১০০% পিকে কটন কাপড়ের ৬ পিস পোলো শার্ট </span>
+              <span>১০০% পিকে কটন কাপড়ের ৫ পিস পোলো শার্ট </span>
               <span className="text-primary">{price} টাকা </span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                ১০০% কটন কাপড়ের ছেলেদের ৬ পিস পোলো টি-শার্ট মাত্র {price} টাকা। ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন। ডেলিভারি চার্জ: ঢাকার ভিতরে ৮০ টাকা, ঢাকার বাইরে ১৫০ টাকা।
+                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। সারা বাংলাদেশে ফ্রি ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন।
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -302,7 +296,7 @@ function Home() {
                 <p className="font-display text-2xl font-extrabold text-primary">
                   <Wallet className="mx-auto h-6 w-6" />
                 </p>
-                <p className="text-sm text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
+                <p className="text-sm text-muted-foreground">ফ্রি ডেলিভারি</p>
               </div>
             </div>
 
@@ -311,7 +305,7 @@ function Home() {
                 <ShieldCheck className="h-4 w-4 text-primary" /> ১০০% এক্সপোর্ট কোয়ালিটি কটন
               </li>
               <li className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
+                <Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ফ্রি ডেলিভারি
               </li>
               <li className="flex items-center gap-2">
                 <Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন
@@ -320,7 +314,7 @@ function Home() {
 
             <img
               src={comboImage}
-              alt="৬ পিস প্রিমিয়াম পোলো শার্ট কম্বো"
+              alt="৫ পিস প্রিমিয়াম পোলো শার্ট কম্বো"
               width={1200}
               height={912}
               className="mt-8 w-full rounded-xl border object-cover"
@@ -358,13 +352,13 @@ function Home() {
             {size && (
               <div className="mt-5 rounded-xl border bg-card p-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold">২. পছন্দের ৬টি ডিজাইন বাছুন</h2>
+                  <h2 className="text-lg font-bold">২. পছন্দের ৫টি ডিজাইন বাছুন</h2>
                   <span className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
                     {totalPicked} / {comboQty}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  নিচের ছবিগুলো থেকে আপনার পছন্দের ৬টি {size} সাইজ এর পোলো শার্ট সিলেক্ট করুন (ছবিতে ট্যাপ করুন) 👇
+                  নিচের ছবিগুলো থেকে আপনার পছন্দের ৫টি {size} সাইজ এর পোলো শার্ট সিলেক্ট করুন (ছবিতে ট্যাপ করুন) 👇
                 </p>
 
                 {isLoading ? (
@@ -469,47 +463,20 @@ function Home() {
                       placeholder="বাসা/রোড, থানা, জেলা"
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label>ডেলিভারি এরিয়া *</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryArea("dhaka")}
-                        className={`rounded-lg border py-3 text-sm font-bold transition ${
-                          deliveryArea === "dhaka"
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "bg-background hover:border-primary"
-                        }`}
-                      >
-                        ঢাকার ভিতরে (৮০ টাকা)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryArea("outside")}
-                        className={`rounded-lg border py-3 text-sm font-bold transition ${
-                          deliveryArea === "outside"
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "bg-background hover:border-primary"
-                        }`}
-                      >
-                        ঢাকার বাইরে (১৫০ টাকা)
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
                   <div className="flex justify-between">
-                    <span>৬ পিস পোলো শার্ট ({size})</span>
+                    <span>৫ পিস পোলো শার্ট ({size})</span>
                     <span className="font-semibold">{price} টাকা</span>
                   </div>
                   <div className="mt-1 flex justify-between">
-                    <span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span>
-                    <span className="font-semibold">{deliveryCharge} টাকা</span>
+                    <span>ডেলিভারি চার্জ</span>
+                    <span className="font-semibold text-primary">ফ্রি</span>
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold">
                     <span>মোট</span>
-                    <span>{price + deliveryCharge} টাকা</span>
+                    <span>{price} টাকা</span>
                   </div>
                 </div>
 
@@ -523,7 +490,7 @@ function Home() {
       )}
 
       <footer className="border-t bg-card py-6 text-center text-sm text-muted-foreground">
-        © Gentsity — সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
+        © Gentsity — সারা বাংলাদেশে ফ্রি ডেলিভারি
       </footer>
     </div>
   );
