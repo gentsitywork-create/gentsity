@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
 import pajamaSizeChart from "@/assets/pajama-size-chart.jpg.asset.json";
+import pajamaHeroBanner from "@/assets/pajama-hero-banner.jpg.asset.json";
 
 export const Route = createFileRoute("/pajama")({
   head: () => ({
@@ -185,6 +186,10 @@ function PajamaPage() {
         <p className="text-sm font-bold text-primary">GENTSITY PAJAMA COLLECTION</p>
         <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> চায়না মাইক্রো স্টিচ ফেব্রিকের প্রিমিয়াম পায়জামা <Flame className="inline h-7 w-7 text-destructive" /></h1>
         <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">আরাম, স্মার্ট লুক আর প্রিমিয়াম কোয়ালিটি—সবকিছু একসাথে! <Sparkles className="inline h-4 w-4 text-primary" /></p>
+
+        <div className="mt-5 overflow-hidden rounded-lg border bg-card">
+          <img src={pajamaHeroBanner.url} alt="Gentsity পায়জামা — নামাজ, বাসা, বাইরে সব খানেই আরামদায়ক ফিট" className="w-full" />
+        </div>
 
         <ul className="mx-auto mt-5 grid max-w-2xl gap-2 text-left text-sm text-muted-foreground md:grid-cols-2">
           <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম কোয়ালিটি চায়না মাইক্রো স্টিচ ফেব্রিক</li>
