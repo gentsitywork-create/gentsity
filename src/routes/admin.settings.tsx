@@ -24,6 +24,8 @@ function AdminSettings() {
     logo_path: "",
     pajama_delivery_charge_dhaka: "70",
     pajama_delivery_charge_outside: "120",
+    polo_delivery_charge_dhaka: "80",
+    polo_delivery_charge_outside: "150",
     sneakers_delivery_charge_dhaka: "80",
     sneakers_delivery_charge_outside: "130",
     whatsapp_number: "",
@@ -56,6 +58,8 @@ function AdminSettings() {
         logo_path: data["logo_path"] ?? "",
         pajama_delivery_charge_dhaka: data["pajama_delivery_charge_dhaka"] ?? "70",
         pajama_delivery_charge_outside: data["pajama_delivery_charge_outside"] ?? "120",
+        polo_delivery_charge_dhaka: data["polo_delivery_charge_dhaka"] ?? "80",
+        polo_delivery_charge_outside: data["polo_delivery_charge_outside"] ?? "150",
         sneakers_delivery_charge_dhaka: data["sneakers_delivery_charge_dhaka"] ?? "80",
         sneakers_delivery_charge_outside: data["sneakers_delivery_charge_outside"] ?? "130",
         whatsapp_number: data["whatsapp_number"] ?? "",
@@ -136,6 +140,26 @@ function AdminSettings() {
             min={1}
             value={values.combo_qty}
             onChange={(e) => setValues({ ...values, combo_qty: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="poldelivery-dhaka">পোলো শার্টের ডেলিভারি চার্জ — ঢাকার ভিতরে (টাকা)</Label>
+          <Input
+            id="poldelivery-dhaka"
+            type="number"
+            min={0}
+            value={values.polo_delivery_charge_dhaka}
+            onChange={(e) => setValues({ ...values, polo_delivery_charge_dhaka: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="poldelivery-outside">পোলো শার্টের ডেলিভারি চার্জ — ঢাকার বাইরে (টাকা)</Label>
+          <Input
+            id="poldelivery-outside"
+            type="number"
+            min={0}
+            value={values.polo_delivery_charge_outside}
+            onChange={(e) => setValues({ ...values, polo_delivery_charge_outside: e.target.value })}
           />
         </div>
         <div className="grid gap-2">
