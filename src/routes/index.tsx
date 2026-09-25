@@ -503,12 +503,12 @@ function Home() {
                     <span className="font-semibold">{price} টাকা</span>
                   </div>
                   <div className="mt-1 flex justify-between">
-                    <span>ডেলিভারি চার্জ</span>
-                    <span className="font-semibold">ফ্রি</span>
+                    <span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span>
+                    <span className="font-semibold">{deliveryCharge} টাকা</span>
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold">
                     <span>মোট</span>
-                    <span>{price} টাকা</span>
+                    <span>{price + deliveryCharge} টাকা</span>
                   </div>
                 </div>
 
