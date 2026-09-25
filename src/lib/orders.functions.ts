@@ -79,16 +79,16 @@ const orderSchema = z.object({
   size: z.enum(["M", "L", "XL", "XXL"]),
   delivery_area: z.enum(["dhaka", "outside"]).optional().default("outside"),
   items: z
-    .array(z.object({ variant_id: z.string().uuid(), qty: z.number().int().min(1).max(5) }))
+    .array(z.object({ variant_id: z.string().uuid(), qty: z.number().int().min(1).max(6) }))
     .min(1)
-    .max(5),
+    .max(6),
 });
 
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => orderSchema.parse(data))
   .handler(async ({ data }) => {
     const totalQty = data.items.reduce((s, i) => s + i.qty, 0);
-    if (totalQty !== 5) throw new Error("অনুগ্রহ করে ঠিক ৫ পিস সিলেক্ট করুন।");
+    if (totalQty !== 6) throw new Error("অনুগ্রহ করে ঠিক ৬ পিস সিলেক্ট করুন।");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -690,10 +690,10 @@ const cartSchema = z.object({
       z.object({
         variant_id: z.string().uuid(),
         color_name: z.string().trim().max(60).optional().default(""),
-        qty: z.number().int().min(1).max(5),
+        qty: z.number().int().min(1).max(6),
       }),
     )
-    .max(5),
+    .max(6),
 });
 
 /** কাস্টমার সিলেক্ট/তথ্য দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার না করলেও) */
