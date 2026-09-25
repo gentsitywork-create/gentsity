@@ -216,6 +216,11 @@ function PajamaPage() {
 
         <p className="mt-6 text-base font-bold"><Ruler className="inline h-4 w-4" /> সাইজ: M – 38 | L – 40 | XL – 42 | XXL – 44</p>
 
+        <div className="mt-5 overflow-hidden rounded-lg border bg-card">
+          <img src={pajamaSizeChart.url} alt="Gentsity সেমি ন্যারো পায়জামা সাইজ চার্ট" className="w-full" loading="lazy" />
+        </div>
+
+
         <ul className="mt-5 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
           <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ডেলিভারি</li>
           <li className="flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" /> হাতে পেয়ে টাকা দিন</li>
