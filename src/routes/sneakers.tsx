@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
+import sneakersHeroBanner from "@/assets/sneakers-hero-banner.jpg.asset.json";
 
 export const Route = createFileRoute("/sneakers")({
   head: () => ({
