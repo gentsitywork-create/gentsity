@@ -468,6 +468,33 @@ function Home() {
                       placeholder="বাসা/রোড, থানা, জেলা"
                     />
                   </div>
+                  <div className="grid gap-2">
+                    <Label>ডেলিভারি এরিয়া *</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryArea("dhaka")}
+                        className={`rounded-lg border py-3 text-sm font-bold transition ${
+                          deliveryArea === "dhaka"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "bg-background hover:border-primary"
+                        }`}
+                      >
+                        ঢাকার ভিতরে (৮০ টাকা)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryArea("outside")}
+                        className={`rounded-lg border py-3 text-sm font-bold transition ${
+                          deliveryArea === "outside"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "bg-background hover:border-primary"
+                        }`}
+                      >
+                        ঢাকার বাইরে (১৫০ টাকা)
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
