@@ -80,6 +80,7 @@ function Home() {
     },
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
+  const comboQty = Number(settings?.["combo_qty"] ?? 6) || 6;
   const deliveryCharge =
     deliveryArea === "dhaka"
       ? Number(settings?.["polo_delivery_charge_dhaka"] ?? 80) || 80
@@ -125,7 +126,7 @@ function Home() {
 
   const prevPicked = useRef(0);
   useEffect(() => {
-    if (totalPicked === 5 && prevPicked.current === 4) {
+    if (totalPicked === comboQty && prevPicked.current === comboQty - 1) {
       setTimeout(() => {
         document
           .getElementById("checkout")
@@ -133,7 +134,7 @@ function Home() {
       }, 300);
     }
     prevPicked.current = totalPicked;
-  }, [totalPicked]);
+  }, [totalPicked, comboQty]);
 
   /** মোবাইল নম্বর দিলে অসম্পূর্ণ কার্ট ব্যাক-এন্ডে সেভ হয় (অর্ডার শেষ না করলেও) */
   useEffect(() => {
@@ -174,8 +175,8 @@ function Home() {
         delete copy[v.id];
         return copy;
       }
-      if (totalPicked >= 5) {
-        toast.error("সর্বোচ্চ ৫ পিস নেওয়া যাবে।");
+      if (totalPicked >= comboQty) {
+        toast.error(`সর্বোচ্চ ${comboQty} পিস নেওয়া যাবে।`);
         return prev;
       }
       return { ...prev, [v.id]: 1 };
@@ -188,8 +189,8 @@ function Home() {
       toast.error("আগে সাইজ বাছুন।");
       return;
     }
-    if (totalPicked !== 5) {
-      toast.error("ঠিক ৫ পিস সিলেক্ট করুন।");
+    if (totalPicked !== comboQty) {
+      toast.error(`ঠিক ${comboQty} পিস সিলেক্ট করুন।`);
       return;
     }
     if (!/^01[3-9]\d{8}$/.test(form.phone.trim())) {
