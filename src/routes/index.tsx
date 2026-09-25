@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
       {
         property: "og:description",
-        content: "সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৬ পিস নিন। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।",
+        content: "সাইজ বাছুন, স্টকে থাকা রঙ থেকে ৫ পিস নিন। সারা বাংলাদেশে ফ্রি ডেলিভারি।",
       },
     ],
   }),
@@ -51,7 +51,6 @@ function Home() {
   const [size, setSize] = useState<Size | null>("M");
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
-  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("dhaka");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number } | null>(null);
 
@@ -81,10 +80,6 @@ function Home() {
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
   const comboQty = Number(settings?.["combo_qty"] ?? 5) || 5;
-  const deliveryCharge =
-    deliveryArea === "dhaka"
-      ? Number(settings?.["polo_delivery_charge_dhaka"] ?? 80) || 80
-      : Number(settings?.["polo_delivery_charge_outside"] ?? 150) || 150;
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
     enabled: Boolean(size),
@@ -206,7 +201,6 @@ function Home() {
           phone: form.phone.trim(),
           address: form.address.trim(),
           size,
-          delivery_area: deliveryArea,
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
       });
@@ -270,7 +264,7 @@ function Home() {
               <span className="text-primary">{price} টাকা </span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। ক্যাশ অন ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন। ডেলিভারি চার্জ: ঢাকার ভিতরে ৮০ টাকা, ঢাকার বাইরে ১৫০ টাকা।
+                ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। সারা বাংলাদেশে ফ্রি ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন।
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
