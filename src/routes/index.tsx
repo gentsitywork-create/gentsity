@@ -330,7 +330,7 @@ function Home() {
 
           <section id="order" className="mx-auto max-w-3xl px-4 pb-16">
             <div className="rounded-xl border bg-card p-5">
-              <h2 className="text-lg font-bold"><span className="attention-wobble attention-flash">১. সাইজ বাছুন</span></h2>
+              <h2 className="text-lg font-bold"><span className="attention-wobble attention-flash-red">১. সাইজ বাছুন</span></h2>
               <div className="mt-3 grid grid-cols-4 gap-3">
                 {SIZES.map((s) => (
                   <button
@@ -353,7 +353,7 @@ function Home() {
               <div className="mt-5 rounded-xl border bg-card p-5">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold">
-                    <span className={totalPicked < comboQty ? "attention-wobble attention-flash" : ""}>
+                    <span className={totalPicked < comboQty ? "attention-wobble attention-flash-red" : ""}>
                       ২. পছন্দের ৫টি ডিজাইন বাছুন
                     </span>
                   </h2>
@@ -361,7 +361,7 @@ function Home() {
                     {totalPicked} / {comboQty}
                   </span>
                 </div>
-                <p className={`mt-2 text-sm text-muted-foreground ${totalPicked < comboQty ? "attention-flash" : ""}`}>
+                <p className={`mt-2 text-sm text-muted-foreground ${totalPicked < comboQty ? "attention-flash-red" : ""}`}>
                   নিচের ছবিগুলো থেকে আপনার পছন্দের ৫টি {size} সাইজ এর পোলো শার্ট সিলেক্ট করুন (ছবিতে ট্যাপ করুন) <span className="inline-block animate-bounce">👇</span>
                 </p>
 
