@@ -322,7 +322,7 @@ function Home() {
 
             <a
               href="#order"
-              className="mt-6 inline-flex rounded-md bg-primary px-8 py-3 font-semibold text-primary-foreground"
+              className="attention-ring mt-6 inline-flex rounded-md bg-primary px-8 py-3 font-semibold text-primary-foreground"
             >
               অর্ডার করতে প্রথমে আপনার যে সাইজ লাগবে সেটা সিলেক্ট করুন
             </a>
