@@ -399,12 +399,18 @@ function Home() {
                                 style={{ backgroundColor: v.color_hex }}
                               />
                             )}
+                            <span className="absolute left-1 top-1 max-w-[55%] truncate rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold leading-tight text-white">
+                              {v.color_name}
+                            </span>
+                            <span className="absolute right-1 top-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold leading-tight text-white">
+                              স্টক: {v.stock}
+                            </span>
                             {qty > 0 && (
                               <>
-                                <span className="absolute left-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                                <span className="absolute left-2 top-7 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
                                   <Check className="h-5 w-5" />
                                 </span>
-                                <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-sm">
+                                <span className="absolute right-2 top-7 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-sm">
                                   {selectionNumber}
                                 </span>
                                 <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm">
@@ -413,13 +419,6 @@ function Home() {
                               </>
                             )}
                           </button>
-                          <div className="p-2">
-                            <p className="truncate text-sm font-semibold">{v.color_name}</p>
-                            <p className="text-xs text-muted-foreground">স্টক: {v.stock} পিস</p>
-                            <p className={`mt-2 text-xs font-semibold ${qty > 0 ? "text-primary" : "text-muted-foreground"}`}>
-                              {qty > 0 ? `${selectionNumber} নম্বর পছন্দ` : "ছবিতে ট্যাপ করে সিলেক্ট করুন"}
-                            </p>
-                          </div>
                         </div>
                       );
                     })}
