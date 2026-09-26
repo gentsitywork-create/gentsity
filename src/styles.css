@@ -175,6 +175,14 @@
   }
 }
 
+@keyframes gentsity-flash-red {
+  0%, 100% { color: var(--color-foreground); text-shadow: 0 0 0 transparent; }
+  50% {
+    color: var(--color-destructive);
+    text-shadow: 0 0 14px color-mix(in oklab, var(--color-destructive) 60%, transparent);
+  }
+}
+
 @keyframes gentsity-ring {
   0%, 100% {
     box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-primary) 50%, transparent);
@@ -191,12 +199,16 @@
 .attention-flash {
   animation: gentsity-flash 2.4s ease-in-out infinite;
 }
+.attention-flash-red {
+  animation: gentsity-flash-red 2.4s ease-in-out infinite;
+}
 .attention-ring {
   animation: gentsity-ring 1.8s ease-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .attention-wobble,
   .attention-flash,
+  .attention-flash-red,
   .attention-ring {
     animation: none;
   }
