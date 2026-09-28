@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminSession } from "@/hooks/useAdminSession";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ type Product = { id: string; name: string; product_kind: "single" | "combo"; pie
 
 function AdminSneakersStock() {
   const qc = useQueryClient();
+  const { isAdmin } = useAdminSession();
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ name: "", product_kind: "single", price: "", "40": "0", "41": "0", "42": "0", "43": "0", "44": "0" });
   const [file, setFile] = useState<File | null>(null);
@@ -126,7 +128,8 @@ function AdminSneakersStock() {
     refresh();
   };
 
-  return <div className="grid gap-6 xl:grid-cols-[340px_1fr]">
+  return <div className={isAdmin ? "grid gap-6 xl:grid-cols-[340px_1fr]" : "grid gap-6"}>
+    {isAdmin && (
     <form onSubmit={add} className="rounded-lg border bg-card p-5">
       <h1 className="font-bold">নতুন স্নিকার্স প্রোডাক্ট যোগ করুন</h1>
       <div className="mt-4 grid gap-4">
@@ -138,6 +141,7 @@ function AdminSneakersStock() {
         <Button type="submit" disabled={saving}>{saving ? "যোগ হচ্ছে…" : "প্রোডাক্ট যোগ করুন"}</Button>
       </div>
     </form>
+    )}
 
     <section className="rounded-lg border bg-card p-5">
       <div className="flex items-center justify-between"><h2 className="font-bold">স্নিকার্স প্রোডাক্ট ও স্টক</h2><span className="text-sm text-muted-foreground">মোট {products.length}টি</span></div>
