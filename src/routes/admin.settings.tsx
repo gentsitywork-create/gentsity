@@ -364,7 +364,7 @@ function StaffManager() {
   const remove = async (id: string) => {
     if (!window.confirm("এই স্টাফ অ্যাকাউন্টটি মুছে ফেলবেন?")) return;
     try {
-      await removeFn({ data: { userId: id } });
+      await removeFn({ data: { user_id: id } });
       toast.success("স্টাফ সরানো হয়েছে।");
       qc.invalidateQueries({ queryKey: ["staff-list"] });
     } catch (err) {
