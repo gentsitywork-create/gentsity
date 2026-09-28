@@ -45,6 +45,7 @@ async function signedUrls(paths: string[]) {
 
 function AdminStock() {
   const qc = useQueryClient();
+  const { isAdmin } = useAdminSession();
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     size: "M",
@@ -176,7 +177,8 @@ function AdminStock() {
   const rows = variants.filter((v) => v.size === sizeFilter);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+    <div className={isAdmin ? "grid gap-6 lg:grid-cols-[320px_1fr]" : "grid gap-6"}>
+      {isAdmin && (
       <form onSubmit={add} className="rounded-xl border bg-card p-5">
         <h2 className="font-bold">নতুন ডিজাইন (ছবি) ও স্টক যোগ করুন</h2>
         <div className="mt-4 grid gap-4">
@@ -246,6 +248,7 @@ function AdminStock() {
           </Button>
         </div>
       </form>
+      )}
 
       <div className="rounded-xl border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -290,38 +293,44 @@ function AdminStock() {
                 )}
                 <p className="mt-2 font-semibold">{v.color_name}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Input
-                    type="number"
-                    min={0}
-                    className="w-24"
-                    defaultValue={v.stock}
-                    onBlur={(e) => {
-                      const n = Number(e.target.value);
-                      if (n !== v.stock) update(v.id, { stock: Number.isFinite(n) ? n : 0 });
-                    }}
-                  />
-                  <Button
-                    variant={v.is_active ? "outline" : "default"}
-                    size="sm"
-                    onClick={() => update(v.id, { is_active: !v.is_active })}
-                  >
-                    {v.is_active ? "চালু" : "বন্ধ"}
-                  </Button>
-                  <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border px-2 py-1.5 text-sm">
-                    <Upload className="h-4 w-4" /> ছবি বদল
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) replaceImage(v, f);
-                      }}
-                    />
-                  </label>
-                  <Button variant="ghost" size="icon" onClick={() => remove(v)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {isAdmin ? (
+                    <>
+                      <Input
+                        type="number"
+                        min={0}
+                        className="w-24"
+                        defaultValue={v.stock}
+                        onBlur={(e) => {
+                          const n = Number(e.target.value);
+                          if (n !== v.stock) update(v.id, { stock: Number.isFinite(n) ? n : 0 });
+                        }}
+                      />
+                      <Button
+                        variant={v.is_active ? "outline" : "default"}
+                        size="sm"
+                        onClick={() => update(v.id, { is_active: !v.is_active })}
+                      >
+                        {v.is_active ? "চালু" : "বন্ধ"}
+                      </Button>
+                      <label className="inline-flex cursor-pointer items-center gap-1 rounded-md border px-2 py-1.5 text-sm">
+                        <Upload className="h-4 w-4" /> ছবি বদল
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) replaceImage(v, f);
+                          }}
+                        />
+                      </label>
+                      <Button variant="ghost" size="icon" onClick={() => remove(v)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <span className="text-sm font-semibold">স্টক: {v.stock} পিস</span>
+                  )}
                 </div>
               </div>
             ))}
