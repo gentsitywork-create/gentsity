@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { createStaff, listStaff, removeStaff } from "@/lib/orders.functions";
 import { AdminOnly } from "./admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,7 +130,8 @@ function AdminSettingsInner() {
   };
 
   return (
-    <form onSubmit={save} className="max-w-lg rounded-xl border bg-card p-5">
+    <div className="grid max-w-lg gap-6">
+    <form onSubmit={save} className="rounded-xl border bg-card p-5">
       <h1 className="text-lg font-bold">সেটিংস</h1>
       <div className="mt-4 grid gap-4">
         <div className="grid gap-2">
@@ -322,5 +325,109 @@ function AdminSettingsInner() {
         {saving ? "সেভ হচ্ছে…" : "সেভ করুন"}
       </Button>
     </form>
+    <StaffManager />
+    </div>
+  );
+}
+
+/** অফিস স্টাফ অ্যাকাউন্ট ম্যানেজমেন্ট — শুধু অ্যাডমিন। */
+function StaffManager() {
+  const qc = useQueryClient();
+  const createFn = useServerFn(createStaff);
+  const listFn = useServerFn(listStaff);
+  const removeFn = useServerFn(removeStaff);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const { data: staff = [] } = useQuery({
+    queryKey: ["staff-list"],
+    queryFn: () => listFn({}),
+  });
+
+  const add = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await createFn({ data: { email: email.trim(), password } });
+      toast.success("স্টাফ অ্যাকাউন্ট তৈরি হয়েছে।");
+      setEmail("");
+      setPassword("");
+      qc.invalidateQueries({ queryKey: ["staff-list"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "স্টাফ তৈরি হয়নি।");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = async (id: string) => {
+    if (!window.confirm("এই স্টাফ অ্যাকাউন্টটি মুছে ফেলবেন?")) return;
+    try {
+      await removeFn({ data: { userId: id } });
+      toast.success("স্টাফ সরানো হয়েছে।");
+      qc.invalidateQueries({ queryKey: ["staff-list"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "সরানো যায়নি।");
+    }
+  };
+
+  return (
+    <section className="rounded-xl border bg-card p-5">
+      <h2 className="text-lg font-bold">অফিস স্টাফ</h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        স্টাফ অর্ডার ও স্টক ম্যানেজ করতে পারবে; ডিলিট, সেটিংস, আইপি ব্লক ও অসম্পূর্ণ অর্ডার পাবে না।
+      </p>
+
+      <form onSubmit={add} className="mt-4 grid gap-3">
+        <div className="grid gap-2">
+          <Label htmlFor="staff-email">স্টাফের ইমেইল</Label>
+          <Input
+            id="staff-email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="staff@example.com"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="staff-pass">পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</Label>
+          <Input
+            id="staff-pass"
+            type="text"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={busy}>
+          {busy ? "তৈরি হচ্ছে…" : "স্টাফ অ্যাকাউন্ট তৈরি করুন"}
+        </Button>
+      </form>
+
+      <div className="mt-4 grid gap-2">
+        {staff.length === 0 && (
+          <p className="text-sm text-muted-foreground">এখনো কোনো স্টাফ নেই।</p>
+        )}
+        {staff.map((s) => (
+          <div
+            key={s.user_id}
+            className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
+          >
+            <span>{s.email}</span>
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              onClick={() => remove(s.user_id)}
+            >
+              সরান
+            </Button>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
