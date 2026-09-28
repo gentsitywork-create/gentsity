@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Phone } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { AdminOnly } from "./admin";
 import { confirmAbandonedCart } from "@/lib/orders.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,14 @@ const STATUS_CLASS: Record<string, string> = {
 };
 
 function AbandonedCarts() {
+  return (
+    <AdminOnly>
+      <AbandonedCartsInner />
+    </AdminOnly>
+  );
+}
+
+function AbandonedCartsInner() {
   const qc = useQueryClient();
   const confirmCart = useServerFn(confirmAbandonedCart);
   const [busy, setBusy] = useState<string | null>(null);

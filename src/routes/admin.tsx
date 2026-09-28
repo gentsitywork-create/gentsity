@@ -17,8 +17,25 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
+/** শুধু অ্যাডমিনের জন্য পেজ র‍্যাপার — স্টাফ ঢুকলে "অনুমতি নেই" দেখায়। */
+export function AdminOnly({ children }: { children: React.ReactNode }) {
+  const { isAdmin, loading } = useAdminSession();
+  if (loading) {
+    return <div className="p-10 text-center text-muted-foreground">লোড হচ্ছে…</div>;
+  }
+  if (!isAdmin) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-xl font-bold">অনুমতি নেই</h1>
+        <p className="mt-2 text-sm text-muted-foreground">এই পেজটি শুধু অ্যাডমিনের জন্য।</p>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function AdminLayout() {
-  const { session, isAdmin, loading } = useAdminSession();
+  const { session, isAdmin, isStaff, loading } = useAdminSession();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,12 +46,12 @@ function AdminLayout() {
     return <div className="p-10 text-center text-muted-foreground">লোড হচ্ছে…</div>;
   }
 
-  if (session && !isAdmin) {
+  if (session && !isAdmin && !isStaff) {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
         <h1 className="text-xl font-bold">অনুমতি নেই</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          এই অ্যাকাউন্টটি অ্যাডমিন নয়। অ্যাডমিন ইমেইল দিয়ে লগইন করুন।
+          এই অ্যাকাউন্টটি অ্যাডমিন বা স্টাফ নয়। সঠিক ইমেইল দিয়ে লগইন করুন।
         </p>
         <Button
           className="mt-5"
@@ -84,27 +101,31 @@ function AdminLayout() {
             >
               স্নিকার্স স্টক
             </Link>
-            <Link
-              to="/admin/abandoned"
-              activeProps={{ className: "bg-secondary font-semibold" }}
-              className="rounded-md px-3 py-2"
-            >
-              অসম্পূর্ণ অর্ডার
-            </Link>
-            <Link
-              to="/admin/blocked"
-              activeProps={{ className: "bg-secondary font-semibold" }}
-              className="rounded-md px-3 py-2"
-            >
-              আইপি ব্লক
-            </Link>
-            <Link
-              to="/admin/settings"
-              activeProps={{ className: "bg-secondary font-semibold" }}
-              className="rounded-md px-3 py-2"
-            >
-              সেটিংস
-            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  to="/admin/abandoned"
+                  activeProps={{ className: "bg-secondary font-semibold" }}
+                  className="rounded-md px-3 py-2"
+                >
+                  অসম্পূর্ণ অর্ডার
+                </Link>
+                <Link
+                  to="/admin/blocked"
+                  activeProps={{ className: "bg-secondary font-semibold" }}
+                  className="rounded-md px-3 py-2"
+                >
+                  আইপি ব্লক
+                </Link>
+                <Link
+                  to="/admin/settings"
+                  activeProps={{ className: "bg-secondary font-semibold" }}
+                  className="rounded-md px-3 py-2"
+                >
+                  সেটিংস
+                </Link>
+              </>
+            )}
           </nav>
           <Button
             variant="outline"

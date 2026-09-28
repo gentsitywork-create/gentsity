@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function useAdminSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,17 +16,27 @@ export function useAdminSession() {
       setSession(s);
       if (!s) {
         setIsAdmin(false);
+        setIsStaff(false);
         setLoading(false);
         return;
       }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", s.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      const [{ data: adminRow }, { data: staffRow }] = await Promise.all([
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", s.user.id)
+          .eq("role", "admin")
+          .maybeSingle(),
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", s.user.id)
+          .eq("role", "staff")
+          .maybeSingle(),
+      ]);
       if (!active) return;
-      setIsAdmin(Boolean(data));
+      setIsAdmin(Boolean(adminRow));
+      setIsStaff(Boolean(staffRow));
       setLoading(false);
     };
 
@@ -41,5 +52,5 @@ export function useAdminSession() {
     };
   }, []);
 
-  return { session, isAdmin, loading };
+  return { session, isAdmin, isStaff, loading };
 }

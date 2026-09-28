@@ -355,11 +355,20 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   if (!isAdmin) throw new Error("অনুমতি নেই।");
 }
 
+/** অর্ডার/স্টক কাজে অ্যাডমিন বা অফিস স্টাফ — উভয়েই অনুমোদিত। */
+async function assertStaffOrAdmin(context: { supabase: any; userId: string }) {
+  const [{ data: isAdmin }, { data: isStaff }] = await Promise.all([
+    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "staff" }),
+  ]);
+  if (!isAdmin && !isStaff) throw new Error("অনুমতি নেই।");
+}
+
 export const adminCreateOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => adminOrderSchema.parse(data))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: order, error } = await supabaseAdmin
@@ -431,7 +440,7 @@ export const adminUpdateOrder = createServerFn({ method: "POST" })
     adminOrderSchema.extend({ order_id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { error: uErr } = await supabaseAdmin
@@ -558,11 +567,7 @@ export const sendToCourier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ order_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) throw new Error("অনুমতি নেই।");
+    await assertStaffOrAdmin(context as any);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -632,7 +637,7 @@ export const checkCourierRatio = createServerFn({ method: "POST" })
     z.object({ phone: z.string().trim().regex(/^01[3-9]\d{8}$/) }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const key = await getSetting(supabaseAdmin, "bdcourier_api_key");
@@ -735,7 +740,7 @@ export const confirmAbandonedCart = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ cart_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: cart, error } = await supabaseAdmin
@@ -803,4 +808,72 @@ export const confirmAbandonedCart = createServerFn({ method: "POST" })
       .eq("id", cart.id);
 
     return { order_no: order.order_no };
+  });
+
+/* ===================== অফিস স্টাফ ম্যানেজমেন্ট (শুধু অ্যাডমিন) ===================== */
+
+/** অ্যাডমিন স্টাফ অ্যাকাউন্ট তৈরি করে — ইমেইল + পাসওয়ার্ড দিয়ে */
+export const createStaff = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) =>
+    z
+      .object({
+        email: z.string().trim().email().max(120),
+        password: z.string().min(6).max(72),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true,
+    });
+    if (error || !created.user) {
+      throw new Error(error?.message?.includes("already") ? "এই ইমেইলে অ্যাকাউন্ট আছে।" : "স্টাফ অ্যাকাউন্ট তৈরি হয়নি।");
+    }
+
+    const { error: rErr } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: created.user.id, role: "staff" }, { onConflict: "user_id,role" });
+    if (rErr) throw new Error("স্টাফ রোল বসানো যায়নি।");
+
+    return { ok: true };
+  });
+
+/** স্টাফদের তালিকা (ইমেইলসহ) */
+export const listStaff = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: roles, error } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id, created_at")
+      .eq("role", "staff");
+    if (error) throw new Error("তালিকা আনা যায়নি।");
+
+    const out: { user_id: string; email: string; created_at: string }[] = [];
+    for (const r of roles ?? []) {
+      const { data: u } = await supabaseAdmin.auth.admin.getUserById(r.user_id);
+      out.push({ user_id: r.user_id, email: u?.user?.email ?? "—", created_at: r.created_at });
+    }
+    return out;
+  });
+
+/** স্টাফ সরিয়ে দেওয়া (অ্যাকাউন্ট + রোল মুছে যায়) */
+export const removeStaff = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ user_id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id).eq("role", "staff");
+    await supabaseAdmin.auth.admin.deleteUser(data.user_id);
+    return { ok: true };
   });
