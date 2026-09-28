@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminSession } from "@/hooks/useAdminSession";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ type Product = { id: string; name: string; product_kind: "single" | "combo"; pie
 
 function AdminSneakersStock() {
   const qc = useQueryClient();
+  const { isAdmin } = useAdminSession();
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ name: "", product_kind: "single", price: "", "40": "0", "41": "0", "42": "0", "43": "0", "44": "0" });
   const [file, setFile] = useState<File | null>(null);
@@ -126,7 +128,8 @@ function AdminSneakersStock() {
     refresh();
   };
 
-  return <div className="grid gap-6 xl:grid-cols-[340px_1fr]">
+  return <div className={isAdmin ? "grid gap-6 xl:grid-cols-[340px_1fr]" : "grid gap-6"}>
+    {isAdmin && (
     <form onSubmit={add} className="rounded-lg border bg-card p-5">
       <h1 className="font-bold">নতুন স্নিকার্স প্রোডাক্ট যোগ করুন</h1>
       <div className="mt-4 grid gap-4">
@@ -138,20 +141,31 @@ function AdminSneakersStock() {
         <Button type="submit" disabled={saving}>{saving ? "যোগ হচ্ছে…" : "প্রোডাক্ট যোগ করুন"}</Button>
       </div>
     </form>
+    )}
 
     <section className="rounded-lg border bg-card p-5">
       <div className="flex items-center justify-between"><h2 className="font-bold">স্নিকার্স প্রোডাক্ট ও স্টক</h2><span className="text-sm text-muted-foreground">মোট {products.length}টি</span></div>
       {isLoading ? <p className="mt-4 text-muted-foreground">লোড হচ্ছে…</p> : products.length === 0 ? <p className="mt-4 text-muted-foreground">এখনো কোনো প্রোডাক্ট যোগ করা হয়নি।</p> : <div className="mt-4 grid gap-4 md:grid-cols-2">{products.map((product) => <article key={product.id} className="rounded-lg border p-3">
         {product.image_url && images[product.image_url] ? <img src={images[product.image_url]} alt={product.name} className="aspect-[4/3] w-full rounded-md object-cover" /> : <div className="flex aspect-[4/3] items-center justify-center rounded-md bg-secondary text-sm text-muted-foreground">ছবি নেই</div>}
         <div className="mt-3 grid gap-3">
-          <div className="grid grid-cols-[1fr_100px] gap-2"><Input defaultValue={product.name} onBlur={(e) => { const value = e.target.value.trim(); if (value && value !== product.name) updateProduct(product.id, { name: value }); }} /><Input type="number" min={1} defaultValue={product.price} onBlur={(e) => { const value = Number(e.target.value); if (value > 0 && value !== product.price) updateProduct(product.id, { price: value }); }} /></div>
-          <div className="grid grid-cols-5 gap-2">{SIZES.map((size) => { const stock = product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0; return <div key={size}><Label className="text-xs">{size}</Label><Input type="number" min={0} defaultValue={stock} onBlur={(e) => { const value = Number(e.target.value); if (value !== stock) updateStock(product.id, size, value); }} /></div>; })}</div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" variant={product.is_active ? "outline" : "default"} onClick={() => updateProduct(product.id, { is_active: !product.is_active })}>{product.is_active ? "চালু" : "বন্ধ"}</Button>
-            <label className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-md border px-3 text-sm font-medium"><Upload className="h-4 w-4" /> ছবি বদল<input type="file" accept="image/*" className="hidden" onChange={(e) => { const nextFile = e.target.files?.[0]; if (nextFile) replaceImage(product, nextFile); }} /></label>
-            <Button type="button" variant="ghost" size="icon" onClick={() => remove(product)} aria-label={`${product.name} মুছুন`}><Trash2 className="h-4 w-4" /></Button>
-            <span className="ml-auto text-xs font-semibold text-muted-foreground">১ জোড়া</span>
-          </div>
+          {isAdmin ? (
+            <>
+              <div className="grid grid-cols-[1fr_100px] gap-2"><Input defaultValue={product.name} onBlur={(e) => { const value = e.target.value.trim(); if (value && value !== product.name) updateProduct(product.id, { name: value }); }} /><Input type="number" min={1} defaultValue={product.price} onBlur={(e) => { const value = Number(e.target.value); if (value > 0 && value !== product.price) updateProduct(product.id, { price: value }); }} /></div>
+              <div className="grid grid-cols-5 gap-2">{SIZES.map((size) => { const stock = product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0; return <div key={size}><Label className="text-xs">{size}</Label><Input type="number" min={0} defaultValue={stock} onBlur={(e) => { const value = Number(e.target.value); if (value !== stock) updateStock(product.id, size, value); }} /></div>; })}</div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="button" size="sm" variant={product.is_active ? "outline" : "default"} onClick={() => updateProduct(product.id, { is_active: !product.is_active })}>{product.is_active ? "চালু" : "বন্ধ"}</Button>
+                <label className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-md border px-3 text-sm font-medium"><Upload className="h-4 w-4" /> ছবি বদল<input type="file" accept="image/*" className="hidden" onChange={(e) => { const nextFile = e.target.files?.[0]; if (nextFile) replaceImage(product, nextFile); }} /></label>
+                <Button type="button" variant="ghost" size="icon" onClick={() => remove(product)} aria-label={`${product.name} মুছুন`}><Trash2 className="h-4 w-4" /></Button>
+                <span className="ml-auto text-xs font-semibold text-muted-foreground">১ জোড়া</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="font-semibold">{product.name} — {product.price} টাকা</p>
+              <div className="grid grid-cols-5 gap-2">{SIZES.map((size) => { const stock = product.pajama_product_stock.find((row) => row.size === size)?.stock ?? 0; return <div key={size} className="rounded-md border px-2 py-1 text-center text-xs"><span className="font-semibold">{size}</span><br />{stock} পিস</div>; })}</div>
+              <p className="text-xs text-muted-foreground">{product.is_active ? "চালু" : "বন্ধ"} · ১ জোড়া</p>
+            </>
+          )}
         </div>
       </article>)}</div>}
     </section>
