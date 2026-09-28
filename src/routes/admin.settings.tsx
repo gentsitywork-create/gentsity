@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { AdminOnly } from "./admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,14 @@ export const Route = createFileRoute("/admin/settings")({
 });
 
 function AdminSettings() {
+  return (
+    <AdminOnly>
+      <AdminSettingsInner />
+    </AdminOnly>
+  );
+}
+
+function AdminSettingsInner() {
   const [values, setValues] = useState({
     combo_price: "999",
     combo_qty: "6",

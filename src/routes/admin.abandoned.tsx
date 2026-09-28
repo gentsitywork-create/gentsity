@@ -49,6 +49,14 @@ const STATUS_CLASS: Record<string, string> = {
 };
 
 function AbandonedCarts() {
+  return (
+    <AdminOnly>
+      <AbandonedCartsInner />
+    </AdminOnly>
+  );
+}
+
+function AbandonedCartsInner() {
   const qc = useQueryClient();
   const confirmCart = useServerFn(confirmAbandonedCart);
   const [busy, setBusy] = useState<string | null>(null);
