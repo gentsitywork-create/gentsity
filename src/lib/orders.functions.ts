@@ -368,7 +368,7 @@ export const adminCreateOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => adminOrderSchema.parse(data))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: order, error } = await supabaseAdmin
@@ -440,7 +440,7 @@ export const adminUpdateOrder = createServerFn({ method: "POST" })
     adminOrderSchema.extend({ order_id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { error: uErr } = await supabaseAdmin
@@ -637,7 +637,7 @@ export const checkCourierRatio = createServerFn({ method: "POST" })
     z.object({ phone: z.string().trim().regex(/^01[3-9]\d{8}$/) }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as any);
+    await assertStaffOrAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const key = await getSetting(supabaseAdmin, "bdcourier_api_key");
