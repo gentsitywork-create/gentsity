@@ -84,27 +84,31 @@ function AdminLayout() {
             >
               স্নিকার্স স্টক
             </Link>
-            <Link
-              to="/admin/abandoned"
-              activeProps={{ className: "bg-secondary font-semibold" }}
-              className="rounded-md px-3 py-2"
-            >
-              অসম্পূর্ণ অর্ডার
-            </Link>
-            <Link
-              to="/admin/blocked"
-              activeProps={{ className: "bg-secondary font-semibold" }}
-              className="rounded-md px-3 py-2"
-            >
-              আইপি ব্লক
-            </Link>
-            <Link
-              to="/admin/settings"
-              activeProps={{ className: "bg-secondary font-semibold" }}
-              className="rounded-md px-3 py-2"
-            >
-              সেটিংস
-            </Link>
+            {isAdmin && (
+              <>
+                <Link
+                  to="/admin/abandoned"
+                  activeProps={{ className: "bg-secondary font-semibold" }}
+                  className="rounded-md px-3 py-2"
+                >
+                  অসম্পূর্ণ অর্ডার
+                </Link>
+                <Link
+                  to="/admin/blocked"
+                  activeProps={{ className: "bg-secondary font-semibold" }}
+                  className="rounded-md px-3 py-2"
+                >
+                  আইপি ব্লক
+                </Link>
+                <Link
+                  to="/admin/settings"
+                  activeProps={{ className: "bg-secondary font-semibold" }}
+                  className="rounded-md px-3 py-2"
+                >
+                  সেটিংস
+                </Link>
+              </>
+            )}
           </nav>
           <Button
             variant="outline"
