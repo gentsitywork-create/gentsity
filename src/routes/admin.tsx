@@ -17,6 +17,23 @@ export const Route = createFileRoute("/admin")({
   component: AdminLayout,
 });
 
+/** শুধু অ্যাডমিনের জন্য পেজ র‍্যাপার — স্টাফ ঢুকলে "অনুমতি নেই" দেখায়। */
+export function AdminOnly({ children }: { children: React.ReactNode }) {
+  const { isAdmin, loading } = useAdminSession();
+  if (loading) {
+    return <div className="p-10 text-center text-muted-foreground">লোড হচ্ছে…</div>;
+  }
+  if (!isAdmin) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-xl font-bold">অনুমতি নেই</h1>
+        <p className="mt-2 text-sm text-muted-foreground">এই পেজটি শুধু অ্যাডমিনের জন্য।</p>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function AdminLayout() {
   const { session, isAdmin, isStaff, loading } = useAdminSession();
   const navigate = useNavigate();

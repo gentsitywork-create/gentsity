@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { AdminOnly } from "./admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,14 @@ export const Route = createFileRoute("/admin/blocked")({
 type Row = { id: string; ip: string; reason: string | null; created_at: string };
 
 function BlockedIps() {
+  return (
+    <AdminOnly>
+      <BlockedIpsInner />
+    </AdminOnly>
+  );
+}
+
+function BlockedIpsInner() {
   const qc = useQueryClient();
   const [ip, setIp] = useState("");
   const [reason, setReason] = useState("");

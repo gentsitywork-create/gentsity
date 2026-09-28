@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Phone } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { AdminOnly } from "./admin";
 import { confirmAbandonedCart } from "@/lib/orders.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
