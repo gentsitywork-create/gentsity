@@ -355,6 +355,15 @@ async function assertAdmin(context: { supabase: any; userId: string }) {
   if (!isAdmin) throw new Error("অনুমতি নেই।");
 }
 
+/** অর্ডার/স্টক কাজে অ্যাডমিন বা অফিস স্টাফ — উভয়েই অনুমোদিত। */
+async function assertStaffOrAdmin(context: { supabase: any; userId: string }) {
+  const [{ data: isAdmin }, { data: isStaff }] = await Promise.all([
+    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "staff" }),
+  ]);
+  if (!isAdmin && !isStaff) throw new Error("অনুমতি নেই।");
+}
+
 export const adminCreateOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => adminOrderSchema.parse(data))
@@ -558,11 +567,7 @@ export const sendToCourier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) => z.object({ order_id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) throw new Error("অনুমতি নেই।");
+    await assertStaffOrAdmin(context as any);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
