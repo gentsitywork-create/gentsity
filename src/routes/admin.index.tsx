@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendToCourier, checkCourierRatio } from "@/lib/orders.functions";
+import { useAdminSession } from "@/hooks/useAdminSession";
 import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
 import { printCourierLabels } from "@/components/admin/printLabels";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ type OrderRow = {
 
 function AdminOrders() {
   const qc = useQueryClient();
+  const { isAdmin } = useAdminSession();
   const send = useServerFn(sendToCourier);
   const checkRatio = useServerFn(checkCourierRatio);
   const [ratioBusy, setRatioBusy] = useState<string | null>(null);
@@ -383,9 +385,11 @@ function AdminOrders() {
             >
               🖨 লেবেল প্রিন্ট (QR)
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => deleteOrders(selected)} disabled={bulkBusy}>
-              🗑 ডিলিট
-            </Button>
+            {isAdmin && (
+              <Button size="sm" variant="destructive" onClick={() => deleteOrders(selected)} disabled={bulkBusy}>
+                🗑 ডিলিট
+              </Button>
+            )}
             <Button size="sm" variant="secondary" onClick={bulkCourier} disabled={bulkBusy}>
               {bulkBusy ? "কাজ চলছে…" : "🚚 Steadfast এ পাঠাও"}
             </Button>
@@ -635,23 +639,27 @@ function AdminOrders() {
                   >
                     {o.status === "hold" ? "▶ হোল্ড সরান" : "⏸ হোল্ড"}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-8 text-xs"
-                    onClick={() => deleteOrders([o.id])}
-                  >
-                    🗑 ডিলিট
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 text-xs text-rose-600 hover:bg-rose-50"
-                    title="এই কাস্টমারের আইপি ব্লক করুন"
-                    onClick={() => blockIp(o.customer_ip, o.customer_name)}
-                  >
-                    আইপি ব্লক
-                  </Button>
+                  {isAdmin && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 text-xs"
+                        onClick={() => deleteOrders([o.id])}
+                      >
+                        🗑 ডিলিট
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs text-rose-600 hover:bg-rose-50"
+                        title="এই কাস্টমারের আইপি ব্লক করুন"
+                        onClick={() => blockIp(o.customer_ip, o.customer_name)}
+                      >
+                        আইপি ব্লক
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             );
