@@ -18,7 +18,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { session, isAdmin, loading } = useAdminSession();
+  const { session, isAdmin, isStaff, loading } = useAdminSession();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,12 +29,12 @@ function AdminLayout() {
     return <div className="p-10 text-center text-muted-foreground">লোড হচ্ছে…</div>;
   }
 
-  if (session && !isAdmin) {
+  if (session && !isAdmin && !isStaff) {
     return (
       <div className="mx-auto max-w-md p-10 text-center">
         <h1 className="text-xl font-bold">অনুমতি নেই</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          এই অ্যাকাউন্টটি অ্যাডমিন নয়। অ্যাডমিন ইমেইল দিয়ে লগইন করুন।
+          এই অ্যাকাউন্টটি অ্যাডমিন বা স্টাফ নয়। সঠিক ইমেইল দিয়ে লগইন করুন।
         </p>
         <Button
           className="mt-5"
