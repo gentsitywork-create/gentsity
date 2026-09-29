@@ -247,10 +247,14 @@ function SneakersPage() {
                 <span className="shrink-0 text-lg font-extrabold text-primary">৳{subtotal}</span>
               </div>
               <div className="mt-5"><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-5 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="px-1 text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
+              {freeDelivery ? (
+                <p className="mt-5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary">সারা বাংলাদেশে ফ্রি ডেলিভারি 🚚</p>
+              ) : (
               <div className="mt-5"><Label>ডেলিভারি এরিয়া *</Label><div className="mt-2 grid grid-cols-2 gap-2">
                 <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="h-auto min-h-10 whitespace-normal px-2 text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
                 <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="h-auto min-h-10 whitespace-normal px-2 text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
               </div></div>
+              )}
               <div className="mt-5 grid gap-4">
                 <div className="grid gap-2"><Label htmlFor="sn-name">আপনার নাম</Label><Input id="sn-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                 <div className="grid gap-2"><Label htmlFor="sn-phone">মোবাইল নম্বর *</Label><Input id="sn-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
