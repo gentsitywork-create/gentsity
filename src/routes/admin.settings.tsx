@@ -41,6 +41,7 @@ function AdminSettingsInner() {
     sneakers_delivery_charge_outside: "130",
     whatsapp_number: "",
     whatsapp_message: "",
+    free_delivery: "off",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -75,6 +76,7 @@ function AdminSettingsInner() {
         sneakers_delivery_charge_outside: data["sneakers_delivery_charge_outside"] ?? "130",
         whatsapp_number: data["whatsapp_number"] ?? "",
         whatsapp_message: data["whatsapp_message"] ?? "",
+        free_delivery: data["free_delivery"] ?? "off",
       });
     }
   }, [data]);
@@ -153,6 +155,30 @@ function AdminSettingsInner() {
             value={values.combo_qty}
             onChange={(e) => setValues({ ...values, combo_qty: e.target.value })}
           />
+        </div>
+        <div className="grid gap-2 rounded-lg border p-3">
+          <h2 className="font-semibold">সব পেজে ফ্রি ডেলিভারি</h2>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant={values.free_delivery === "on" ? "default" : "outline"}
+              className="flex-1 font-bold"
+              onClick={() => setValues({ ...values, free_delivery: "on" })}
+            >
+              চালু
+            </Button>
+            <Button
+              type="button"
+              variant={values.free_delivery === "on" ? "outline" : "default"}
+              className="flex-1 font-bold"
+              onClick={() => setValues({ ...values, free_delivery: "off" })}
+            >
+              বন্ধ
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            চালু করলে পায়জামা ও স্নিকার্স পেজে ডেলিভারি চার্জ ০ হয়ে যাবে এবং কাস্টমার "ফ্রি ডেলিভারি" দেখবে। বন্ধ করলে নিচের চার্জগুলোই কার্যকর থাকবে।
+          </p>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="poldelivery-dhaka">পোলো শার্টের ডেলিভারি চার্জ — ঢাকার ভিতরে (টাকা)</Label>
