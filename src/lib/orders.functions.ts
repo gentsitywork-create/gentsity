@@ -126,12 +126,22 @@ export const placeOrder = createServerFn({ method: "POST" })
     const { data: priceRows } = await supabaseAdmin
       .from("settings")
       .select("key, value")
-      .in("key", ["combo_price"]);
+      .in("key", [
+        "combo_price",
+        "polo_free_delivery",
+        "polo_delivery_charge_dhaka",
+        "polo_delivery_charge_outside",
+      ]);
     const sMap: Record<string, string> = {};
     (priceRows ?? []).forEach((r: any) => (sMap[r.key] = r.value ?? ""));
     const comboPrice = Number(sMap["combo_price"] ?? 999) || 999;
-    const deliveryCharge = 0;
-    const total = comboPrice;
+    const poloFree = sMap["polo_free_delivery"] !== "off";
+    const poloRate =
+      data.delivery_area === "dhaka"
+        ? Number(sMap["polo_delivery_charge_dhaka"] ?? 80) || 80
+        : Number(sMap["polo_delivery_charge_outside"] ?? 150) || 150;
+    const deliveryCharge = poloFree ? 0 : Math.max(0, poloRate);
+    const total = comboPrice + deliveryCharge;
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
