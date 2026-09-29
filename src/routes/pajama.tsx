@@ -62,9 +62,10 @@ function PajamaPage() {
       return Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""])) as Record<string, string>;
     },
   });
+  const freeDelivery = settings?.["free_delivery"] === "on";
   const dhakaCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_dhaka"] ?? 70) || 70);
   const outsideCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_outside"] ?? 120) || 120);
-  const deliveryCharge = deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
+  const deliveryCharge = freeDelivery ? 0 : deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["pajama-products"],
     queryFn: async () => {

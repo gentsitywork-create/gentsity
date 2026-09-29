@@ -61,9 +61,10 @@ function SneakersPage() {
       return Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""])) as Record<string, string>;
     },
   });
+  const freeDelivery = settings?.["free_delivery"] === "on";
   const dhakaCharge = Math.max(0, Number(settings?.["sneakers_delivery_charge_dhaka"] ?? 80) || 80);
   const outsideCharge = Math.max(0, Number(settings?.["sneakers_delivery_charge_outside"] ?? 130) || 130);
-  const deliveryCharge = deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
+  const deliveryCharge = freeDelivery ? 0 : deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["sneakers-products"],
     queryFn: async () => {
