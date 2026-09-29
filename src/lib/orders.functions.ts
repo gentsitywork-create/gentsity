@@ -249,13 +249,15 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
         subtotal += product.price * item.qty;
       }
 
-      const [{ data: dhakaRow }, { data: outsideRow }] = await Promise.all([
+      const [{ data: dhakaRow }, { data: outsideRow }, { data: freeRow }] = await Promise.all([
         supabaseAdmin.from("settings").select("value").eq("key", config.dhakaKey).maybeSingle(),
         supabaseAdmin.from("settings").select("value").eq("key", config.outsideKey).maybeSingle(),
+        supabaseAdmin.from("settings").select("value").eq("key", "free_delivery").maybeSingle(),
       ]);
       const areaRate = data.delivery_area === "dhaka" ? dhakaRow?.value : outsideRow?.value;
       const fallback = data.delivery_area === "dhaka" ? config.dhakaFallback : config.outsideFallback;
-      const deliveryCharge = Math.max(0, Number(areaRate ?? fallback) || fallback);
+      const deliveryCharge =
+        freeRow?.value === "on" ? 0 : Math.max(0, Number(areaRate ?? fallback) || fallback);
       const total = subtotal + deliveryCharge;
 
       const { data: order, error: oErr } = await supabaseAdmin
