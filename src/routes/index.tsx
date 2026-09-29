@@ -234,7 +234,7 @@ function Home() {
             className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-            ফ্রি ডেলিভারি
+            {poloFree ? "ফ্রি ডেলিভারি" : "ক্যাশ অন ডেলিভারি"}
           </span>
         </div>
       </header>
@@ -475,6 +475,16 @@ function Home() {
                   </div>
                 </div>
 
+                {!poloFree && (
+                  <div className="mt-4">
+                    <Label>ডেলিভারি এরিয়া *</Label>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <Button type="button" variant={deliveryArea === "dhaka" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("dhaka")}>ঢাকার ভিতরে (+{dhakaCharge}৳)</Button>
+                      <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
                   <div className="flex justify-between">
                     <span>৫ পিস পোলো শার্ট ({size})</span>
@@ -482,11 +492,11 @@ function Home() {
                   </div>
                   <div className="mt-1 flex justify-between">
                     <span>ডেলিভারি চার্জ</span>
-                    <span className="font-semibold text-primary">ফ্রি</span>
+                    <span className="font-semibold text-primary">{poloFree ? "ফ্রি" : `${deliveryCharge} টাকা`}</span>
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold">
                     <span>মোট</span>
-                    <span>{price} টাকা</span>
+                    <span>{grandTotal} টাকা</span>
                   </div>
                 </div>
 
