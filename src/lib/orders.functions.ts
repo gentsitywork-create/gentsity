@@ -190,6 +190,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 
 type CatalogConfig = {
   page: "pajama" | "sneakers";
+  freeKey: string;
   dhakaKey: string;
   outsideKey: string;
   dhakaFallback: number;
@@ -262,7 +263,7 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
       const [{ data: dhakaRow }, { data: outsideRow }, { data: freeRow }] = await Promise.all([
         supabaseAdmin.from("settings").select("value").eq("key", config.dhakaKey).maybeSingle(),
         supabaseAdmin.from("settings").select("value").eq("key", config.outsideKey).maybeSingle(),
-        supabaseAdmin.from("settings").select("value").eq("key", "free_delivery").maybeSingle(),
+        supabaseAdmin.from("settings").select("value").eq("key", config.freeKey).maybeSingle(),
       ]);
       const areaRate = data.delivery_area === "dhaka" ? dhakaRow?.value : outsideRow?.value;
       const fallback = data.delivery_area === "dhaka" ? config.dhakaFallback : config.outsideFallback;
