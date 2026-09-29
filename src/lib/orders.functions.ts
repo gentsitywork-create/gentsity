@@ -126,12 +126,22 @@ export const placeOrder = createServerFn({ method: "POST" })
     const { data: priceRows } = await supabaseAdmin
       .from("settings")
       .select("key, value")
-      .in("key", ["combo_price"]);
+      .in("key", [
+        "combo_price",
+        "polo_free_delivery",
+        "polo_delivery_charge_dhaka",
+        "polo_delivery_charge_outside",
+      ]);
     const sMap: Record<string, string> = {};
     (priceRows ?? []).forEach((r: any) => (sMap[r.key] = r.value ?? ""));
     const comboPrice = Number(sMap["combo_price"] ?? 999) || 999;
-    const deliveryCharge = 0;
-    const total = comboPrice;
+    const poloFree = sMap["polo_free_delivery"] !== "off";
+    const poloRate =
+      data.delivery_area === "dhaka"
+        ? Number(sMap["polo_delivery_charge_dhaka"] ?? 80) || 80
+        : Number(sMap["polo_delivery_charge_outside"] ?? 150) || 150;
+    const deliveryCharge = poloFree ? 0 : Math.max(0, poloRate);
+    const total = comboPrice + deliveryCharge;
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
@@ -180,6 +190,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 
 type CatalogConfig = {
   page: "pajama" | "sneakers";
+  freeKey: string;
   dhakaKey: string;
   outsideKey: string;
   dhakaFallback: number;
@@ -252,7 +263,7 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
       const [{ data: dhakaRow }, { data: outsideRow }, { data: freeRow }] = await Promise.all([
         supabaseAdmin.from("settings").select("value").eq("key", config.dhakaKey).maybeSingle(),
         supabaseAdmin.from("settings").select("value").eq("key", config.outsideKey).maybeSingle(),
-        supabaseAdmin.from("settings").select("value").eq("key", "free_delivery").maybeSingle(),
+        supabaseAdmin.from("settings").select("value").eq("key", config.freeKey).maybeSingle(),
       ]);
       const areaRate = data.delivery_area === "dhaka" ? dhakaRow?.value : outsideRow?.value;
       const fallback = data.delivery_area === "dhaka" ? config.dhakaFallback : config.outsideFallback;
@@ -314,7 +325,7 @@ export const placePajamaOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => pajamaSchema.parse(data))
   .handler(async ({ data }) =>
     handleCatalogOrder(
-      { page: "pajama", dhakaKey: "pajama_delivery_charge_dhaka", outsideKey: "pajama_delivery_charge_outside", dhakaFallback: 70, outsideFallback: 120 },
+      { page: "pajama", freeKey: "pajama_free_delivery", dhakaKey: "pajama_delivery_charge_dhaka", outsideKey: "pajama_delivery_charge_outside", dhakaFallback: 70, outsideFallback: 120 },
       data as CatalogOrderData,
     ),
   );
@@ -323,7 +334,7 @@ export const placeSneakersOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => sneakersSchema.parse(data))
   .handler(async ({ data }) =>
     handleCatalogOrder(
-      { page: "sneakers", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
+      { page: "sneakers", freeKey: "sneakers_free_delivery", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
       data as CatalogOrderData,
     ),
   );

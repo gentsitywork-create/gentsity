@@ -41,7 +41,9 @@ function AdminSettingsInner() {
     sneakers_delivery_charge_outside: "130",
     whatsapp_number: "",
     whatsapp_message: "",
-    free_delivery: "off",
+    polo_free_delivery: "on",
+    pajama_free_delivery: "off",
+    sneakers_free_delivery: "off",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -76,7 +78,9 @@ function AdminSettingsInner() {
         sneakers_delivery_charge_outside: data["sneakers_delivery_charge_outside"] ?? "130",
         whatsapp_number: data["whatsapp_number"] ?? "",
         whatsapp_message: data["whatsapp_message"] ?? "",
-        free_delivery: data["free_delivery"] ?? "off",
+        polo_free_delivery: data["polo_free_delivery"] ?? "on",
+        pajama_free_delivery: data["pajama_free_delivery"] ?? "off",
+        sneakers_free_delivery: data["sneakers_free_delivery"] ?? "off",
       });
     }
   }, [data]);
@@ -156,28 +160,41 @@ function AdminSettingsInner() {
             onChange={(e) => setValues({ ...values, combo_qty: e.target.value })}
           />
         </div>
-        <div className="grid gap-2 rounded-lg border p-3">
-          <h2 className="font-semibold">সব পেজে ফ্রি ডেলিভারি</h2>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={values.free_delivery === "on" ? "default" : "outline"}
-              className="flex-1 font-bold"
-              onClick={() => setValues({ ...values, free_delivery: "on" })}
-            >
-              চালু
-            </Button>
-            <Button
-              type="button"
-              variant={values.free_delivery === "on" ? "outline" : "default"}
-              className="flex-1 font-bold"
-              onClick={() => setValues({ ...values, free_delivery: "off" })}
-            >
-              বন্ধ
-            </Button>
-          </div>
+        <div className="grid gap-3 rounded-lg border p-3">
+          <h2 className="font-semibold">ফ্রি ডেলিভারি (পেজ অনুযায়ী)</h2>
+          {(
+            [
+              ["polo_free_delivery", "পোলো শার্ট"],
+              ["pajama_free_delivery", "পায়জামা"],
+              ["sneakers_free_delivery", "স্নিকার্স"],
+            ] as const
+          ).map(([key, label]) => (
+            <div key={key} className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium">{label}</span>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={values[key] === "on" ? "default" : "outline"}
+                  className="font-bold"
+                  onClick={() => setValues({ ...values, [key]: "on" })}
+                >
+                  ফ্রি
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={values[key] === "on" ? "outline" : "default"}
+                  className="font-bold"
+                  onClick={() => setValues({ ...values, [key]: "off" })}
+                >
+                  চার্জ
+                </Button>
+              </div>
+            </div>
+          ))}
           <p className="text-xs text-muted-foreground">
-            চালু করলে পায়জামা ও স্নিকার্স পেজে ডেলিভারি চার্জ ০ হয়ে যাবে এবং কাস্টমার "ফ্রি ডেলিভারি" দেখবে। বন্ধ করলে নিচের চার্জগুলোই কার্যকর থাকবে।
+            যে পেজে "ফ্রি" সিলেক্ট করবেন সেখানে ডেলিভারি চার্জ ০ হবে এবং কাস্টমার "ফ্রি ডেলিভারি" দেখবে। "চার্জ" থাকলে নিচের চার্জগুলো কার্যকর থাকবে।
           </p>
         </div>
         <div className="grid gap-2">
