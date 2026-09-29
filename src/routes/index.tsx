@@ -80,6 +80,12 @@ function Home() {
   });
   const price = Number(settings?.["combo_price"] ?? 999) || 999;
   const comboQty = Number(settings?.["combo_qty"] ?? 5) || 5;
+  const poloFree = settings?.["polo_free_delivery"] !== "off";
+  const dhakaCharge = Math.max(0, Number(settings?.["polo_delivery_charge_dhaka"] ?? 80) || 80);
+  const outsideCharge = Math.max(0, Number(settings?.["polo_delivery_charge_outside"] ?? 150) || 150);
+  const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
+  const deliveryCharge = poloFree ? 0 : deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
+  const grandTotal = price + deliveryCharge;
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
     enabled: Boolean(size),
@@ -201,6 +207,7 @@ function Home() {
           phone: form.phone.trim(),
           address: form.address.trim(),
           size,
+          delivery_area: deliveryArea,
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
       });
