@@ -41,7 +41,9 @@ function AdminSettingsInner() {
     sneakers_delivery_charge_outside: "130",
     whatsapp_number: "",
     whatsapp_message: "",
-    free_delivery: "off",
+    polo_free_delivery: "on",
+    pajama_free_delivery: "off",
+    sneakers_free_delivery: "off",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -76,7 +78,9 @@ function AdminSettingsInner() {
         sneakers_delivery_charge_outside: data["sneakers_delivery_charge_outside"] ?? "130",
         whatsapp_number: data["whatsapp_number"] ?? "",
         whatsapp_message: data["whatsapp_message"] ?? "",
-        free_delivery: data["free_delivery"] ?? "off",
+        polo_free_delivery: data["polo_free_delivery"] ?? "on",
+        pajama_free_delivery: data["pajama_free_delivery"] ?? "off",
+        sneakers_free_delivery: data["sneakers_free_delivery"] ?? "off",
       });
     }
   }, [data]);
