@@ -324,7 +324,7 @@ export const placePajamaOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => pajamaSchema.parse(data))
   .handler(async ({ data }) =>
     handleCatalogOrder(
-      { page: "pajama", dhakaKey: "pajama_delivery_charge_dhaka", outsideKey: "pajama_delivery_charge_outside", dhakaFallback: 70, outsideFallback: 120 },
+      { page: "pajama", freeKey: "pajama_free_delivery", dhakaKey: "pajama_delivery_charge_dhaka", outsideKey: "pajama_delivery_charge_outside", dhakaFallback: 70, outsideFallback: 120 },
       data as CatalogOrderData,
     ),
   );
@@ -333,7 +333,7 @@ export const placeSneakersOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => sneakersSchema.parse(data))
   .handler(async ({ data }) =>
     handleCatalogOrder(
-      { page: "sneakers", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
+      { page: "sneakers", freeKey: "sneakers_free_delivery", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
       data as CatalogOrderData,
     ),
   );
