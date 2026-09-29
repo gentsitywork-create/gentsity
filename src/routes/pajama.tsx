@@ -285,7 +285,7 @@ function PajamaPage() {
             <div className="rounded-lg bg-secondary p-4 text-sm">
               {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}
               <div className="mt-2 flex justify-between border-t pt-2"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
-              <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ ({deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})</span><span>{deliveryCharge} টাকা</span></div>
+              <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ{freeDelivery ? "" : ` (${deliveryArea === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"})`}</span><span>{freeDelivery ? "ফ্রি" : `${deliveryCharge} টাকা`}</span></div>
               <div className="mt-2 flex justify-between border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
             </div>
             <Button type="submit" className="w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${total} টাকা`}</Button>

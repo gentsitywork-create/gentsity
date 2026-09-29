@@ -262,7 +262,7 @@ function SneakersPage() {
               </div>
               <div className="mt-5 rounded-lg bg-secondary p-4 text-sm">
                 <div className="flex justify-between gap-3"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>
-                <div className="mt-1 flex justify-between gap-3"><span>ডেলিভারি চার্জ</span><span>{deliveryCharge} টাকা</span></div>
+                <div className="mt-1 flex justify-between gap-3"><span>ডেলিভারি চার্জ</span><span>{freeDelivery ? "ফ্রি" : `${deliveryCharge} টাকা`}</span></div>
                 <div className="mt-2 flex justify-between gap-3 border-t pt-2 text-base font-bold"><span>সর্বমোট</span><span>{total} টাকা</span></div>
               </div>
               <Button type="submit" className="mt-5 w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${total} টাকা`}</Button>
