@@ -67,7 +67,7 @@ export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity
           </div>
           <div class="barcode">
             ${bars ? `<img src="${bars}" alt="barcode" />` : ""}
-            <div class="digits">${esc(digits)}</div>
+            <div class="digits">${esc(courierId)}</div>
           </div>
           <div class="box">
             <img class="qr" src="${qr}" alt="QR" />
