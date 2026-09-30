@@ -34,11 +34,9 @@ function barcodeDataUrl(value: string) {
   }
 }
 
-const digitsOf = (o: LabelOrder) => {
-  const raw = (o.courier_consignment_id || "").replace(/\D/g, "");
-  if (raw.length >= 6) return raw;
-  return String(100000000 + o.order_no * 7919).slice(0, 9);
-};
+/** বারকোড/QR-এর মূল মান — কুরিয়ার কনসাইনমেন্ট আইডি (না থাকলে অর্ডার নম্বর)। */
+const courierIdOf = (o: LabelOrder) =>
+  o.courier_consignment_id || `GT${o.order_no}`;
 
 export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity") {
   if (orders.length === 0) return;
@@ -53,14 +51,10 @@ export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity
 
   const labels = await Promise.all(
     orders.map(async (o) => {
-      const code = o.courier_tracking_code || o.courier_consignment_id || `GT${o.order_no}`;
-      const invoice = code.toUpperCase();
-      const digits = digitsOf(o);
-      const qrValue = o.courier_tracking_code
-        ? `https://steadfast.com.bd/t/${o.courier_tracking_code}`
-        : code;
-      const qr = await QRCode.toDataURL(qrValue, { margin: 0, width: 260 });
-      const bars = barcodeDataUrl(digits);
+      const courierId = courierIdOf(o);
+      const invoice = courierId.toUpperCase();
+      const qr = await QRCode.toDataURL(courierId, { margin: 0, width: 260 });
+      const bars = barcodeDataUrl(courierId);
       const totalQty = o.order_items.reduce((s, i) => s + i.qty, 0);
       const items = o.order_items
         .map((i) => `${esc(i.color_name)} (${esc(i.size)}) × ${i.qty}`)
@@ -73,7 +67,7 @@ export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity
           </div>
           <div class="barcode">
             ${bars ? `<img src="${bars}" alt="barcode" />` : ""}
-            <div class="digits">${esc(digits)}</div>
+            <div class="digits">${esc(courierId)}</div>
           </div>
           <div class="box">
             <img class="qr" src="${qr}" alt="QR" />
