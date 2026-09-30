@@ -51,14 +51,10 @@ export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity
 
   const labels = await Promise.all(
     orders.map(async (o) => {
-      const code = o.courier_tracking_code || o.courier_consignment_id || `GT${o.order_no}`;
-      const invoice = code.toUpperCase();
-      const digits = digitsOf(o);
-      const qrValue = o.courier_tracking_code
-        ? `https://steadfast.com.bd/t/${o.courier_tracking_code}`
-        : code;
-      const qr = await QRCode.toDataURL(qrValue, { margin: 0, width: 260 });
-      const bars = barcodeDataUrl(digits);
+      const courierId = courierIdOf(o);
+      const invoice = courierId.toUpperCase();
+      const qr = await QRCode.toDataURL(courierId, { margin: 0, width: 260 });
+      const bars = barcodeDataUrl(courierId);
       const totalQty = o.order_items.reduce((s, i) => s + i.qty, 0);
       const items = o.order_items
         .map((i) => `${esc(i.color_name)} (${esc(i.size)}) × ${i.qty}`)
