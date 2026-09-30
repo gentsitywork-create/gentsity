@@ -34,11 +34,9 @@ function barcodeDataUrl(value: string) {
   }
 }
 
-const digitsOf = (o: LabelOrder) => {
-  const raw = (o.courier_consignment_id || "").replace(/\D/g, "");
-  if (raw.length >= 6) return raw;
-  return String(100000000 + o.order_no * 7919).slice(0, 9);
-};
+/** বারকোড/QR-এর মূল মান — কুরিয়ার কনসাইনমেন্ট আইডি (না থাকলে অর্ডার নম্বর)। */
+const courierIdOf = (o: LabelOrder) =>
+  o.courier_consignment_id || `GT${o.order_no}`;
 
 export async function printCourierLabels(orders: LabelOrder[], brand = "Gentsity") {
   if (orders.length === 0) return;
