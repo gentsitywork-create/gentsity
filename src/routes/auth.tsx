@@ -25,7 +25,6 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const claim = useServerFn(claimAdmin);
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -34,18 +33,6 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
-        });
-        if (error) throw error;
-        toast.success("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে আসা লিংকে ক্লিক করে নিশ্চিত করুন।");
-        setMode("login");
-        return;
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
@@ -65,9 +52,7 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <form onSubmit={handle} className="w-full max-w-sm rounded-xl border bg-card p-6">
         <h1 className="font-display text-2xl font-extrabold text-primary">Gentsity</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {mode === "login" ? "অ্যাডমিন প্যানেলে লগইন করুন" : "প্রথমবার অ্যাকাউন্ট তৈরি করুন"}
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">অ্যাডমিন / স্টাফ প্যানেলে লগইন করুন</p>
 
         <div className="mt-5 grid gap-4">
           <div className="grid gap-2">
@@ -94,16 +79,8 @@ function AuthPage() {
         </div>
 
         <Button type="submit" className="mt-5 w-full" disabled={busy}>
-          {busy ? "অপেক্ষা করুন…" : mode === "login" ? "লগইন" : "অ্যাকাউন্ট তৈরি করুন"}
+          {busy ? "অপেক্ষা করুন…" : "লগইন"}
         </Button>
-
-        <button
-          type="button"
-          className="mt-4 w-full text-sm text-muted-foreground underline"
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
-        >
-          {mode === "login" ? "নতুন অ্যাকাউন্ট তৈরি করব" : "আমার অ্যাকাউন্ট আছে, লগইন করব"}
-        </button>
       </form>
     </div>
   );
