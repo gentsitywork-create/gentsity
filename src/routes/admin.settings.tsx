@@ -368,8 +368,76 @@ function AdminSettingsInner() {
         {saving ? "সেভ হচ্ছে…" : "সেভ করুন"}
       </Button>
     </form>
+    <PasswordManager />
     <StaffManager />
     </div>
+  );
+}
+
+/** লগইন করা অ্যাকাউন্টের (অ্যাডমিন/স্টাফ) নিজের পাসওয়ার্ড বদলানোর অংশ। */
+function PasswordManager() {
+  const [newPass, setNewPass] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const update = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPass.length < 6) {
+      toast.error("পাসওয়ার্ড কমপক্ষে ৬ অক্ষর দিন।");
+      return;
+    }
+    if (newPass !== confirm) {
+      toast.error("দুটো পাসওয়ার্ড এক নয়।");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPass });
+      if (error) throw error;
+      toast.success("পাসওয়ার্ড বদলে গেছে।");
+      setNewPass("");
+      setConfirm("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "পাসওয়ার্ড বদলানো যায়নি।");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="rounded-xl border bg-card p-5">
+      <h2 className="text-lg font-bold">নিজের পাসওয়ার্ড বদলান</h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        এই পাসওয়ার্ড দিয়েই /auth পেজ থেকে লগইন করা হয়।
+      </p>
+      <form onSubmit={update} className="mt-4 grid gap-3">
+        <div className="grid gap-2">
+          <Label htmlFor="new-pass">নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</Label>
+          <Input
+            id="new-pass"
+            type="password"
+            required
+            minLength={6}
+            value={newPass}
+            onChange={(e) => setNewPass(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="confirm-pass">নতুন পাসওয়ার্ড আবার লিখুন</Label>
+          <Input
+            id="confirm-pass"
+            type="password"
+            required
+            minLength={6}
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={busy}>
+          {busy ? "বদলানো হচ্ছে…" : "পাসওয়ার্ড বদলান"}
+        </Button>
+      </form>
+    </section>
   );
 }
 
