@@ -206,9 +206,11 @@ function SweatshirtPage() {
           <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Wallet className="h-4 w-4" /> ক্যাশ অন ডেলিভারি</li>
         </ul>
 
-        {heroImage && (
-          <div className="mt-5 overflow-hidden rounded-lg border bg-card">
-            <img src={heroImage} alt="Gentsity প্রিমিয়াম সোয়েটশার্ট" className="mx-auto w-full max-w-md" loading="lazy" />
+        {bannerImages.length > 0 && (
+          <div className={`mx-auto mt-5 grid max-w-2xl gap-2 overflow-hidden rounded-lg border bg-card sm:gap-3 ${bannerImages.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+            {bannerImages.map((src, index) => (
+              <img key={src} src={src} alt={index === 0 ? "Gentsity প্রিমিয়াম সোয়েটশার্ট (কালো)" : "Gentsity প্রিমিয়াম সোয়েটশার্ট (সাদা)"} className="h-full w-full object-contain" loading="lazy" />
+            ))}
           </div>
         )}
 
