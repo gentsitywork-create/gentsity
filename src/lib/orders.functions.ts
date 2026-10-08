@@ -320,6 +320,7 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
 
 const pajamaSchema = catalogOrderSchema(["M", "L", "XL", "XXL"]);
 const sneakersSchema = catalogOrderSchema(["40", "41", "42", "43", "44"]);
+const sweatshirtSchema = catalogOrderSchema(["M", "L", "XL"]);
 
 export const placePajamaOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => pajamaSchema.parse(data))

@@ -461,6 +461,11 @@ function AdminOrders() {
                         স্নিকার্স
                       </span>
                     )}
+                    {o.product_type === "sweatshirt" && (
+                      <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800">
+                        সোয়েটশার্ট
+                      </span>
+                    )}
                     {(phoneCount[o.phone] ?? 0) > 1 && (
                       <button
                         type="button"
