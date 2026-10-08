@@ -83,15 +83,12 @@ function SweatshirtPage() {
       return (data ?? []) as Product[];
     },
   });
-  const { data: images = {} } = useQuery({
-    queryKey: ["sweatshirt-product-images", products.map((p) => p.image_url).join(",")],
-    enabled: products.some((p) => Boolean(p.image_url)),
+  const BANNER_PATHS = ["sweatshirt/products/sweatshirt-1.png", "sweatshirt/products/sweatshirt-2.png"];
+  const { data: bannerImages = [] } = useQuery({
+    queryKey: ["sweatshirt-banner-images"],
     queryFn: async () => {
-      const paths = products.map((p) => p.image_url).filter((path): path is string => Boolean(path));
-      const map: Record<string, string> = {};
-      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-      (data ?? []).forEach((row) => { if (row.path && row.signedUrl) map[row.path] = row.signedUrl; });
-      return map;
+      const { data } = await supabase.storage.from("products").createSignedUrls(BANNER_PATHS, 3600);
+      return (data ?? []).map((row) => row.signedUrl).filter((url): url is string => Boolean(url));
     },
   });
 
@@ -99,7 +96,6 @@ function SweatshirtPage() {
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
   const subtotal = selected.reduce((sum, p) => sum + p.price * (picks[p.id] ?? 0), 0);
   const total = subtotal + deliveryCharge;
-  const heroImage = products.length ? images[products[0]!.image_url ?? ""] : undefined;
 
   const changeQty = (product: Product, delta: number) => {
     setPicks((current) => {

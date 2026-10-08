@@ -1,0 +1,1 @@
+UPDATE public.pajama_products SET is_active = false WHERE page = 'sweatshirt' AND image_url = 'sweatshirt/products/sweatshirt-2.png';
