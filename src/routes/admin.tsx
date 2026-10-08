@@ -101,6 +101,13 @@ function AdminLayout() {
             >
               স্নিকার্স স্টক
             </Link>
+            <Link
+              to="/admin/sweatshirt-stock"
+              activeProps={{ className: "bg-secondary font-semibold" }}
+              className="rounded-md px-3 py-2"
+            >
+              সোয়েটশার্ট স্টক
+            </Link>
             {isAdmin && (
               <>
                 <Link

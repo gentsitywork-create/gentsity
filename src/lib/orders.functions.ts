@@ -189,7 +189,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 /* ===================== পায়জামা/স্নিকার্স অর্ডার (পিস অনুযায়ী) ===================== */
 
 type CatalogConfig = {
-  page: "pajama" | "sneakers";
+  page: "pajama" | "sneakers" | "sweatshirt";
   freeKey: string;
   dhakaKey: string;
   outsideKey: string;
@@ -320,6 +320,7 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
 
 const pajamaSchema = catalogOrderSchema(["M", "L", "XL", "XXL"]);
 const sneakersSchema = catalogOrderSchema(["40", "41", "42", "43", "44"]);
+const sweatshirtSchema = catalogOrderSchema(["M", "L", "XL"]);
 
 export const placePajamaOrder = createServerFn({ method: "POST" })
   .inputValidator((data) => pajamaSchema.parse(data))
@@ -335,6 +336,15 @@ export const placeSneakersOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) =>
     handleCatalogOrder(
       { page: "sneakers", freeKey: "sneakers_free_delivery", dhakaKey: "sneakers_delivery_charge_dhaka", outsideKey: "sneakers_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
+      data as CatalogOrderData,
+    ),
+  );
+
+export const placeSweatshirtOrder = createServerFn({ method: "POST" })
+  .inputValidator((data) => sweatshirtSchema.parse(data))
+  .handler(async ({ data }) =>
+    handleCatalogOrder(
+      { page: "sweatshirt", freeKey: "sweatshirt_free_delivery", dhakaKey: "sweatshirt_delivery_charge_dhaka", outsideKey: "sweatshirt_delivery_charge_outside", dhakaFallback: 80, outsideFallback: 130 },
       data as CatalogOrderData,
     ),
   );
@@ -356,7 +366,7 @@ const adminOrderSchema = z.object({
   total_amount: z.number().int().min(0).max(1000000),
   delivery_charge: z.number().int().min(0).max(10000).optional().default(0),
   status: z.enum(["pending", "confirmed", "hold", "shipped", "delivered", "cancelled"]).optional(),
-  product_type: z.enum(["polo", "pajama", "sneakers"]).optional().default("polo"),
+  product_type: z.enum(["polo", "pajama", "sneakers", "sweatshirt"]).optional().default("polo"),
   items: z.array(adminItemSchema).min(1).max(20),
 });
 

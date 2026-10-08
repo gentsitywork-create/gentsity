@@ -3,10 +3,10 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Flame, KeyRound, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
+import { Check, Flame, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { placePajamaOrder } from "@/lib/orders.functions";
+import { placeSweatshirtOrder } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,24 +14,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
-import pajamaSizeChart from "@/assets/pajama-size-chart.jpg.asset.json";
-import pajamaHeroBanner from "@/assets/pajama-hero-banner.jpg.asset.json";
 
-export const Route = createFileRoute("/pajama")({
+export const Route = createFileRoute("/sweatshirt")({
   head: () => ({
     meta: [
-      { title: "Gentsity — চায়না মাইক্রো স্ট্রেচ পায়জামা" },
-      { name: "description", content: "চায়না মাইক্রো স্ট্রেচ পায়জামার কম্বো ও সিঙ্গেল কালেকশন। পছন্দের প্রোডাক্ট ও পরিমাণ বেছে অর্ডার করুন।" },
-      { property: "og:title", content: "Gentsity — চায়না মাইক্রো স্ট্রেচ পায়জামা" },
-      { property: "og:description", content: "কম্বো ও সিঙ্গেল পায়জামা থেকে পছন্দের প্রোডাক্ট বেছে অর্ডার করুন।" },
+      { title: "Gentsity — এক্সপোর্ট কোয়ালিটি প্রিমিয়াম সোয়েটশার্ট" },
+      { name: "description", content: "এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা। ফ্রি ডেলিভারি, ক্যাশ অন ডেলিভারি।" },
+      { property: "og:title", content: "Gentsity — এক্সপোর্ট কোয়ালিটি প্রিমিয়াম সোয়েটশার্ট" },
+      { property: "og:description", content: "কটন ফ্লিস ফেব্রিকের ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা। ফ্রি ডেলিভারি, ক্যাশ অন ডেলিভারি।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: PajamaPage,
+  component: SweatshirtPage,
 });
 
-const SIZES = ["M", "L", "XL", "XXL"] as const;
+const SIZES = ["M", "L", "XL"] as const;
 type Size = (typeof SIZES)[number];
 type StockRow = { size: string; stock: number };
 type Product = {
@@ -45,7 +43,13 @@ type Product = {
   pajama_product_stock: StockRow[];
 };
 
-function PajamaPage() {
+const SIZE_CHART: Record<Size, { chest: string; length: string }> = {
+  M: { chest: "৩৮", length: "২৭" },
+  L: { chest: "৪০", length: "২৮" },
+  XL: { chest: "৪২", length: "২৯" },
+};
+
+function SweatshirtPage() {
   const [size, setSize] = useState<Size | null>(null);
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
@@ -53,7 +57,7 @@ function PajamaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [done, setDone] = useState<{ order_no: number; total: number; delivery_charge: number } | null>(null);
-  const submit = useServerFn(placePajamaOrder);
+  const submit = useServerFn(placeSweatshirtOrder);
 
   const { data: settings } = useQuery({
     queryKey: ["settings"],
@@ -62,17 +66,17 @@ function PajamaPage() {
       return Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""])) as Record<string, string>;
     },
   });
-  const freeDelivery = settings?.["pajama_free_delivery"] === "on";
-  const dhakaCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_dhaka"] ?? 70) || 70);
-  const outsideCharge = Math.max(0, Number(settings?.["pajama_delivery_charge_outside"] ?? 120) || 120);
+  const freeDelivery = settings?.["sweatshirt_free_delivery"] !== "off";
+  const dhakaCharge = Math.max(0, Number(settings?.["sweatshirt_delivery_charge_dhaka"] ?? 80) || 80);
+  const outsideCharge = Math.max(0, Number(settings?.["sweatshirt_delivery_charge_outside"] ?? 130) || 130);
   const deliveryCharge = freeDelivery ? 0 : deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["pajama-products"],
+    queryKey: ["sweatshirt-products"],
     queryFn: async () => {
       const { data, error } = await (supabase
         .from("pajama_products")
         .select("id, name, product_kind, pieces_per_unit, price, image_url, sort_order, pajama_product_stock(size, stock)") as any)
-        .eq("page", "pajama")
+        .eq("page", "sweatshirt")
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
@@ -80,7 +84,7 @@ function PajamaPage() {
     },
   });
   const { data: images = {} } = useQuery({
-    queryKey: ["pajama-product-images", products.map((p) => p.image_url).join(",")],
+    queryKey: ["sweatshirt-product-images", products.map((p) => p.image_url).join(",")],
     enabled: products.some((p) => Boolean(p.image_url)),
     queryFn: async () => {
       const paths = products.map((p) => p.image_url).filter((path): path is string => Boolean(path));
@@ -91,11 +95,11 @@ function PajamaPage() {
     },
   });
 
-
   const selected = useMemo(() => products.filter((p) => (picks[p.id] ?? 0) > 0), [products, picks]);
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
   const subtotal = selected.reduce((sum, p) => sum + p.price * (picks[p.id] ?? 0), 0);
   const total = subtotal + deliveryCharge;
+  const heroImage = products.length ? images[products[0]!.image_url ?? ""] : undefined;
 
   const changeQty = (product: Product, delta: number) => {
     setPicks((current) => {
@@ -123,7 +127,7 @@ function PajamaPage() {
       return;
     }
     setSize(nextSize);
-    trackPixel("ViewContent", { content_name: `Pajama ${nextSize}` });
+    trackPixel("ViewContent", { content_name: `Sweatshirt ${nextSize}` });
   };
 
   const orderProduct = (product: Product) => {
@@ -185,48 +189,39 @@ function PajamaPage() {
       </div>
     </section> : <>
       <section className="mx-auto max-w-4xl px-4 pb-6 pt-9 text-center">
-        <p className="text-sm font-bold text-primary">GENTSITY PAJAMA COLLECTION</p>
-        <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> চায়না মাইক্রো স্টিচ ফেব্রিকের প্রিমিয়াম পায়জামা <Flame className="inline h-7 w-7 text-destructive" /></h1>
-        <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">আরাম, স্মার্ট লুক আর প্রিমিয়াম কোয়ালিটি—সবকিছু একসাথে! <Sparkles className="inline h-4 w-4 text-primary" /></p>
+        <p className="text-sm font-bold text-primary">GENTSITY SWEATSHIRT COLLECTION</p>
+        <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের তৈরি ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
+        <p className="mt-3 text-lg font-bold">রেগুলার প্রাইস <span className="text-muted-foreground line-through">২২০০ টাকা</span> — অফারে মাত্র <span className="text-primary">১১৯০ টাকা</span></p>
+        <p className="mx-auto mt-2 max-w-2xl text-muted-foreground">সফট, উষ্ণ ও প্রিমিয়াম কোয়ালিটি — শীতের জন্য পারফেক্ট পছন্দ! <Sparkles className="inline h-4 w-4 text-primary" /></p>
 
-        <div className="mt-5 overflow-hidden rounded-lg border bg-card">
-          <img src={pajamaHeroBanner.url} alt="Gentsity পায়জামা — নামাজ, বাসা, বাইরে সব খানেই আরামদায়ক ফিট" className="w-full" />
-        </div>
-
-        <ul className="mx-auto mt-5 grid max-w-2xl gap-2 text-left text-sm text-muted-foreground md:grid-cols-2">
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম কোয়ালিটি চায়না মাইক্রো স্টিচ ফেব্রিক</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> সফট, আরামদায়ক ও টেকসই</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> Semi Narrow Pant Cutting – স্মার্ট ও কমফোর্টেবল ফিট</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> পুরোপুরি স্কিনি নয়, তাই চলাফেরায় আরাম</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> অফিস, ক্যাজুয়াল ও ডেইলি ওয়্যারের জন্য পারফেক্ট</li>
-          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> আয়রন করার ঝামেলা নেই – সবসময় স্মার্ট লুক</li>
+        <ul className="mt-5 flex flex-wrap justify-center gap-3 text-sm font-semibold">
+          <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Truck className="h-4 w-4" /> ডেলিভারি চার্জ ফ্রি</li>
+          <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Wallet className="h-4 w-4" /> ক্যাশ অন ডেলিভারি</li>
         </ul>
 
-        <div className="mt-6 rounded-lg bg-secondary p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground"><KeyRound className="inline h-4 w-4" /> Semi Narrow Cutting-এর বিশেষত্ব:</h2>
-          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-            <li>কোমর থেকে হাঁটু পর্যন্ত নরমাল ফিট</li>
-            <li>হাঁটু থেকে নিচে হালকা টেপার্ড</li>
-            <li>স্মার্ট লুকের সাথে সর্বোচ্চ কমফোর্ট</li>
-          </ul>
-        </div>
+        {heroImage && (
+          <div className="mt-5 overflow-hidden rounded-lg border bg-card">
+            <img src={heroImage} alt="Gentsity প্রিমিয়াম সোয়েটশার্ট" className="mx-auto w-full max-w-md" loading="lazy" />
+          </div>
+        )}
+
+        <ul className="mx-auto mt-5 grid max-w-2xl gap-2 text-left text-sm text-muted-foreground md:grid-cols-2">
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> এক্সপোর্ট কোয়ালিটি কটন ফ্লিস ফেব্রিক</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> সফট, উষ্ণ ও আরামদায়ক</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> প্রিমিয়াম ফিনিশিং ও টেকসই সেলাই</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> ডেইলি ইউজ ও ক্যাজুয়াল আউটিংয়ের জন্য পারফেক্ট</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> মেশিন ওয়াশেবল — রঙ উঠবে না</li>
+          <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> ক্লাসিক ক্রু-নেক ডিজাইন — সব পোশাকের সাথে মানানসই</li>
+        </ul>
 
         <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground"><Flame className="inline h-4 w-4 text-destructive" /> আমাদের পায়জামার বিশেষ বৈশিষ্ট্য</h2>
-          <ol className="list-decimal space-y-2 pl-5 text-muted-foreground">
-            <li><strong className="text-foreground">প্রিমিয়াম চায়না মাইক্রো স্টিচ ফেব্রিক:</strong> উন্নতমানের চায়না মাইক্রো স্টিচ ফেব্রিক দিয়ে তৈরি। কাপড়ে ভাঁজ কম পড়ে, তাই বারবার আয়রন করার ঝামেলা নেই।</li>
-            <li><strong className="text-foreground">প্রিমিয়াম মেটাল জিপার:</strong> গেট ও পিছনের পকেটে ব্যবহার করা হয়েছে মজবুত মেটাল জিপার, যা পায়জামাকে দিয়েছে প্রিমিয়াম লুক ও দীর্ঘস্থায়িত্ব।</li>
-            <li><strong className="text-foreground">পকেটেও একই ফেব্রিক:</strong> পকেটের জন্য আলাদা কোনো ফেব্রিক ব্যবহার করা হয়নি। পায়জামায় ব্যবহৃত মূল ফেব্রিকই পকেটেও ব্যবহার করা হয়েছে, ফলে কোয়ালিটি ও আরাম দুটোই বজায় থাকে।</li>
-            <li><strong className="text-foreground">মেটাল ড্রস্ট্রিং ও প্রিমিয়াম আইলেট:</strong> পায়জামায় ব্যবহার করা হয়েছে মজবুত মেটাল ড্রস্ট্রিং এবং ড্রস্ট্রিংয়ের জন্য প্রিমিয়াম আইলেট, যা পায়জামার ফিনিশিং ও স্থায়িত্ব আরও বাড়িয়ে দেয়।</li>
-          </ol>
+          <h2 className="mb-2 font-bold text-foreground"><Ruler className="inline h-4 w-4" /> SIZE MEASUREMENT (INCH)</h2>
+          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+            <li><strong className="text-foreground">M</strong> — বুক {SIZE_CHART.M.chest} ইঞ্চি · লম্বা {SIZE_CHART.M.length} ইঞ্চি</li>
+            <li><strong className="text-foreground">L</strong> — বুক {SIZE_CHART.L.chest} ইঞ্চি · লম্বা {SIZE_CHART.L.length} ইঞ্চি</li>
+            <li><strong className="text-foreground">XL</strong> — বুক {SIZE_CHART.XL.chest} ইঞ্চি · লম্বা {SIZE_CHART.XL.length} ইঞ্চি</li>
+          </ul>
         </div>
-
-        <p className="mt-6 text-base font-bold"><Ruler className="inline h-4 w-4" /> সাইজ: M – 38 | L – 40 | XL – 42 | XXL – 44</p>
-
-        <div className="mt-5 overflow-hidden rounded-lg border bg-card">
-          <img src={pajamaSizeChart.url} alt="Gentsity সেমি ন্যারো পায়জামা সাইজ চার্ট" className="w-full" loading="lazy" />
-        </div>
-
 
         <ul className="mt-5 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
           <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ডেলিভারি</li>
@@ -236,7 +231,7 @@ function PajamaPage() {
       </section>
 
       <main className="mx-auto max-w-6xl px-4 pb-16">
-        {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">পায়জামার প্রোডাক্ট শিগগিরই আসছে।</p> :
+        {isLoading ? <p className="py-10 text-center text-muted-foreground">প্রোডাক্ট লোড হচ্ছে…</p> : products.length === 0 ? <p className="rounded-lg border bg-card p-8 text-center text-muted-foreground">সোয়েটশার্টের প্রোডাক্ট শিগগিরই আসছে।</p> :
           <div className="mx-auto grid w-full max-w-64 grid-cols-1 gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-4 md:grid-cols-4 md:gap-5">{products.map((product) => {
             const qty = picks[product.id] ?? 0;
             const image = product.image_url ? images[product.image_url] : undefined;
@@ -250,6 +245,7 @@ function PajamaPage() {
               <div className="p-3">
                 <h2 className="min-h-10 text-sm font-bold leading-5 md:text-base">{product.name}</h2>
                 <p className="mt-1 text-lg font-extrabold text-primary">৳{product.price}</p>
+                <p className="text-xs text-muted-foreground">রেগুলার প্রাইস <span className="line-through">২২০০ টাকা</span></p>
                 {size && <p className="text-xs text-muted-foreground">{size} স্টক: {stock}</p>}
                 <Button type="button" className="mt-3 w-full" onClick={() => orderProduct(product)}>অর্ডার করুন</Button>
               </div>
@@ -271,7 +267,7 @@ function PajamaPage() {
             <DialogDescription>সাইজ, ঠিকানা ও মোবাইল নম্বর দিয়ে অর্ডারটি কনফার্ম করুন।</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleOrder} className="space-y-4">
-            <div><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-4 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
+            <div><Label>আপনার সাইজ *</Label><div className="mt-2 grid grid-cols-3 gap-2">{SIZES.map((option) => <Button key={option} type="button" variant={size === option ? "default" : "outline"} className="text-base font-bold" onClick={() => chooseSize(option)}>{option}</Button>)}</div></div>
             {freeDelivery ? (
               <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold text-primary">সারা বাংলাদেশে ফ্রি ডেলিভারি 🚚</p>
             ) : (
@@ -280,9 +276,9 @@ function PajamaPage() {
               <Button type="button" variant={deliveryArea === "outside" ? "default" : "outline"} className="text-sm font-bold" onClick={() => setDeliveryArea("outside")}>ঢাকার বাইরে (+{outsideCharge}৳)</Button>
             </div></div>
             )}
-            <div className="grid gap-2"><Label htmlFor="pj-name">আপনার নাম</Label><Input id="pj-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-            <div className="grid gap-2"><Label htmlFor="pj-phone">মোবাইল নম্বর *</Label><Input id="pj-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
-            <div className="grid gap-2"><Label htmlFor="pj-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="pj-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+            <div className="grid gap-2"><Label htmlFor="sw-name">আপনার নাম</Label><Input id="sw-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div className="grid gap-2"><Label htmlFor="sw-phone">মোবাইল নম্বর *</Label><Input id="sw-phone" required inputMode="numeric" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="01XXXXXXXXX" /></div>
+            <div className="grid gap-2"><Label htmlFor="sw-address">আপনার সম্পূর্ণ ঠিকানা লিখুন, থানা, জেলাসহ</Label><Textarea id="sw-address" rows={3} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
             <div className="rounded-lg bg-secondary p-4 text-sm">
               {selected.map((product) => <div key={product.id} className="mb-1 flex justify-between gap-3"><span>{product.name} × {picks[product.id]}</span><span>{product.price * (picks[product.id] ?? 0)} টাকা</span></div>)}
               <div className="mt-2 flex justify-between border-t pt-2"><span>পণ্যের দাম</span><span>{subtotal} টাকা</span></div>

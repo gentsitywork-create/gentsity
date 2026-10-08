@@ -8,6 +8,13 @@
       "when": 1790965239580,
       "tag": "0000_speed_up_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791442338542,
+      "tag": "0001_seed_sweatshirt_product",
+      "breakpoints": true
     }
   ]
 }
