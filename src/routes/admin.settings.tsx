@@ -44,6 +44,9 @@ function AdminSettingsInner() {
     polo_free_delivery: "on",
     pajama_free_delivery: "off",
     sneakers_free_delivery: "off",
+    sweatshirt_free_delivery: "on",
+    sweatshirt_delivery_charge_dhaka: "80",
+    sweatshirt_delivery_charge_outside: "130",
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
