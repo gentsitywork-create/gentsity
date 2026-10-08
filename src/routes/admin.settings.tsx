@@ -81,6 +81,7 @@ function AdminSettingsInner() {
         polo_free_delivery: data["polo_free_delivery"] ?? "on",
         pajama_free_delivery: data["pajama_free_delivery"] ?? "off",
         sneakers_free_delivery: data["sneakers_free_delivery"] ?? "off",
+        sweatshirt_free_delivery: data["sweatshirt_free_delivery"] ?? "on",
       });
     }
   }, [data]);
@@ -167,6 +168,7 @@ function AdminSettingsInner() {
               ["polo_free_delivery", "পোলো শার্ট"],
               ["pajama_free_delivery", "পায়জামা"],
               ["sneakers_free_delivery", "স্নিকার্স"],
+              ["sweatshirt_free_delivery", "সোয়েটশার্ট"],
             ] as const
           ).map(([key, label]) => (
             <div key={key} className="flex items-center justify-between gap-3">
@@ -255,6 +257,26 @@ function AdminSettingsInner() {
             min={0}
             value={values.sneakers_delivery_charge_outside}
             onChange={(e) => setValues({ ...values, sneakers_delivery_charge_outside: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="swdelivery-dhaka">সোয়েটশার্টের ডেলিভারি চার্জ — ঢাকার ভিতরে (টাকা)</Label>
+          <Input
+            id="swdelivery-dhaka"
+            type="number"
+            min={0}
+            value={values.sweatshirt_delivery_charge_dhaka}
+            onChange={(e) => setValues({ ...values, sweatshirt_delivery_charge_dhaka: e.target.value })}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="swdelivery-outside">সোয়েটশার্টের ডেলিভারি চার্জ — ঢাকার বাইরে (টাকা)</Label>
+          <Input
+            id="swdelivery-outside"
+            type="number"
+            min={0}
+            value={values.sweatshirt_delivery_charge_outside}
+            onChange={(e) => setValues({ ...values, sweatshirt_delivery_charge_outside: e.target.value })}
           />
         </div>
         <div className="grid gap-2 rounded-lg border p-3">
