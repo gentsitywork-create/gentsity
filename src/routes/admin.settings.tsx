@@ -85,6 +85,8 @@ function AdminSettingsInner() {
         pajama_free_delivery: data["pajama_free_delivery"] ?? "off",
         sneakers_free_delivery: data["sneakers_free_delivery"] ?? "off",
         sweatshirt_free_delivery: data["sweatshirt_free_delivery"] ?? "on",
+        sweatshirt_delivery_charge_dhaka: data["sweatshirt_delivery_charge_dhaka"] ?? "80",
+        sweatshirt_delivery_charge_outside: data["sweatshirt_delivery_charge_outside"] ?? "130",
       });
     }
   }, [data]);
