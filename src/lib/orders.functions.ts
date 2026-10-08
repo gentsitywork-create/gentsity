@@ -353,7 +353,7 @@ const adminItemSchema = z.object({
   variant_id: z.string().uuid().nullable().optional(),
   pajama_product_id: z.string().uuid().nullable().optional(),
   size: z.enum(["M", "L", "XL", "XXL", "40", "41", "42", "43", "44"]),
-  color_name: z.string().trim().min(1).max(60),
+  color_name: z.string().trim().min(1).max(200),
   qty: z.number().int().min(1).max(20),
 });
 
@@ -714,7 +714,7 @@ const cartSchema = z.object({
     .array(
       z.object({
         variant_id: z.string().uuid(),
-        color_name: z.string().trim().max(60).optional().default(""),
+        color_name: z.string().trim().max(200).optional().default(""),
         qty: z.number().int().min(1).max(6),
       }),
     )
