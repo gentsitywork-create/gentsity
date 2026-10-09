@@ -82,14 +82,22 @@ function AdminOrders() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select(
-          "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
-        )
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as OrderRow[];
+      const all: OrderRow[] = [];
+      const PAGE = 1000;
+      for (let start = 0; ; start += PAGE) {
+        const { data, error } = await supabase
+          .from("orders")
+          .select(
+            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
+          )
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(start, start + PAGE - 1);
+        if (error) throw error;
+        all.push(...((data ?? []) as OrderRow[]));
+        if (!data || data.length < PAGE) break;
+      }
+      return all;
     },
   });
 
