@@ -184,6 +184,7 @@ function SweatshirtPage() {
         <Link to="/pajama" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পায়জামা</Link>
         <Link to="/sneakers" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>স্নিকার্স</Link>
         <Link to="/sweatshirt" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>সোয়েটশার্ট</Link>
+        <Link to="/hoodie-combo" className="rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-primary-foreground" }}>হুডি কম্বো</Link>
       </div>
     </nav>
 

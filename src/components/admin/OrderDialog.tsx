@@ -74,7 +74,7 @@ export function OrderDialog({
   const [status, setStatus] = useState("confirmed");
   const [size, setSize] = useState<Size>("M");
   const [items, setItems] = useState<Item[]>([]);
-  const [productType, setProductType] = useState<"polo" | "pajama" | "sneakers" | "sweatshirt">("polo");
+  const [productType, setProductType] = useState<"polo" | "pajama" | "sneakers" | "sweatshirt" | "hoodie_combo">("polo");
   const [saving, setSaving] = useState(false);
 
   const { data: variants = [] } = useQuery({
@@ -91,7 +91,7 @@ export function OrderDialog({
 
   const { data: catalogProducts = [] } = useQuery({
     queryKey: ["admin-order-catalog-products", productType],
-    enabled: open && (productType === "pajama" || productType === "sneakers" || productType === "sweatshirt"),
+    enabled: open && (productType === "pajama" || productType === "sneakers" || productType === "sweatshirt" || productType === "hoodie_combo"),
     queryFn: async () => {
       const { data: products, error: productsError } = await supabase
         .from("pajama_products")
@@ -126,7 +126,7 @@ export function OrderDialog({
       setNote(order.note ?? "");
       setPrice(String(order.total_amount));
       setStatus(order.status);
-      setProductType(order.product_type === "pajama" || order.product_type === "sneakers" || order.product_type === "sweatshirt" ? order.product_type : "polo");
+      setProductType(order.product_type === "pajama" || order.product_type === "sneakers" || order.product_type === "sweatshirt" || order.product_type === "hoodie_combo" ? order.product_type : "polo");
       const first = (order.order_items[0]?.size ?? "M") as Size;
       setSize(SIZES.includes(first) ? first : "M");
       setItems(
@@ -246,7 +246,7 @@ export function OrderDialog({
 
         {!editing && (
           <div className="flex flex-wrap gap-2">
-            {([["polo", "পোলো শার্ট"], ["pajama", "পায়জামা"], ["sneakers", "স্নিকার্স"], ["sweatshirt", "সোয়েটশার্ট"]] as const).map(([k, label]) => (
+            {([["polo", "পোলো শার্ট"], ["pajama", "পায়জামা"], ["sneakers", "স্নিকার্স"], ["sweatshirt", "সোয়েটশার্ট"], ["hoodie_combo", "হুডি কম্বো"]] as const).map(([k, label]) => (
               <Button
                 key={k}
                 type="button"
@@ -328,10 +328,10 @@ export function OrderDialog({
 
         <div className="mt-2">
           <p className="text-sm font-semibold">
-            {productType === "sneakers" ? `স্নিকার্স ডিজাইন যোগ করুন (${size})` : productType === "pajama" ? `পায়জামা ডিজাইন যোগ করুন (${size})` : productType === "sweatshirt" ? `সোয়েটশার্ট ডিজাইন যোগ করুন (${size})` : `কালার যোগ করুন (${size})`}
+            {productType === "sneakers" ? `স্নিকার্স ডিজাইন যোগ করুন (${size})` : productType === "pajama" ? `পায়জামা ডিজাইন যোগ করুন (${size})` : productType === "hoodie_combo" ? `হুডি/সোয়েটশার্ট ডিজাইন যোগ করুন (${size})` : productType === "sweatshirt" ? `সোয়েটশার্ট ডিজাইন যোগ করুন (${size})` : `কালার যোগ করুন (${size})`}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {productType === "pajama" || productType === "sneakers" || productType === "sweatshirt" ? (
+            {productType === "pajama" || productType === "sneakers" || productType === "sweatshirt" || productType === "hoodie_combo" ? (
               <>
                 {sizeCatalogProducts.map((product) => (
                   <Button
