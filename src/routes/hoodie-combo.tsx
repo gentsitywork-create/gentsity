@@ -166,7 +166,7 @@ function HoodieComboPage() {
       </section>
 
       <section className="mt-8 rounded-lg border bg-card p-4">
-        <h2 className={`text-lg font-bold ${size ? "" : "attention-wobble attention-flash"}`}>১. আপনার সাইজ বাছুন</h2>
+        <h2 className={`text-lg font-bold ${size ? "" : "attention-wobble attention-flash-red"}`}>১. আপনার সাইজ বাছুন</h2>
         <div className="mt-3 grid grid-cols-3 gap-2">
           {SIZES.map((s) => <Button key={s.key} type="button" variant={size === s.key ? "default" : "outline"} className="py-6 text-base font-bold" onClick={() => pickSize(s.key)}>{s.label}</Button>)}
         </div>
@@ -174,12 +174,12 @@ function HoodieComboPage() {
 
       {size && (isLoading ? <p className="py-8 text-center text-muted-foreground">লোড হচ্ছে…</p> : <>
         <section className="mt-6">
-          <h2 className={`text-lg font-bold ${hoodie ? "" : "attention-wobble attention-flash"}`}>২. পছন্দের ১টি হুডি বাছুন {hoodie && "✓"}</h2>
+          <h2 className={`text-lg font-bold ${hoodie ? "" : "attention-wobble attention-flash-red"}`}>২. পছন্দের ১টি হুডি বাছুন {hoodie && "✓"}</h2>
           {hoodies.length === 0 ? <p className="mt-3 rounded-lg border bg-card p-6 text-center text-muted-foreground">এই সাইজে এখন কোনো হুডি নেই।</p> :
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">{hoodies.map((p) => card(p, hoodie === p.id, null, () => setHoodie(hoodie === p.id ? null : p.id)))}</div>}
         </section>
         <section className="mt-6">
-          <h2 className={`text-lg font-bold ${sweats.length === 2 ? "" : "attention-wobble attention-flash"}`}>৩. পছন্দের ২টি সোয়েটশার্ট বাছুন ({sweats.length}/২)</h2>
+          <h2 className={`text-lg font-bold ${sweats.length === 2 ? "" : "attention-wobble attention-flash-red"}`}>৩. পছন্দের ২টি সোয়েটশার্ট বাছুন ({sweats.length}/২)</h2>
           {sweatshirts.length === 0 ? <p className="mt-3 rounded-lg border bg-card p-6 text-center text-muted-foreground">এই সাইজে এখন কোনো সোয়েটশার্ট নেই।</p> :
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">{sweatshirts.map((p) => { const i = sweats.indexOf(p.id); return card(p, i >= 0, i >= 0 ? i + 1 : null, () => toggleSweat(p.id)); })}</div>}
         </section>

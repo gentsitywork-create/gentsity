@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HoodieComboRouteImport } from './routes/hoodie-combo'
 import { Route as PajamaRouteImport } from './routes/pajama'
 import { Route as SneakersRouteImport } from './routes/sneakers'
 import { Route as SweatshirtRouteImport } from './routes/sweatshirt'
@@ -38,6 +39,11 @@ const AdminRoute = AdminRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HoodieComboRoute = HoodieComboRouteImport.update({
+  id: '/hoodie-combo',
+  path: '/hoodie-combo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PajamaRoute = PajamaRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/hoodie-combo': typeof HoodieComboRoute
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hoodie-combo': typeof HoodieComboRoute
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/hoodie-combo': typeof HoodieComboRoute
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/hoodie-combo'
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/hoodie-combo'
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/hoodie-combo'
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  HoodieComboRoute: typeof HoodieComboRoute
   PajamaRoute: typeof PajamaRoute
   SneakersRoute: typeof SneakersRoute
   SweatshirtRoute: typeof SweatshirtRoute
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hoodie-combo': {
+      id: '/hoodie-combo'
+      path: '/hoodie-combo'
+      fullPath: '/hoodie-combo'
+      preLoaderRoute: typeof HoodieComboRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pajama': {
@@ -354,6 +374,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  HoodieComboRoute: HoodieComboRoute,
   PajamaRoute: PajamaRoute,
   SneakersRoute: SneakersRoute,
   SweatshirtRoute: SweatshirtRoute,
