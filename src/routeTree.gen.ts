@@ -12,12 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HoodieComboRouteImport } from './routes/hoodie-combo'
 import { Route as PajamaRouteImport } from './routes/pajama'
 import { Route as SneakersRouteImport } from './routes/sneakers'
 import { Route as SweatshirtRouteImport } from './routes/sweatshirt'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAbandonedRouteImport } from './routes/admin.abandoned'
 import { Route as AdminBlockedRouteImport } from './routes/admin.blocked'
+import { Route as AdminHoodieComboStockRouteImport } from './routes/admin.hoodie-combo-stock'
 import { Route as AdminPajamaStockRouteImport } from './routes/admin.pajama-stock'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSneakersStockRouteImport } from './routes/admin.sneakers-stock'
@@ -37,6 +39,11 @@ const AdminRoute = AdminRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HoodieComboRoute = HoodieComboRouteImport.update({
+  id: '/hoodie-combo',
+  path: '/hoodie-combo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PajamaRoute = PajamaRouteImport.update({
@@ -69,6 +76,11 @@ const AdminBlockedRoute = AdminBlockedRouteImport.update({
   path: '/blocked',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHoodieComboStockRoute = AdminHoodieComboStockRouteImport.update({
+  id: '/hoodie-combo-stock',
+  path: '/hoodie-combo-stock',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPajamaStockRoute = AdminPajamaStockRouteImport.update({
   id: '/pajama-stock',
   path: '/pajama-stock',
@@ -99,11 +111,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/hoodie-combo': typeof HoodieComboRoute
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
+  '/admin/hoodie-combo-stock': typeof AdminHoodieComboStockRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sneakers-stock': typeof AdminSneakersStockRoute
@@ -114,11 +128,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hoodie-combo': typeof HoodieComboRoute
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
+  '/admin/hoodie-combo-stock': typeof AdminHoodieComboStockRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sneakers-stock': typeof AdminSneakersStockRoute
@@ -131,11 +147,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/hoodie-combo': typeof HoodieComboRoute
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
+  '/admin/hoodie-combo-stock': typeof AdminHoodieComboStockRoute
   '/admin/pajama-stock': typeof AdminPajamaStockRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sneakers-stock': typeof AdminSneakersStockRoute
@@ -149,11 +167,13 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/hoodie-combo'
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
     | '/admin/abandoned'
     | '/admin/blocked'
+    | '/admin/hoodie-combo-stock'
     | '/admin/pajama-stock'
     | '/admin/settings'
     | '/admin/sneakers-stock'
@@ -164,11 +184,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/hoodie-combo'
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
     | '/admin/abandoned'
     | '/admin/blocked'
+    | '/admin/hoodie-combo-stock'
     | '/admin/pajama-stock'
     | '/admin/settings'
     | '/admin/sneakers-stock'
@@ -180,11 +202,13 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/hoodie-combo'
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
     | '/admin/abandoned'
     | '/admin/blocked'
+    | '/admin/hoodie-combo-stock'
     | '/admin/pajama-stock'
     | '/admin/settings'
     | '/admin/sneakers-stock'
@@ -197,6 +221,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
+  HoodieComboRoute: typeof HoodieComboRoute
   PajamaRoute: typeof PajamaRoute
   SneakersRoute: typeof SneakersRoute
   SweatshirtRoute: typeof SweatshirtRoute
@@ -223,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hoodie-combo': {
+      id: '/hoodie-combo'
+      path: '/hoodie-combo'
+      fullPath: '/hoodie-combo'
+      preLoaderRoute: typeof HoodieComboRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pajama': {
@@ -267,6 +299,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlockedRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/hoodie-combo-stock': {
+      id: '/admin/hoodie-combo-stock'
+      path: '/hoodie-combo-stock'
+      fullPath: '/admin/hoodie-combo-stock'
+      preLoaderRoute: typeof AdminHoodieComboStockRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pajama-stock': {
       id: '/admin/pajama-stock'
       path: '/pajama-stock'
@@ -308,6 +347,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAbandonedRoute: typeof AdminAbandonedRoute
   AdminBlockedRoute: typeof AdminBlockedRoute
+  AdminHoodieComboStockRoute: typeof AdminHoodieComboStockRoute
   AdminPajamaStockRoute: typeof AdminPajamaStockRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSneakersStockRoute: typeof AdminSneakersStockRoute
@@ -319,6 +359,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAbandonedRoute: AdminAbandonedRoute,
   AdminBlockedRoute: AdminBlockedRoute,
+  AdminHoodieComboStockRoute: AdminHoodieComboStockRoute,
   AdminPajamaStockRoute: AdminPajamaStockRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSneakersStockRoute: AdminSneakersStockRoute,
@@ -333,6 +374,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
+  HoodieComboRoute: HoodieComboRoute,
   PajamaRoute: PajamaRoute,
   SneakersRoute: SneakersRoute,
   SweatshirtRoute: SweatshirtRoute,

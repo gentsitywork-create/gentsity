@@ -349,6 +349,74 @@ export const placeSweatshirtOrder = createServerFn({ method: "POST" })
     ),
   );
 
+/* ===================== হুডি + সোয়েটশার্ট কম্বো (১ হুডি + ২ সোয়েটশার্ট) ===================== */
+
+export const HOODIE_COMBO_PRICE = 1090;
+
+const hoodieComboSchema = z.object({
+  customer_name: z.string().trim().max(80).optional().default(""),
+  phone: z.string().trim().regex(/^01[3-9]\d{8}$/),
+  address: z.string().trim().max(400).optional().default(""),
+  size: z.enum(["M", "L", "XL"]),
+  hoodie_id: z.string().uuid(),
+  sweatshirt_ids: z.array(z.string().uuid()).length(2),
+});
+
+export const placeHoodieComboOrder = createServerFn({ method: "POST" })
+  .inputValidator((data) => hoodieComboSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (new Set(data.sweatshirt_ids).size !== 2) throw new Error("দুইটি আলাদা সোয়েটশার্ট বাছুন।");
+    const ip = clientIp();
+    if (ip) {
+      const { data: blocked } = await supabaseAdmin.from("blocked_ips").select("id").eq("ip", ip).maybeSingle();
+      if (blocked) throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না। সহায়তার জন্য যোগাযোগ করুন।");
+    }
+    await blockRecentOrder(supabaseAdmin, data.phone);
+
+    const ids = [data.hoodie_id, ...data.sweatshirt_ids];
+    const [{ data: rawProducts, error: pErr }, { data: stocks, error: sErr }] = await Promise.all([
+      (supabaseAdmin.from("pajama_products").select("id, name, product_kind, is_active") as any)
+        .eq("page", "hoodie_combo").in("id", ids),
+      supabaseAdmin.from("pajama_product_stock").select("product_id, size, stock").in("product_id", ids).eq("size", data.size),
+    ]);
+    if (pErr || sErr) throw new Error("স্টক যাচাই করা যায়নি, আবার চেষ্টা করুন।");
+    const products = (rawProducts ?? []) as { id: string; name: string; product_kind: string; is_active: boolean }[];
+    for (const id of ids) {
+      const p = products.find((x) => x.id === id);
+      const expected = id === data.hoodie_id ? "hoodie" : "sweatshirt";
+      if (!p || !p.is_active || p.product_kind !== expected) throw new Error("নির্বাচিত ডিজাইন এখন আর পাওয়া যাচ্ছে না।");
+      const s = stocks?.find((x) => x.product_id === id);
+      if (!s || s.stock < 1) throw new Error(`${p.name} — ${data.size} সাইজের স্টক নেই।`);
+    }
+
+    const total = HOODIE_COMBO_PRICE;
+    const { data: order, error: oErr } = await supabaseAdmin.from("orders").insert({
+      customer_name: data.customer_name, phone: data.phone, address: data.address,
+      total_amount: total, delivery_charge: 0, product_type: "hoodie_combo", customer_ip: ip || null,
+    }).select("id, order_no").single();
+    if (oErr || !order) throw new Error("অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
+
+    const rows = ids.map((id) => {
+      const p = products.find((x) => x.id === id)!;
+      return {
+        order_id: order.id, variant_id: null, pajama_product_id: id, size: data.size,
+        color_name: `${p.name} (${p.product_kind === "hoodie" ? "হুডি" : "সোয়েটশার্ট"})`,
+        qty: 1, unit_price: null, pieces_per_unit: 1,
+      };
+    });
+    const { error: iErr } = await supabaseAdmin.from("order_items").insert(rows);
+    if (iErr) throw new Error("অর্ডারের তথ্য সেভ হয়নি, আবার চেষ্টা করুন।");
+
+    for (const id of ids) {
+      const s = stocks?.find((x) => x.product_id === id);
+      if (!s) continue;
+      await supabaseAdmin.from("pajama_product_stock").update({ stock: s.stock - 1 }).eq("product_id", id).eq("size", data.size);
+    }
+    await sendPurchaseCapi(supabaseAdmin, { orderNo: order.order_no, total, phone: data.phone });
+    return { order_no: order.order_no, total, delivery_charge: 0 };
+  });
+
 const adminItemSchema = z.object({
   variant_id: z.string().uuid().nullable().optional(),
   pajama_product_id: z.string().uuid().nullable().optional(),
@@ -366,7 +434,7 @@ const adminOrderSchema = z.object({
   total_amount: z.number().int().min(0).max(1000000),
   delivery_charge: z.number().int().min(0).max(10000).optional().default(0),
   status: z.enum(["pending", "confirmed", "hold", "shipped", "delivered", "cancelled"]).optional(),
-  product_type: z.enum(["polo", "pajama", "sneakers", "sweatshirt"]).optional().default("polo"),
+  product_type: z.enum(["polo", "pajama", "sneakers", "sweatshirt", "hoodie_combo"]).optional().default("polo"),
   items: z.array(adminItemSchema).min(1).max(20),
 });
 
