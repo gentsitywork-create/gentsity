@@ -29,6 +29,13 @@
       "when": 1791443079516,
       "tag": "0003_deactivate_white_sweatshirt_product",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791703549742,
+      "tag": "0004_allow_hoodie_combo_products",
+      "breakpoints": true
     }
   ]
 }
