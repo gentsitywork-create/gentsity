@@ -9,6 +9,7 @@ import { sendToCourier, checkCourierRatio } from "@/lib/orders.functions";
 import { useAdminSession } from "@/hooks/useAdminSession";
 import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
 import { printCourierLabels } from "@/components/admin/printLabels";
+import { toBn } from "@/components/LiveVisitors";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,15 @@ const STATUS_CLASS: Record<string, string> = {
   cancelled: "bg-rose-100 text-rose-800",
 };
 
+const LIVE_PATHS: Record<string, string> = {
+  "/": "পোলো শার্ট",
+  "/pajama": "পায়জামা",
+  "/sneakers": "স্নিকার্স",
+  "/sweatshirt": "সোয়েটশার্ট",
+  "/hoodie-combo": "হুডি কম্বো",
+  "/auth": "লগইন পেজ",
+};
+
 type OrderRow = {
   id: string;
   order_no: number;
@@ -62,7 +72,7 @@ type OrderRow = {
 
 function AdminOrders() {
   const qc = useQueryClient();
-  const { isAdmin } = useAdminSession();
+  const { session, isAdmin } = useAdminSession();
   const send = useServerFn(sendToCourier);
   const checkRatio = useServerFn(checkCourierRatio);
   const [ratioBusy, setRatioBusy] = useState<string | null>(null);
@@ -100,6 +110,28 @@ function AdminOrders() {
       return all;
     },
   });
+
+  // লাইভ ভিজিটর — শেষ ২ মিনিটে সক্রিয়
+  const { data: liveVisits = [] } = useQuery({
+    queryKey: ["live-visitors"],
+    queryFn: async () => {
+      const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from("site_visits")
+        .select("path")
+        .gt("last_seen", cutoff);
+      if (error) throw error;
+      return (data ?? []) as { path: string }[];
+    },
+    enabled: Boolean(session),
+    refetchInterval: 30_000,
+  });
+
+  const liveByPath = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const v of liveVisits) map[v.path] = (map[v.path] ?? 0) + 1;
+    return map;
+  }, [liveVisits]);
 
   const dateFiltered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -320,6 +352,31 @@ function AdminOrders() {
           </Button>
         </div>
       </div>
+
+      {/* লাইভ ভিজিটর */}
+      {liveVisits.length > 0 && (
+        <div className="mt-5 rounded-xl border bg-card p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
+            <h2 className="text-sm font-bold text-primary">
+              এখন {toBn(liveVisits.length)} জন ভিজিটর লাইভ
+            </h2>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(liveByPath).map(([path, n]) => (
+              <span
+                key={path}
+                className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
+              >
+                {LIVE_PATHS[path] ?? path}: {toBn(n)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* সার্চ ও তারিখ */}
       <div className="mt-5 flex flex-wrap items-center gap-3">

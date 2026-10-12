@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
+import { LiveViewersBadge } from "@/components/LiveVisitors";
 
 export const Route = createFileRoute("/sweatshirt")({
   head: () => ({
@@ -201,6 +202,9 @@ function SweatshirtPage() {
         <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের তৈরি ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
         <p className="mt-3 text-lg font-bold">রেগুলার প্রাইস <span className="text-muted-foreground line-through">২২০০ টাকা</span> — অফারে মাত্র <span className="text-primary">১১৯০ টাকা</span></p>
         <p className="mx-auto mt-2 max-w-2xl text-muted-foreground">সফট, উষ্ণ ও প্রিমিয়াম কোয়ালিটি — শীতের জন্য পারফেক্ট পছন্দ! <Sparkles className="inline h-4 w-4 text-primary" /></p>
+        <div>
+          <LiveViewersBadge />
+        </div>
 
         <ul className="mt-5 flex flex-wrap justify-center gap-3 text-sm font-semibold">
           <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Truck className="h-4 w-4" /> ডেলিভারি চার্জ ফ্রি</li>

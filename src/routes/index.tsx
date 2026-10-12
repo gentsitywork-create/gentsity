@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import comboImage from "@/assets/polo-combo.jpg";
+import { LiveViewersBadge } from "@/components/LiveVisitors";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
 
 export const Route = createFileRoute("/")({
@@ -275,6 +276,9 @@ function Home() {
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
                 ১০০% কটন কাপড়ের ছেলেদের ৫ পিস পোলো টি-শার্ট মাত্র {price} টাকা। সারা বাংলাদেশে ফ্রি ডেলিভারি — ১ টাকাও আগে দেওয়া লাগবে না, ডেলিভারি ম্যান এর সামনে প্রডাক্ট চেক করে পেমেন্ট করতে পারবেন।
             </p>
+            <div>
+              <LiveViewersBadge />
+            </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border bg-card p-4">
