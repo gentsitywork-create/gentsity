@@ -36,6 +36,13 @@
       "when": 1791703549742,
       "tag": "0004_allow_hoodie_combo_products",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791825402762,
+      "tag": "0005_create_site_visits",
+      "breakpoints": true
     }
   ]
 }
