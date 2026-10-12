@@ -25,6 +25,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSneakersStockRouteImport } from './routes/admin.sneakers-stock'
 import { Route as AdminStockRouteImport } from './routes/admin.stock'
 import { Route as AdminSweatshirtStockRouteImport } from './routes/admin.sweatshirt-stock'
+import { Route as ApiPublicVisitorHeartbeatRouteImport } from './routes/api/public/visitor-heartbeat'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -106,6 +107,12 @@ const AdminSweatshirtStockRoute = AdminSweatshirtStockRouteImport.update({
   path: '/sweatshirt-stock',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicVisitorHeartbeatRoute =
+  ApiPublicVisitorHeartbeatRouteImport.update({
+    id: '/api/public/visitor-heartbeat',
+    path: '/api/public/visitor-heartbeat',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/admin/stock': typeof AdminStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/visitor-heartbeat': typeof ApiPublicVisitorHeartbeatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,6 +149,7 @@ export interface FileRoutesByTo {
   '/admin/stock': typeof AdminStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/visitor-heartbeat': typeof ApiPublicVisitorHeartbeatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -160,6 +169,7 @@ export interface FileRoutesById {
   '/admin/stock': typeof AdminStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/visitor-heartbeat': typeof ApiPublicVisitorHeartbeatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/admin/stock'
     | '/admin/sweatshirt-stock'
     | '/admin/'
+    | '/api/public/visitor-heartbeat'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/admin/stock'
     | '/admin/sweatshirt-stock'
     | '/admin'
+    | '/api/public/visitor-heartbeat'
   id:
     | '__root__'
     | '/'
@@ -215,6 +227,7 @@ export interface FileRouteTypes {
     | '/admin/stock'
     | '/admin/sweatshirt-stock'
     | '/admin/'
+    | '/api/public/visitor-heartbeat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,6 +238,7 @@ export interface RootRouteChildren {
   PajamaRoute: typeof PajamaRoute
   SneakersRoute: typeof SneakersRoute
   SweatshirtRoute: typeof SweatshirtRoute
+  ApiPublicVisitorHeartbeatRoute: typeof ApiPublicVisitorHeartbeatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -341,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSweatshirtStockRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/visitor-heartbeat': {
+      id: '/api/public/visitor-heartbeat'
+      path: '/api/public/visitor-heartbeat'
+      fullPath: '/api/public/visitor-heartbeat'
+      preLoaderRoute: typeof ApiPublicVisitorHeartbeatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -378,6 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   PajamaRoute: PajamaRoute,
   SneakersRoute: SneakersRoute,
   SweatshirtRoute: SweatshirtRoute,
+  ApiPublicVisitorHeartbeatRoute: ApiPublicVisitorHeartbeatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
