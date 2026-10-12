@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
+import { LiveViewersBadge } from "@/components/LiveVisitors";
 
 export const Route = createFileRoute("/hoodie-combo")({
   head: () => ({
@@ -158,6 +159,9 @@ function HoodieComboPage() {
         <p className="text-sm font-bold text-primary">HOODIE + SWEATSHIRT COMBO</p>
         <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> ১ পিস হুডি + ২ পিস সোয়েটশার্ট মাত্র ১০৯০ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
         <p className="mt-2 text-muted-foreground">হুডি + সোয়েট — কটন ফ্লিস ফেব্রিকস, ইনসাইড ব্রাশ</p>
+        <div>
+          <LiveViewersBadge />
+        </div>
         <ul className="mt-4 flex flex-wrap justify-center gap-3 text-sm font-semibold">
           <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Truck className="h-4 w-4" /> ডেলিভারি চার্জ একদম ফ্রি</li>
           <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Wallet className="h-4 w-4" /> ক্যাশ অন ডেলিভারি</li>

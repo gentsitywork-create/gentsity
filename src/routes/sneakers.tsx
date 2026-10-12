@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
 import sneakersHeroBanner from "@/assets/sneakers-hero-banner.jpg.asset.json";
+import { LiveViewersBadge } from "@/components/LiveVisitors";
 
 export const Route = createFileRoute("/sneakers")({
   head: () => ({
@@ -172,6 +173,9 @@ function SneakersPage() {
         <p className="text-sm font-bold text-primary">GENTSITY SNEAKERS COLLECTION</p>
         <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> প্রিমিয়াম স্নিকার্স <Flame className="inline h-7 w-7 text-destructive" /></h1>
         <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">দেখতে স্মার্ট, ব্যবহারে কমফোর্টেবল — প্রতিদিনের জন্য পারফেক্ট জুতা! <Sparkles className="inline h-4 w-4 text-primary" /></p>
+        <div>
+          <LiveViewersBadge />
+        </div>
 
         <img src={sneakersHeroBanner.url} alt="Gentsity স্নিকার্স — স্টাইল আর কমফোর্টের গ্যারেন্টি, সাদা/কালা/বেজ/প্রিন্টেড কালার" className="mt-6 w-full rounded-lg border" loading="lazy" />
 
