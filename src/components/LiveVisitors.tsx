@@ -67,10 +67,12 @@ export function LiveVisitorTracker() {
 
     void beat();
     const timer = setInterval(() => void beat(), 30_000);
-    document.addEventListener("visibilitychange", () => void beat());
+    const onVisible = () => void beat();
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       stopped = true;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
