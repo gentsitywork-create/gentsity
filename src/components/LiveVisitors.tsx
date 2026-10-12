@@ -24,7 +24,7 @@ export function useLiveVisitors(): number {
 
 const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
 export function toBn(n: number): string {
-  return String(n).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+  return String(n).replace(/\d/g, (d) => BN_DIGITS[Number(d)] ?? d);
 }
 
 function getVisitorId(): string {
