@@ -493,7 +493,7 @@ function AdminOrders() {
           );
         })}
         <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary shadow-sm">
-          মোট: ৳{toBn(Number(totalAmount.toLocaleString("en-US").replace(/,/g, "")))}
+          মোট: ৳{new Intl.NumberFormat("bn-BD").format(totalAmount)}
         </div>
       </div>
 
