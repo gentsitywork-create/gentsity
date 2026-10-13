@@ -70,6 +70,7 @@ type OrderRow = {
   courier_tracking_code: string | null;
   customer_ip: string | null;
   product_type: string;
+  label_printed_at: string | null;
   created_at: string;
   order_items: { variant_id: string | null; pajama_product_id: string | null; size: string; color_name: string; qty: number }[];
 };
@@ -104,7 +105,7 @@ function AdminOrders() {
         const { data, error } = await supabase
           .from("orders")
           .select(
-            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
+            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, label_printed_at, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
           )
           .order("created_at", { ascending: false })
           .order("id")
@@ -207,17 +208,26 @@ function AdminOrders() {
     return map;
   }, [orders]);
 
+  /** কুরিয়ারে পাঠানো হয়েছে কিন্তু লেবেল এখনো প্রিন্ট হয়নি এমন অর্ডার */
+  const isLabelPending = (o: OrderRow) =>
+    Boolean(o.courier_consignment_id) && !o.label_printed_at && o.status !== "cancelled";
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: dateFiltered.length };
     for (const k of Object.keys(STATUS)) c[k] = 0;
-    for (const o of dateFiltered) c[o.status] = (c[o.status] ?? 0) + 1;
+    c["label_pending"] = 0;
+    for (const o of dateFiltered) {
+      c[o.status] = (c[o.status] ?? 0) + 1;
+      if (isLabelPending(o)) c["label_pending"]++;
+    }
     return c;
   }, [dateFiltered]);
 
-  const rows = useMemo(
-    () => (filter === "all" ? dateFiltered : dateFiltered.filter((o) => o.status === filter)),
-    [dateFiltered, filter],
-  );
+  const rows = useMemo(() => {
+    if (filter === "all") return dateFiltered;
+    if (filter === "label_pending") return dateFiltered.filter(isLabelPending);
+    return dateFiltered.filter((o) => o.status === filter);
+  }, [dateFiltered, filter]);
 
   /** বর্তমান ফিল্টারের অর্ডারগুলোর মোট টাকার পরিমাণ */
   const totalAmount = useMemo(
@@ -346,6 +356,12 @@ function AdminOrders() {
       return;
     }
     await printCourierLabels(list);
+    // প্রিন্ট হয়ে গেছে মার্ক করি — পরে "লেবেল বাকি" ফিল্টারে আর দেখাবে না
+    const { error } = await supabase
+      .from("orders")
+      .update({ label_printed_at: new Date().toISOString() })
+      .in("id", list.map((o) => o.id));
+    if (!error) qc.invalidateQueries({ queryKey: ["admin-orders"] });
   };
 
   const exportCsv = () => {
@@ -515,7 +531,7 @@ function AdminOrders() {
 
       {/* স্ট্যাটাস ট্যাব */}
       <div className="mt-4 flex flex-wrap gap-2">
-        {(["all", ...Object.keys(STATUS)] as string[]).map((k) => {
+        {(["all", ...Object.keys(STATUS), "label_pending"] as string[]).map((k) => {
           const active = filter === k;
           return (
             <button
@@ -528,7 +544,7 @@ function AdminOrders() {
                   : "bg-card hover:bg-secondary"
               }`}
             >
-              {k === "all" ? "সব" : STATUS[k]}
+              {k === "all" ? "সব" : k === "label_pending" ? "🖨 লেবেল বাকি" : STATUS[k]}
               <span
                 className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${
                   active ? "bg-primary-foreground/20" : "bg-secondary"
@@ -656,6 +672,11 @@ function AdminOrders() {
                       >
                         ⚠ ডুপ্লিকেট ({phoneCount[o.phone]})
                       </button>
+                    )}
+                    {o.label_printed_at && (
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-muted-foreground">
+                        🖨 প্রিন্ট হয়েছে
+                      </span>
                     )}
                   </div>
                   <p className="mt-0.5 font-bold">{o.customer_name}</p>

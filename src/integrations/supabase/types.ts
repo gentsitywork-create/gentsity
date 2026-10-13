@@ -173,6 +173,7 @@ export type Database = {
           delivery_charge: number
           district: string | null
           id: string
+          label_printed_at: string | null
           note: string | null
           order_no: number
           phone: string
@@ -192,6 +193,7 @@ export type Database = {
           delivery_charge?: number
           district?: string | null
           id?: string
+          label_printed_at?: string | null
           note?: string | null
           order_no?: number
           phone: string
@@ -211,6 +213,7 @@ export type Database = {
           delivery_charge?: number
           district?: string | null
           id?: string
+          label_printed_at?: string | null
           note?: string | null
           order_no?: number
           phone?: string
