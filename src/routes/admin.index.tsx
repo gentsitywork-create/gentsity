@@ -531,7 +531,7 @@ function AdminOrders() {
 
       {/* স্ট্যাটাস ট্যাব */}
       <div className="mt-4 flex flex-wrap gap-2">
-        {(["all", ...Object.keys(STATUS)] as string[]).map((k) => {
+        {(["all", ...Object.keys(STATUS), "label_pending"] as string[]).map((k) => {
           const active = filter === k;
           return (
             <button
@@ -544,7 +544,7 @@ function AdminOrders() {
                   : "bg-card hover:bg-secondary"
               }`}
             >
-              {k === "all" ? "সব" : STATUS[k]}
+              {k === "all" ? "সব" : k === "label_pending" ? "🖨 লেবেল বাকি" : STATUS[k]}
               <span
                 className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${
                   active ? "bg-primary-foreground/20" : "bg-secondary"
@@ -672,6 +672,11 @@ function AdminOrders() {
                       >
                         ⚠ ডুপ্লিকেট ({phoneCount[o.phone]})
                       </button>
+                    )}
+                    {o.label_printed_at && (
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-muted-foreground">
+                        🖨 প্রিন্ট হয়েছে
+                      </span>
                     )}
                   </div>
                   <p className="mt-0.5 font-bold">{o.customer_name}</p>
