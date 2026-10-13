@@ -433,7 +433,7 @@ const adminOrderSchema = z.object({
   note: z.string().trim().max(300).optional().default(""),
   total_amount: z.number().int().min(0).max(1000000),
   delivery_charge: z.number().int().min(0).max(10000).optional().default(0),
-  status: z.enum(["pending", "confirmed", "hold", "shipped", "delivered", "cancelled"]).optional(),
+  status: z.enum(["pending", "confirmed", "hold", "shipped", "courier_pending", "partial_delivered", "delivered", "cancelled"]).optional(),
   product_type: z.enum(["polo", "pajama", "sneakers", "sweatshirt", "hoodie_combo"]).optional().default("polo"),
   items: z.array(adminItemSchema).min(1).max(20),
 });

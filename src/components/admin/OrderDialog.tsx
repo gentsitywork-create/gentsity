@@ -213,7 +213,7 @@ export function OrderDialog({
       note,
       total_amount: Number(price) || 0,
       delivery_charge: 0,
-      status: status as "pending" | "confirmed" | "shipped" | "delivered" | "cancelled",
+      status: status as "pending" | "confirmed" | "shipped" | "courier_pending" | "partial_delivered" | "delivered" | "cancelled",
       product_type: productType,
       items,
     };
@@ -299,7 +299,9 @@ export function OrderDialog({
               <SelectContent>
                 <SelectItem value="pending">নতুন</SelectItem>
                 <SelectItem value="confirmed">কনফার্ম</SelectItem>
-                <SelectItem value="shipped">কুরিয়ারে</SelectItem>
+                <SelectItem value="shipped">In Review</SelectItem>
+                <SelectItem value="courier_pending">Pending (কুরিয়ার)</SelectItem>
+                <SelectItem value="partial_delivered">Partial Delivered</SelectItem>
                 <SelectItem value="delivered">ডেলিভারি হয়েছে</SelectItem>
                 <SelectItem value="cancelled">বাতিল</SelectItem>
               </SelectContent>
