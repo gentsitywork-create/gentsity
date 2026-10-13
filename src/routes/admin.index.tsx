@@ -420,6 +420,25 @@ function AdminOrders() {
         </div>
       )}
 
+      {/* আজকের পেজ-ভিত্তিক ভিজিটর */}
+      {todaySummary && Object.keys(todaySummary.byPath).length > 0 && (
+        <div className="mt-3 rounded-xl border bg-card p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-primary">আজকের ভিজিটর — কোন পেজে কত জন</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(todaySummary.byPath)
+              .sort((a, b) => b[1] - a[1])
+              .map(([path, n]) => (
+                <span
+                  key={path}
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
+                >
+                  {LIVE_PATHS[path] ?? path}: {toBn(n)} জন
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* লাইভ ভিজিটর */}
       {liveVisits.length > 0 && (
         <div className="mt-5 rounded-xl border bg-card p-4 shadow-sm">
