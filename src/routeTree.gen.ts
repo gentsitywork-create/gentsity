@@ -25,6 +25,8 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSneakersStockRouteImport } from './routes/admin.sneakers-stock'
 import { Route as AdminStockRouteImport } from './routes/admin.stock'
 import { Route as AdminSweatshirtStockRouteImport } from './routes/admin.sweatshirt-stock'
+import { Route as ApiPublicSteadfastSyncRouteImport } from './routes/api/public/steadfast-sync'
+import { Route as ApiPublicSteadfastWebhookRouteImport } from './routes/api/public/steadfast-webhook'
 import { Route as ApiPublicVisitorHeartbeatRouteImport } from './routes/api/public/visitor-heartbeat'
 
 const IndexRoute = IndexRouteImport.update({
@@ -107,6 +109,17 @@ const AdminSweatshirtStockRoute = AdminSweatshirtStockRouteImport.update({
   path: '/sweatshirt-stock',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicSteadfastSyncRoute = ApiPublicSteadfastSyncRouteImport.update({
+  id: '/api/public/steadfast-sync',
+  path: '/api/public/steadfast-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicSteadfastWebhookRoute =
+  ApiPublicSteadfastWebhookRouteImport.update({
+    id: '/api/public/steadfast-webhook',
+    path: '/api/public/steadfast-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicVisitorHeartbeatRoute =
   ApiPublicVisitorHeartbeatRouteImport.update({
     id: '/api/public/visitor-heartbeat',
@@ -131,6 +144,8 @@ export interface FileRoutesByFullPath {
   '/admin/stock': typeof AdminStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/steadfast-sync': typeof ApiPublicSteadfastSyncRoute
+  '/api/public/steadfast-webhook': typeof ApiPublicSteadfastWebhookRoute
   '/api/public/visitor-heartbeat': typeof ApiPublicVisitorHeartbeatRoute
 }
 export interface FileRoutesByTo {
@@ -149,6 +164,8 @@ export interface FileRoutesByTo {
   '/admin/stock': typeof AdminStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/steadfast-sync': typeof ApiPublicSteadfastSyncRoute
+  '/api/public/steadfast-webhook': typeof ApiPublicSteadfastWebhookRoute
   '/api/public/visitor-heartbeat': typeof ApiPublicVisitorHeartbeatRoute
 }
 export interface FileRoutesById {
@@ -169,6 +186,8 @@ export interface FileRoutesById {
   '/admin/stock': typeof AdminStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/steadfast-sync': typeof ApiPublicSteadfastSyncRoute
+  '/api/public/steadfast-webhook': typeof ApiPublicSteadfastWebhookRoute
   '/api/public/visitor-heartbeat': typeof ApiPublicVisitorHeartbeatRoute
 }
 export interface FileRouteTypes {
@@ -190,6 +209,8 @@ export interface FileRouteTypes {
     | '/admin/stock'
     | '/admin/sweatshirt-stock'
     | '/admin/'
+    | '/api/public/steadfast-sync'
+    | '/api/public/steadfast-webhook'
     | '/api/public/visitor-heartbeat'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -208,6 +229,8 @@ export interface FileRouteTypes {
     | '/admin/stock'
     | '/admin/sweatshirt-stock'
     | '/admin'
+    | '/api/public/steadfast-sync'
+    | '/api/public/steadfast-webhook'
     | '/api/public/visitor-heartbeat'
   id:
     | '__root__'
@@ -227,6 +250,8 @@ export interface FileRouteTypes {
     | '/admin/stock'
     | '/admin/sweatshirt-stock'
     | '/admin/'
+    | '/api/public/steadfast-sync'
+    | '/api/public/steadfast-webhook'
     | '/api/public/visitor-heartbeat'
   fileRoutesById: FileRoutesById
 }
@@ -238,6 +263,8 @@ export interface RootRouteChildren {
   PajamaRoute: typeof PajamaRoute
   SneakersRoute: typeof SneakersRoute
   SweatshirtRoute: typeof SweatshirtRoute
+  ApiPublicSteadfastSyncRoute: typeof ApiPublicSteadfastSyncRoute
+  ApiPublicSteadfastWebhookRoute: typeof ApiPublicSteadfastWebhookRoute
   ApiPublicVisitorHeartbeatRoute: typeof ApiPublicVisitorHeartbeatRoute
 }
 
@@ -355,6 +382,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSweatshirtStockRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/steadfast-sync': {
+      id: '/api/public/steadfast-sync'
+      path: '/api/public/steadfast-sync'
+      fullPath: '/api/public/steadfast-sync'
+      preLoaderRoute: typeof ApiPublicSteadfastSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/steadfast-webhook': {
+      id: '/api/public/steadfast-webhook'
+      path: '/api/public/steadfast-webhook'
+      fullPath: '/api/public/steadfast-webhook'
+      preLoaderRoute: typeof ApiPublicSteadfastWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/visitor-heartbeat': {
       id: '/api/public/visitor-heartbeat'
       path: '/api/public/visitor-heartbeat'
@@ -399,6 +440,8 @@ const rootRouteChildren: RootRouteChildren = {
   PajamaRoute: PajamaRoute,
   SneakersRoute: SneakersRoute,
   SweatshirtRoute: SweatshirtRoute,
+  ApiPublicSteadfastSyncRoute: ApiPublicSteadfastSyncRoute,
+  ApiPublicSteadfastWebhookRoute: ApiPublicSteadfastWebhookRoute,
   ApiPublicVisitorHeartbeatRoute: ApiPublicVisitorHeartbeatRoute,
 }
 export const routeTree = rootRouteImport
