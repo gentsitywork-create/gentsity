@@ -137,7 +137,7 @@ function AdminOrders() {
       const [visits, todayOrders, abandoned] = await Promise.all([
         supabase
           .from("site_visits")
-          .select("visitor_id", { count: "exact", head: true })
+          .select("path")
           .gte("created_at", startIso),
         supabase
           .from("orders")
@@ -151,11 +151,15 @@ function AdminOrders() {
           .is("order_id", null),
       ]);
       const orderRows = (todayOrders.data ?? []) as { total_amount: number }[];
+      const visitRows = (visits.data ?? []) as { path: string }[];
+      const byPath: Record<string, number> = {};
+      for (const v of visitRows) byPath[v.path] = (byPath[v.path] ?? 0) + 1;
       return {
-        visitors: visits.count ?? 0,
+        visitors: visitRows.length,
         orders: todayOrders.count ?? 0,
         sales: orderRows.reduce((s, o) => s + (o.total_amount ?? 0), 0),
         left: abandoned.count ?? 0,
+        byPath,
       };
     },
     enabled: Boolean(session),
@@ -412,6 +416,25 @@ function AdminOrders() {
           <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
             <p className="text-2xl font-extrabold text-primary">৳{toBn(todaySummary.sales)}</p>
             <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের বিক্রি</p>
+          </div>
+        </div>
+      )}
+
+      {/* আজকের পেজ-ভিত্তিক ভিজিটর */}
+      {todaySummary && Object.keys(todaySummary.byPath).length > 0 && (
+        <div className="mt-3 rounded-xl border bg-card p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-primary">আজকের ভিজিটর — কোন পেজে কত জন</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(todaySummary.byPath)
+              .sort((a, b) => b[1] - a[1])
+              .map(([path, n]) => (
+                <span
+                  key={path}
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
+                >
+                  {LIVE_PATHS[path] ?? path}: {toBn(n)} জন
+                </span>
+              ))}
           </div>
         </div>
       )}
