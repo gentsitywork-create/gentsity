@@ -215,10 +215,10 @@ function AdminOrders() {
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: dateFiltered.length };
     for (const k of Object.keys(STATUS)) c[k] = 0;
-    c.label_pending = 0;
+    c["label_pending"] = 0;
     for (const o of dateFiltered) {
       c[o.status] = (c[o.status] ?? 0) + 1;
-      if (isLabelPending(o)) c.label_pending++;
+      if (isLabelPending(o)) c["label_pending"]++;
     }
     return c;
   }, [dateFiltered]);
