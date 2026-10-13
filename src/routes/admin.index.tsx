@@ -743,12 +743,12 @@ function AdminOrders() {
                 <div>
                   <span
                     className={`inline-block rounded-md px-2 py-1 text-xs font-bold ${
-                      o.status === "delivered"
+                      (o.status === "delivered" || o.status === "partial_delivered")
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-amber-100 text-amber-700"
                     }`}
                   >
-                    {o.status === "delivered" ? "Paid" : "Pending"}
+                    {(o.status === "delivered" || o.status === "partial_delivered") ? "Paid" : "Pending"}
                   </span>
                   <p className="mt-1 text-[11px] text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
                 </div>
