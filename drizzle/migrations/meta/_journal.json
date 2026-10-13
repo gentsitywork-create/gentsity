@@ -43,6 +43,13 @@
       "when": 1791825402762,
       "tag": "0005_create_site_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791883647105,
+      "tag": "0006_add_label_printed_at_to_orders",
+      "breakpoints": true
     }
   ]
 }
