@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { sendToCourier, checkCourierRatio } from "@/lib/orders.functions";
+import { sendToCourier, checkCourierRatio, refreshCourierStatuses } from "@/lib/orders.functions";
 import { useAdminSession } from "@/hooks/useAdminSession";
 import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
 import { printCourierLabels } from "@/components/admin/printLabels";
@@ -74,6 +74,8 @@ function AdminOrders() {
   const qc = useQueryClient();
   const { session, isAdmin } = useAdminSession();
   const send = useServerFn(sendToCourier);
+  const refreshStatus = useServerFn(refreshCourierStatuses);
+  const [syncing, setSyncing] = useState(false);
   const checkRatio = useServerFn(checkCourierRatio);
   const [ratioBusy, setRatioBusy] = useState<string | null>(null);
   const [ratios, setRatios] = useState<
@@ -394,6 +396,24 @@ function AdminOrders() {
           </Button>
           <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
             ⬇ এক্সপোর্ট
+          </Button>
+          <Button
+            variant="outline"
+            disabled={syncing}
+            onClick={async () => {
+              setSyncing(true);
+              try {
+                const r = await refreshStatus();
+                toast.success(`${r.checked}টি চেক হয়েছে, ${r.updated}টির স্ট্যাটাস বদলেছে।`);
+                qc.invalidateQueries({ queryKey: ["admin-orders"] });
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : "স্ট্যাটাস আপডেট হয়নি।");
+              } finally {
+                setSyncing(false);
+              }
+            }}
+          >
+            {syncing ? "আপডেট হচ্ছে…" : "🔄 কুরিয়ার স্ট্যাটাস"}
           </Button>
         </div>
       </div>
