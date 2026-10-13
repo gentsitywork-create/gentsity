@@ -127,6 +127,41 @@ function AdminOrders() {
     refetchInterval: 30_000,
   });
 
+  // আজকের সামারি — ভিজিটর, অর্ডার, অর্ডার না করে চলে যাওয়া
+  const { data: todaySummary } = useQuery({
+    queryKey: ["today-summary"],
+    queryFn: async () => {
+      const dayStart = new Date();
+      dayStart.setHours(0, 0, 0, 0);
+      const startIso = dayStart.toISOString();
+      const [visits, todayOrders, abandoned] = await Promise.all([
+        supabase
+          .from("site_visits")
+          .select("visitor_id", { count: "exact", head: true })
+          .gte("created_at", startIso),
+        supabase
+          .from("orders")
+          .select("id, total_amount", { count: "exact" })
+          .gte("created_at", startIso)
+          .neq("status", "cancelled"),
+        supabase
+          .from("abandoned_carts")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", startIso)
+          .is("order_id", null),
+      ]);
+      const orderRows = (todayOrders.data ?? []) as { total_amount: number }[];
+      return {
+        visitors: visits.count ?? 0,
+        orders: todayOrders.count ?? 0,
+        sales: orderRows.reduce((s, o) => s + (o.total_amount ?? 0), 0),
+        left: abandoned.count ?? 0,
+      };
+    },
+    enabled: Boolean(session),
+    refetchInterval: 60_000,
+  });
+
   const liveByPath = useMemo(() => {
     const map: Record<string, number> = {};
     for (const v of liveVisits) map[v.path] = (map[v.path] ?? 0) + 1;
@@ -352,6 +387,28 @@ function AdminOrders() {
           </Button>
         </div>
       </div>
+
+      {/* আজকের সামারি */}
+      {todaySummary && (
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-primary">{toBn(todaySummary.visitors)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের ভিজিটর</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-emerald-600">{toBn(todaySummary.orders)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের অর্ডার</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-amber-600">{toBn(todaySummary.left)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">অর্ডার না করে চলে গেছে</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-primary">৳{toBn(todaySummary.sales)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের বিক্রি</p>
+          </div>
+        </div>
+      )}
 
       {/* লাইভ ভিজিটর */}
       {liveVisits.length > 0 && (
