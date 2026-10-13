@@ -137,7 +137,7 @@ function AdminOrders() {
       const [visits, todayOrders, abandoned] = await Promise.all([
         supabase
           .from("site_visits")
-          .select("visitor_id", { count: "exact", head: true })
+          .select("path")
           .gte("created_at", startIso),
         supabase
           .from("orders")
@@ -151,11 +151,15 @@ function AdminOrders() {
           .is("order_id", null),
       ]);
       const orderRows = (todayOrders.data ?? []) as { total_amount: number }[];
+      const visitRows = (visits.data ?? []) as { path: string }[];
+      const byPath: Record<string, number> = {};
+      for (const v of visitRows) byPath[v.path] = (byPath[v.path] ?? 0) + 1;
       return {
-        visitors: visits.count ?? 0,
+        visitors: visitRows.length,
         orders: todayOrders.count ?? 0,
         sales: orderRows.reduce((s, o) => s + (o.total_amount ?? 0), 0),
         left: abandoned.count ?? 0,
+        byPath,
       };
     },
     enabled: Boolean(session),
