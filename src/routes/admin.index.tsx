@@ -208,17 +208,26 @@ function AdminOrders() {
     return map;
   }, [orders]);
 
+  /** কুরিয়ারে পাঠানো হয়েছে কিন্তু লেবেল এখনো প্রিন্ট হয়নি এমন অর্ডার */
+  const isLabelPending = (o: OrderRow) =>
+    Boolean(o.courier_consignment_id) && !o.label_printed_at && o.status !== "cancelled";
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: dateFiltered.length };
     for (const k of Object.keys(STATUS)) c[k] = 0;
-    for (const o of dateFiltered) c[o.status] = (c[o.status] ?? 0) + 1;
+    c.label_pending = 0;
+    for (const o of dateFiltered) {
+      c[o.status] = (c[o.status] ?? 0) + 1;
+      if (isLabelPending(o)) c.label_pending++;
+    }
     return c;
   }, [dateFiltered]);
 
-  const rows = useMemo(
-    () => (filter === "all" ? dateFiltered : dateFiltered.filter((o) => o.status === filter)),
-    [dateFiltered, filter],
-  );
+  const rows = useMemo(() => {
+    if (filter === "all") return dateFiltered;
+    if (filter === "label_pending") return dateFiltered.filter(isLabelPending);
+    return dateFiltered.filter((o) => o.status === filter);
+  }, [dateFiltered, filter]);
 
   /** বর্তমান ফিল্টারের অর্ডারগুলোর মোট টাকার পরিমাণ */
   const totalAmount = useMemo(
@@ -347,6 +356,12 @@ function AdminOrders() {
       return;
     }
     await printCourierLabels(list);
+    // প্রিন্ট হয়ে গেছে মার্ক করি — পরে "লেবেল বাকি" ফিল্টারে আর দেখাবে না
+    const { error } = await supabase
+      .from("orders")
+      .update({ label_printed_at: new Date().toISOString() })
+      .in("id", list.map((o) => o.id));
+    if (!error) qc.invalidateQueries({ queryKey: ["admin-orders"] });
   };
 
   const exportCsv = () => {
