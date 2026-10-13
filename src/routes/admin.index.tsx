@@ -209,6 +209,12 @@ function AdminOrders() {
     [dateFiltered, filter],
   );
 
+  /** বর্তমান ফিল্টারের অর্ডারগুলোর মোট টাকার পরিমাণ */
+  const totalAmount = useMemo(
+    () => rows.reduce((sum, o) => sum + (o.total_amount ?? 0), 0),
+    [rows],
+  );
+
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) {
