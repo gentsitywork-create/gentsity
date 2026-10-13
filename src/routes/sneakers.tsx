@@ -135,7 +135,7 @@ function SneakersPage() {
         delivery_area: deliveryArea,
         items: Object.entries(picks).map(([product_id, qty]) => ({ product_id, qty })),
       } });
-      trackPixel("Purchase", { value: result.total, currency: "BDT" });
+      trackPixel("Purchase", { value: result.total, currency: "BDT" }, `order-${result.order_no}`);
       setDone(result); setPicks({}); setSize(null); setDeliveryArea("outside"); setForm({ name: "", phone: "", address: "" });
       setCheckoutOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });

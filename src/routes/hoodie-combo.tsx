@@ -108,7 +108,7 @@ function HoodieComboPage() {
     setSubmitting(true);
     try {
       const res = await submit({ data: { customer_name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim(), size, hoodie_id: hoodie, sweatshirt_ids: sweats } });
-      trackPixel("Purchase", { value: res.total, currency: "BDT" });
+      trackPixel("Purchase", { value: res.total, currency: "BDT" }, `order-${res.order_no}`);
       setDone(res); setOpen(false); setSize(null); setHoodie(null); setSweats([]); setForm({ name: "", phone: "", address: "" });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {

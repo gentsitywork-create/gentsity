@@ -8,9 +8,11 @@ declare global {
   }
 }
 
-export function trackPixel(event: string, params?: Record<string, unknown>) {
+export function trackPixel(event: string, params?: Record<string, unknown>, eventId?: string) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
-    window.fbq("track", event, params);
+    // eventID lets Facebook merge this browser event with the server (CAPI) event — no double count.
+    if (eventId) window.fbq("track", event, params, { eventID: eventId });
+    else window.fbq("track", event, params);
   }
 }
 
