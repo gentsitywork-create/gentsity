@@ -29,7 +29,9 @@ const STATUS: Record<string, string> = {
   pending: "নতুন",
   confirmed: "কনফার্ম",
   hold: "হোল্ড",
-  shipped: "কুরিয়ারে",
+  shipped: "In Review",
+  courier_pending: "Pending (কুরিয়ার)",
+  partial_delivered: "Partial Delivered",
   delivered: "ডেলিভারি হয়েছে",
   cancelled: "বাতিল",
 };
@@ -39,6 +41,8 @@ const STATUS_CLASS: Record<string, string> = {
   confirmed: "bg-blue-100 text-blue-800",
   hold: "bg-slate-200 text-slate-800",
   shipped: "bg-violet-100 text-violet-800",
+  courier_pending: "bg-orange-100 text-orange-800",
+  partial_delivered: "bg-teal-100 text-teal-800",
   delivered: "bg-emerald-100 text-emerald-800",
   cancelled: "bg-rose-100 text-rose-800",
 };
@@ -739,12 +743,12 @@ function AdminOrders() {
                 <div>
                   <span
                     className={`inline-block rounded-md px-2 py-1 text-xs font-bold ${
-                      o.status === "delivered"
+                      (o.status === "delivered" || o.status === "partial_delivered")
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-amber-100 text-amber-700"
                     }`}
                   >
-                    {o.status === "delivered" ? "Paid" : "Pending"}
+                    {(o.status === "delivered" || o.status === "partial_delivered") ? "Paid" : "Pending"}
                   </span>
                   <p className="mt-1 text-[11px] text-muted-foreground">ক্যাশ অন ডেলিভারি</p>
                 </div>

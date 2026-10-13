@@ -1,9 +1,12 @@
 /** Steadfast কুরিয়ার স্ট্যাটাস → ওয়েবসাইটের অর্ডার স্ট্যাটাস। */
-export function mapCourierStatus(courierStatus: string): "delivered" | "cancelled" | "shipped" {
+export type CourierOrderStatus = "shipped" | "courier_pending" | "partial_delivered" | "delivered" | "cancelled";
+export function mapCourierStatus(courierStatus: string): CourierOrderStatus {
   const s = courierStatus.toLowerCase();
-  if (s.startsWith("delivered") || s.startsWith("partial_delivered")) return "delivered";
+  if (s.startsWith("partial_delivered")) return "partial_delivered";
+  if (s.startsWith("delivered")) return "delivered";
   if (s.startsWith("cancelled") || s.includes("return")) return "cancelled";
-  return "shipped";
+  if (s === "in_review") return "shipped";
+  return "courier_pending";
 }
 
 export async function applyCourierStatus(
@@ -36,8 +39,8 @@ export async function syncSteadfastStatuses(supabaseAdmin: any) {
 
   const { data: orders } = await supabaseAdmin
     .from("orders")
-    .select("id, courier_consignment_id")
-    .eq("status", "shipped")
+    .select("id, status, courier_consignment_id")
+    .in("status", ["shipped", "courier_pending"])
     .not("courier_consignment_id", "is", null)
     .limit(300);
 
@@ -58,11 +61,12 @@ export async function syncSteadfastStatuses(supabaseAdmin: any) {
       checked++;
       if (!body.delivery_status) continue;
       const status = mapCourierStatus(body.delivery_status);
+      const prev = o.status;
       await supabaseAdmin
         .from("orders")
         .update({ courier_status: body.delivery_status, status })
         .eq("id", o.id);
-      if (status !== "shipped") updated++;
+      if (status !== prev) updated++;
     } catch (e) {
       console.error("Steadfast status error", e);
     }
