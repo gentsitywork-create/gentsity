@@ -8,7 +8,7 @@ export function mapCourierStatus(courierStatus: string): "delivered" | "cancelle
 
 export async function applyCourierStatus(
   supabaseAdmin: any,
-  match: { consignment_id?: string; invoice?: string },
+  match: { consignment_id?: string | undefined; invoice?: string | undefined },
   courierStatus: string,
 ) {
   let q = supabaseAdmin.from("orders").update({
