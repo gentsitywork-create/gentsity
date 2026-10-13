@@ -209,6 +209,12 @@ function AdminOrders() {
     [dateFiltered, filter],
   );
 
+  /** বর্তমান ফিল্টারের অর্ডারগুলোর মোট টাকার পরিমাণ */
+  const totalAmount = useMemo(
+    () => rows.reduce((sum, o) => sum + (o.total_amount ?? 0), 0),
+    [rows],
+  );
+
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) {
@@ -486,6 +492,9 @@ function AdminOrders() {
             </button>
           );
         })}
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary shadow-sm">
+          মোট: ৳{new Intl.NumberFormat("bn-BD").format(totalAmount)}
+        </div>
       </div>
 
       {/* বাল্ক অ্যাকশন বার */}
