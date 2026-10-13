@@ -388,6 +388,28 @@ function AdminOrders() {
         </div>
       </div>
 
+      {/* আজকের সামারি */}
+      {todaySummary && (
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-primary">{toBn(todaySummary.visitors)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের ভিজিটর</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-emerald-600">{toBn(todaySummary.orders)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের অর্ডার</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-amber-600">{toBn(todaySummary.left)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">অর্ডার না করে চলে গেছে</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-primary">৳{toBn(todaySummary.sales)}</p>
+            <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের বিক্রি</p>
+          </div>
+        </div>
+      )}
+
       {/* লাইভ ভিজিটর */}
       {liveVisits.length > 0 && (
         <div className="mt-5 rounded-xl border bg-card p-4 shadow-sm">
