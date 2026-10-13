@@ -70,6 +70,7 @@ type OrderRow = {
   courier_tracking_code: string | null;
   customer_ip: string | null;
   product_type: string;
+  label_printed_at: string | null;
   created_at: string;
   order_items: { variant_id: string | null; pajama_product_id: string | null; size: string; color_name: string; qty: number }[];
 };
@@ -104,7 +105,7 @@ function AdminOrders() {
         const { data, error } = await supabase
           .from("orders")
           .select(
-            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
+            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, label_printed_at, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
           )
           .order("created_at", { ascending: false })
           .order("id")
