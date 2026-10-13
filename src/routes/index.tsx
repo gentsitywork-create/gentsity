@@ -212,7 +212,7 @@ function Home() {
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
       });
-      trackPixel("Purchase", { value: res.total, currency: "BDT" });
+      trackPixel("Purchase", { value: res.total, currency: "BDT" }, `order-${res.order_no}`);
       clearCart({ data: { session_key: sessionKey.current } }).catch(() => {});
       setDone(res);
       setPicks({});
