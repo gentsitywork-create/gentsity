@@ -31,6 +31,7 @@ function AdminSettingsInner() {
     fb_access_token: "",
     steadfast_api_key: "",
     steadfast_secret_key: "",
+    steadfast_webhook_token: "",
     bdcourier_api_key: "",
     logo_path: "",
     pajama_delivery_charge_dhaka: "70",
@@ -71,6 +72,7 @@ function AdminSettingsInner() {
         fb_access_token: data["fb_access_token"] ?? "",
         steadfast_api_key: data["steadfast_api_key"] ?? "",
         steadfast_secret_key: data["steadfast_secret_key"] ?? "",
+        steadfast_webhook_token: data["steadfast_webhook_token"] ?? "",
         bdcourier_api_key: data["bdcourier_api_key"] ?? "",
         logo_path: data["logo_path"] ?? "",
         pajama_delivery_charge_dhaka: data["pajama_delivery_charge_dhaka"] ?? "70",
@@ -351,6 +353,35 @@ function AdminSettingsInner() {
           <p className="text-xs text-muted-foreground">
             এই দুটি কী বসালে অর্ডার প্যানেল থেকে সরাসরি Steadfast-এ পাঠানো যাবে।
           </p>
+          <div className="mt-2 grid gap-2 rounded-md bg-secondary/50 p-3">
+            <p className="text-sm font-semibold">অটো স্ট্যাটাস আপডেট (Webhook)</p>
+            <Label>Callback URL (Steadfast প্যানেলে বসান)</Label>
+            <Input readOnly value="https://gentsity.lovable.app/api/public/steadfast-webhook" onFocus={(e) => e.currentTarget.select()} />
+            <Label htmlFor="steadfast_webhook_token">Auth Token (Bearer)</Label>
+            <div className="flex gap-2">
+              <Input
+                id="steadfast_webhook_token"
+                value={values.steadfast_webhook_token}
+                onChange={(e) => setValues({ ...values, steadfast_webhook_token: e.target.value })}
+                placeholder="টোকেন তৈরি করুন"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  const arr = new Uint8Array(24);
+                  crypto.getRandomValues(arr);
+                  const t = Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("");
+                  setValues({ ...values, steadfast_webhook_token: t });
+                }}
+              >
+                তৈরি করুন
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              টোকেন তৈরি করে সেভ করুন, তারপর Steadfast প্যানেল → API → Webhook-এ URL ও এই টোকেনটি বসান। ডেলিভারি/বাতিল হলে অর্ডারের স্ট্যাটাস নিজে বদলাবে।
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-2 rounded-lg border p-3">

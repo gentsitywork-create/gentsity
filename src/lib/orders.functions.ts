@@ -721,6 +721,16 @@ export const sendToCourier = createServerFn({ method: "POST" })
     };
   });
 
+/** কুরিয়ারে থাকা অর্ডারগুলোর স্ট্যাটাস এখনই Steadfast থেকে আপডেট */
+export const refreshCourierStatuses = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaffOrAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { syncSteadfastStatuses } = await import("@/lib/steadfast.server");
+    return syncSteadfastStatuses(supabaseAdmin);
+  });
+
 /** BD Courier দিয়ে কাস্টমারের ডেলিভারি সাকসেস রেশিও যাচাই */
 export const checkCourierRatio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
