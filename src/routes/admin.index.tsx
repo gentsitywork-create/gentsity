@@ -492,6 +492,9 @@ function AdminOrders() {
             </button>
           );
         })}
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary shadow-sm">
+          মোট: ৳{toBn(totalAmount.toLocaleString("en-US"))}
+        </div>
       </div>
 
       {/* বাল্ক অ্যাকশন বার */}
