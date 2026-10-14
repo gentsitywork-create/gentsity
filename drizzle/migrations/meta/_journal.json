@@ -50,6 +50,13 @@
       "when": 1791883647105,
       "tag": "0006_add_label_printed_at_to_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791959006789,
+      "tag": "0007_staff_read_update_abandoned_carts",
+      "breakpoints": true
     }
   ]
 }

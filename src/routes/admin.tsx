@@ -34,6 +34,23 @@ export function AdminOnly({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** অ্যাডমিন ও স্টাফ — দুজনের জন্যই পেজ র‍্যাপার। */
+export function StaffOrAdmin({ children }: { children: React.ReactNode }) {
+  const { isAdmin, isStaff, loading } = useAdminSession();
+  if (loading) {
+    return <div className="p-10 text-center text-muted-foreground">লোড হচ্ছে…</div>;
+  }
+  if (!isAdmin && !isStaff) {
+    return (
+      <div className="p-10 text-center">
+        <h1 className="text-xl font-bold">অনুমতি নেই</h1>
+        <p className="mt-2 text-sm text-muted-foreground">এই পেজটি অ্যাডমিন ও স্টাফের জন্য।</p>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function AdminLayout() {
   const { session, isAdmin, isStaff, loading } = useAdminSession();
   const navigate = useNavigate();
@@ -109,15 +126,15 @@ function AdminLayout() {
               সোয়েটশার্ট স্টক
             </Link>
             <Link to="/admin/hoodie-combo-stock" activeProps={{ className: "bg-secondary font-semibold" }} className="rounded-md px-3 py-2">হুডি কম্বো স্টক</Link>
+            <Link
+              to="/admin/abandoned"
+              activeProps={{ className: "bg-secondary font-semibold" }}
+              className="rounded-md px-3 py-2"
+            >
+              অসম্পূর্ণ অর্ডার
+            </Link>
             {isAdmin && (
               <>
-                <Link
-                  to="/admin/abandoned"
-                  activeProps={{ className: "bg-secondary font-semibold" }}
-                  className="rounded-md px-3 py-2"
-                >
-                  অসম্পূর্ণ অর্ডার
-                </Link>
                 <Link
                   to="/admin/blocked"
                   activeProps={{ className: "bg-secondary font-semibold" }}
