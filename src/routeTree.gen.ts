@@ -16,6 +16,7 @@ import { Route as HoodieComboRouteImport } from './routes/hoodie-combo'
 import { Route as PajamaRouteImport } from './routes/pajama'
 import { Route as SneakersRouteImport } from './routes/sneakers'
 import { Route as SweatshirtRouteImport } from './routes/sweatshirt'
+import { Route as SweatshirtComboRouteImport } from './routes/sweatshirt-combo'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAbandonedRouteImport } from './routes/admin.abandoned'
 import { Route as AdminBlockedRouteImport } from './routes/admin.blocked'
@@ -24,6 +25,7 @@ import { Route as AdminPajamaStockRouteImport } from './routes/admin.pajama-stoc
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSneakersStockRouteImport } from './routes/admin.sneakers-stock'
 import { Route as AdminStockRouteImport } from './routes/admin.stock'
+import { Route as AdminSweatshirtComboStockRouteImport } from './routes/admin.sweatshirt-combo-stock'
 import { Route as AdminSweatshirtStockRouteImport } from './routes/admin.sweatshirt-stock'
 import { Route as ApiPublicSteadfastSyncRouteImport } from './routes/api/public/steadfast-sync'
 import { Route as ApiPublicSteadfastWebhookRouteImport } from './routes/api/public/steadfast-webhook'
@@ -62,6 +64,11 @@ const SneakersRoute = SneakersRouteImport.update({
 const SweatshirtRoute = SweatshirtRouteImport.update({
   id: '/sweatshirt',
   path: '/sweatshirt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SweatshirtComboRoute = SweatshirtComboRouteImport.update({
+  id: '/sweatshirt-combo',
+  path: '/sweatshirt-combo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -104,6 +111,12 @@ const AdminStockRoute = AdminStockRouteImport.update({
   path: '/stock',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSweatshirtComboStockRoute =
+  AdminSweatshirtComboStockRouteImport.update({
+    id: '/sweatshirt-combo-stock',
+    path: '/sweatshirt-combo-stock',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminSweatshirtStockRoute = AdminSweatshirtStockRouteImport.update({
   id: '/sweatshirt-stock',
   path: '/sweatshirt-stock',
@@ -135,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
+  '/sweatshirt-combo': typeof SweatshirtComboRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/hoodie-combo-stock': typeof AdminHoodieComboStockRoute
@@ -142,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sneakers-stock': typeof AdminSneakersStockRoute
   '/admin/stock': typeof AdminStockRoute
+  '/admin/sweatshirt-combo-stock': typeof AdminSweatshirtComboStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/steadfast-sync': typeof ApiPublicSteadfastSyncRoute
@@ -155,6 +170,7 @@ export interface FileRoutesByTo {
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
+  '/sweatshirt-combo': typeof SweatshirtComboRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/hoodie-combo-stock': typeof AdminHoodieComboStockRoute
@@ -162,6 +178,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sneakers-stock': typeof AdminSneakersStockRoute
   '/admin/stock': typeof AdminStockRoute
+  '/admin/sweatshirt-combo-stock': typeof AdminSweatshirtComboStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/steadfast-sync': typeof ApiPublicSteadfastSyncRoute
@@ -177,6 +194,7 @@ export interface FileRoutesById {
   '/pajama': typeof PajamaRoute
   '/sneakers': typeof SneakersRoute
   '/sweatshirt': typeof SweatshirtRoute
+  '/sweatshirt-combo': typeof SweatshirtComboRoute
   '/admin/abandoned': typeof AdminAbandonedRoute
   '/admin/blocked': typeof AdminBlockedRoute
   '/admin/hoodie-combo-stock': typeof AdminHoodieComboStockRoute
@@ -184,6 +202,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sneakers-stock': typeof AdminSneakersStockRoute
   '/admin/stock': typeof AdminStockRoute
+  '/admin/sweatshirt-combo-stock': typeof AdminSweatshirtComboStockRoute
   '/admin/sweatshirt-stock': typeof AdminSweatshirtStockRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/steadfast-sync': typeof ApiPublicSteadfastSyncRoute
@@ -200,6 +219,7 @@ export interface FileRouteTypes {
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
+    | '/sweatshirt-combo'
     | '/admin/abandoned'
     | '/admin/blocked'
     | '/admin/hoodie-combo-stock'
@@ -207,6 +227,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sneakers-stock'
     | '/admin/stock'
+    | '/admin/sweatshirt-combo-stock'
     | '/admin/sweatshirt-stock'
     | '/admin/'
     | '/api/public/steadfast-sync'
@@ -220,6 +241,7 @@ export interface FileRouteTypes {
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
+    | '/sweatshirt-combo'
     | '/admin/abandoned'
     | '/admin/blocked'
     | '/admin/hoodie-combo-stock'
@@ -227,6 +249,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sneakers-stock'
     | '/admin/stock'
+    | '/admin/sweatshirt-combo-stock'
     | '/admin/sweatshirt-stock'
     | '/admin'
     | '/api/public/steadfast-sync'
@@ -241,6 +264,7 @@ export interface FileRouteTypes {
     | '/pajama'
     | '/sneakers'
     | '/sweatshirt'
+    | '/sweatshirt-combo'
     | '/admin/abandoned'
     | '/admin/blocked'
     | '/admin/hoodie-combo-stock'
@@ -248,6 +272,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/sneakers-stock'
     | '/admin/stock'
+    | '/admin/sweatshirt-combo-stock'
     | '/admin/sweatshirt-stock'
     | '/admin/'
     | '/api/public/steadfast-sync'
@@ -263,6 +288,7 @@ export interface RootRouteChildren {
   PajamaRoute: typeof PajamaRoute
   SneakersRoute: typeof SneakersRoute
   SweatshirtRoute: typeof SweatshirtRoute
+  SweatshirtComboRoute: typeof SweatshirtComboRoute
   ApiPublicSteadfastSyncRoute: typeof ApiPublicSteadfastSyncRoute
   ApiPublicSteadfastWebhookRoute: typeof ApiPublicSteadfastWebhookRoute
   ApiPublicVisitorHeartbeatRoute: typeof ApiPublicVisitorHeartbeatRoute
@@ -317,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/sweatshirt'
       fullPath: '/sweatshirt'
       preLoaderRoute: typeof SweatshirtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sweatshirt-combo': {
+      id: '/sweatshirt-combo'
+      path: '/sweatshirt-combo'
+      fullPath: '/sweatshirt-combo'
+      preLoaderRoute: typeof SweatshirtComboRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -375,6 +408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStockRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sweatshirt-combo-stock': {
+      id: '/admin/sweatshirt-combo-stock'
+      path: '/sweatshirt-combo-stock'
+      fullPath: '/admin/sweatshirt-combo-stock'
+      preLoaderRoute: typeof AdminSweatshirtComboStockRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/sweatshirt-stock': {
       id: '/admin/sweatshirt-stock'
       path: '/sweatshirt-stock'
@@ -414,6 +454,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSneakersStockRoute: typeof AdminSneakersStockRoute
   AdminStockRoute: typeof AdminStockRoute
+  AdminSweatshirtComboStockRoute: typeof AdminSweatshirtComboStockRoute
   AdminSweatshirtStockRoute: typeof AdminSweatshirtStockRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -426,6 +467,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSneakersStockRoute: AdminSneakersStockRoute,
   AdminStockRoute: AdminStockRoute,
+  AdminSweatshirtComboStockRoute: AdminSweatshirtComboStockRoute,
   AdminSweatshirtStockRoute: AdminSweatshirtStockRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -440,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   PajamaRoute: PajamaRoute,
   SneakersRoute: SneakersRoute,
   SweatshirtRoute: SweatshirtRoute,
+  SweatshirtComboRoute: SweatshirtComboRoute,
   ApiPublicSteadfastSyncRoute: ApiPublicSteadfastSyncRoute,
   ApiPublicSteadfastWebhookRoute: ApiPublicSteadfastWebhookRoute,
   ApiPublicVisitorHeartbeatRoute: ApiPublicVisitorHeartbeatRoute,

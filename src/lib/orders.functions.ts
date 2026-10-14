@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { sweatshirtComboSchema, SWEATSHIRT_COMBO_PRICE, SWEATSHIRT_COMBO_DELIVERY } from "@/lib/sweatshirt-combo";
 
 function clientIp(): string {
   const fwd = getRequestHeader("x-forwarded-for") ?? "";
@@ -417,6 +418,52 @@ export const placeHoodieComboOrder = createServerFn({ method: "POST" })
     return { order_no: order.order_no, total, delivery_charge: 0 };
   });
 
+export const placeSweatshirtComboOrder = createServerFn({ method: "POST" })
+  .inputValidator((data) => sweatshirtComboSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ip = clientIp();
+    if (ip) {
+      const { data: blocked } = await supabaseAdmin.from("blocked_ips").select("id").eq("ip", ip).maybeSingle();
+      if (blocked) throw new Error("দুঃখিত, এই মুহূর্তে অর্ডার নেওয়া যাচ্ছে না।");
+    }
+    await blockRecentOrder(supabaseAdmin, data.phone);
+    const ids = data.sweatshirt_ids;
+    const [{ data: rawProducts, error: pErr }, { data: stocks, error: sErr }] = await Promise.all([
+      supabaseAdmin.from("pajama_products").select("id, name, product_kind, is_active").eq("page", "sweatshirt_combo").in("id", ids),
+      supabaseAdmin.from("pajama_product_stock").select("product_id, stock").in("product_id", ids).eq("size", data.size),
+    ]);
+    if (pErr || sErr) throw new Error("স্টক যাচাই করা যায়নি, আবার চেষ্টা করুন।");
+    const selected = ids.map((id) => {
+      const product = rawProducts?.find((p) => p.id === id);
+      const stock = stocks?.find((s) => s.product_id === id);
+      if (!product || !product.is_active || product.product_kind !== "sweatshirt") throw new Error("নির্বাচিত ডিজাইন এখন আর পাওয়া যাচ্ছে না।");
+      if (!stock || stock.stock < 1) throw new Error(`${product.name} — ${data.size} সাইজের স্টক নেই।`);
+      return { product, stock };
+    });
+    const total = SWEATSHIRT_COMBO_PRICE;
+    const { data: order, error } = await supabaseAdmin.from("orders").insert({
+      customer_name: data.customer_name, phone: data.phone, address: data.address,
+      total_amount: total, delivery_charge: SWEATSHIRT_COMBO_DELIVERY,
+      product_type: "sweatshirt_combo", customer_ip: ip || null,
+    }).select("id, order_no").single();
+    if (error || !order) throw new Error("অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
+    const { error: itemError } = await supabaseAdmin.from("order_items").insert(selected.map(({ product }) => ({
+      order_id: order.id, variant_id: null, pajama_product_id: product.id, size: data.size,
+      color_name: `${product.name} (সোয়েটশার্ট)`, qty: 1, unit_price: null, pieces_per_unit: 1,
+    })));
+    if (itemError) {
+      await supabaseAdmin.from("orders").delete().eq("id", order.id);
+      throw new Error("অর্ডারের তথ্য সেভ হয়নি, আবার চেষ্টা করুন।");
+    }
+    for (const { product, stock } of selected) {
+      const { error: stockError } = await supabaseAdmin.from("pajama_product_stock").update({ stock: stock.stock - 1 }).eq("product_id", product.id).eq("size", data.size);
+      if (stockError) throw new Error("স্টক আপডেটে সমস্যা হয়েছে। অর্ডারটি জমা হয়েছে, সহায়তার জন্য যোগাযোগ করুন।");
+    }
+    await sendPurchaseCapi(supabaseAdmin, { orderNo: order.order_no, total, phone: data.phone });
+    return { order_no: order.order_no, total, delivery_charge: SWEATSHIRT_COMBO_DELIVERY };
+  });
+
 const adminItemSchema = z.object({
   variant_id: z.string().uuid().nullable().optional(),
   pajama_product_id: z.string().uuid().nullable().optional(),
@@ -434,7 +481,7 @@ const adminOrderSchema = z.object({
   total_amount: z.number().int().min(0).max(1000000),
   delivery_charge: z.number().int().min(0).max(10000).optional().default(0),
   status: z.enum(["pending", "confirmed", "hold", "shipped", "courier_pending", "partial_delivered", "delivered", "cancelled"]).optional(),
-  product_type: z.enum(["polo", "pajama", "sneakers", "sweatshirt", "hoodie_combo"]).optional().default("polo"),
+  product_type: z.enum(["polo", "pajama", "sneakers", "sweatshirt", "hoodie_combo", "sweatshirt_combo"]).optional().default("polo"),
   items: z.array(adminItemSchema).min(1).max(20),
 });
 

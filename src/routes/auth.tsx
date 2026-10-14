@@ -16,6 +16,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Gentsity স্টোরের অর্ডার ও স্টক ম্যানেজমেন্ট প্যানেলে ঢুকুন।" },
       { property: "og:title", content: "অ্যাডমিন লগইন — Gentsity" },
       { property: "og:description", content: "Gentsity ব্যাক-এন্ড প্যানেল।" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),

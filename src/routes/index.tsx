@@ -20,6 +20,8 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Gentsity — ৫ পিস পোলো শার্ট ৯৯৯ টাকা" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       {
         name: "description",
         content:
@@ -241,12 +243,13 @@ function Home() {
       </header>
 
       <nav className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-center gap-2 overflow-x-auto px-4 py-2.5">
+        <div className="mx-auto flex max-w-5xl items-center gap-2 overflow-x-auto px-4 py-2.5 sm:justify-center">
           <Link to="/" activeOptions={{ exact: true }} className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পোলো শার্ট</Link>
           <Link to="/pajama" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>পায়জামা</Link>
           <Link to="/sneakers" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>স্নিকার্স</Link>
           <Link to="/sweatshirt" className="rounded-full border px-4 py-1.5 text-sm font-semibold" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground" }}>সোয়েটশার্ট</Link>
         <Link to="/hoodie-combo" className="rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-primary-foreground" }}>হুডি কম্বো</Link>
+        <Link to="/sweatshirt-combo" className="rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap" activeProps={{ className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-primary-foreground" }}>সোয়েটশার্ট কম্বো</Link>
         </div>
       </nav>
 

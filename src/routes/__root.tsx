@@ -15,6 +15,7 @@ import FacebookPixel from "@/components/FacebookPixel";
 import { LiveVisitorTracker } from "@/components/LiveVisitors";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Toaster } from "@/components/ui/sonner";
+import { BilingualClock } from "@/components/BilingualClock";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -132,6 +133,7 @@ function RootComponent() {
       <FacebookPixel />
       <LiveVisitorTracker />
       <Toaster />
+      <BilingualClock />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <WhatsAppButton />

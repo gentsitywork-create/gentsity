@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/abandoned")({
+  head: () => ({ meta: [{ title: "অসম্পূর্ণ অর্ডার — Gentsity" }, { name: "description", content: "Gentsity — অসম্পূর্ণ অর্ডার ব্যবস্থাপনা।" }, { property: "og:title", content: "অসম্পূর্ণ অর্ডার — Gentsity" }, { property: "og:description", content: "Gentsity — অসম্পূর্ণ অর্ডার ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), 
   component: AbandonedCarts,
 });
 

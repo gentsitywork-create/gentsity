@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/")({
+  head: () => ({ meta: [{ title: "অর্ডার — Gentsity" }, { name: "description", content: "Gentsity — অর্ডার ব্যবস্থাপনা।" }, { property: "og:title", content: "অর্ডার — Gentsity" }, { property: "og:description", content: "Gentsity — অর্ডার ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), 
   component: AdminOrders,
 });
 
@@ -53,6 +54,7 @@ const LIVE_PATHS: Record<string, string> = {
   "/sneakers": "স্নিকার্স",
   "/sweatshirt": "সোয়েটশার্ট",
   "/hoodie-combo": "হুডি কম্বো",
+  "/sweatshirt-combo": "সোয়েটশার্ট কম্বো",
   "/auth": "লগইন পেজ",
 };
 
@@ -680,6 +682,9 @@ function AdminOrders() {
                     )}
                     {o.product_type === "hoodie_combo" && (
                       <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">হুডি কম্বো</span>
+                    )}
+                    {o.product_type === "sweatshirt_combo" && (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">সোয়েটশার্ট কম্বো</span>
                     )}
                     {(phoneCount[o.phone] ?? 0) > 1 && (
                       <button

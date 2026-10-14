@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/admin/settings")({
+  head: () => ({ meta: [{ title: "সেটিংস — Gentsity" }, { name: "description", content: "Gentsity — সেটিংস ব্যবস্থাপনা।" }, { property: "og:title", content: "সেটিংস — Gentsity" }, { property: "og:description", content: "Gentsity — সেটিংস ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), 
   component: AdminSettings,
 });
 

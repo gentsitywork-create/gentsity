@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/stock")({
+  head: () => ({ meta: [{ title: "পোলো স্টক — Gentsity" }, { name: "description", content: "Gentsity — পোলো স্টক ব্যবস্থাপনা।" }, { property: "og:title", content: "পোলো স্টক — Gentsity" }, { property: "og:description", content: "Gentsity — পোলো স্টক ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), 
   component: AdminStock,
 });
 

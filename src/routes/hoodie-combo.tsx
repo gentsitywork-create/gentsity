@@ -144,6 +144,7 @@ function HoodieComboPage() {
         <Link to="/sneakers" className={navCls} activeProps={navActive}>স্নিকার্স</Link>
         <Link to="/sweatshirt" className={navCls} activeProps={navActive}>সোয়েটশার্ট</Link>
         <Link to="/hoodie-combo" className={navCls} activeProps={navActive}>হুডি কম্বো</Link>
+        <Link to="/sweatshirt-combo" className={navCls} activeProps={navActive}>সোয়েটশার্ট কম্বো</Link>
       </div>
     </nav>
 
