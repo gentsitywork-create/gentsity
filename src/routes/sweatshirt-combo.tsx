@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
+import sweatshirtComboHeroBanner from "@/assets/sweatshirt-combo-hero-banner.jpg.asset.json";
 import { SWEATSHIRT_COMBO_PRICE, SWEATSHIRT_COMBO_SIZES } from "@/lib/sweatshirt-combo";
 import { LiveViewersBadge } from "@/components/LiveVisitors";
 
@@ -164,6 +165,10 @@ function SweatshirtComboPage() {
           <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><ShieldCheck className="h-4 w-4" /> কটন ফ্লিস, ইনসাইড ব্রাশ</li>
         </ul>
       </section>
+
+      <div className="mt-6 overflow-hidden rounded-lg border bg-card">
+        <img src={sweatshirtComboHeroBanner.url} alt="Gentsity সোয়েটশার্ট কম্বো — Premium Collection, Comfort Meets Style" className="w-full" loading="lazy" />
+      </div>
 
       <section className="mt-8 border-y py-4">
         <h2 className={`text-lg font-bold ${size ? "" : "attention-wobble attention-flash-red"}`}>১. আপনার সাইজ বাছুন</h2>
