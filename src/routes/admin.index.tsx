@@ -177,7 +177,6 @@ function AdminOrders() {
           .is("order_id", null),
       ]);
       const orderRows = (todayOrders.data ?? []) as { total_amount: number }[];
-      const visitRows = (visits.data ?? []) as { path: string }[];
       const byPath: Record<string, number> = {};
       for (const v of visitRows) byPath[v.path] = (byPath[v.path] ?? 0) + 1;
       return {
