@@ -148,11 +148,23 @@ function AdminOrders() {
       const dayStart = new Date();
       dayStart.setHours(0, 0, 0, 0);
       const startIso = dayStart.toISOString();
-      const [visits, todayOrders, abandoned] = await Promise.all([
-        supabase
-          .from("site_visits")
-          .select("path")
-          .gte("created_at", startIso),
+      const fetchAllVisits = async () => {
+        const all: { path: string }[] = [];
+        const PAGE = 1000;
+        for (let start = 0; ; start += PAGE) {
+          const { data, error } = await supabase
+            .from("site_visits")
+            .select("path")
+            .gte("created_at", startIso)
+            .range(start, start + PAGE - 1);
+          if (error) throw error;
+          all.push(...((data ?? []) as { path: string }[]));
+          if (!data || data.length < PAGE) break;
+        }
+        return all;
+      };
+      const [visitRows, todayOrders, abandoned] = await Promise.all([
+        fetchAllVisits(),
         supabase
           .from("orders")
           .select("id, total_amount", { count: "exact" })
