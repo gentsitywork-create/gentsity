@@ -123,12 +123,19 @@ function AdminOrders() {
     queryKey: ["live-visitors"],
     queryFn: async () => {
       const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("site_visits")
-        .select("path")
-        .gt("last_seen", cutoff);
-      if (error) throw error;
-      return (data ?? []) as { path: string }[];
+      const all: { path: string }[] = [];
+      const PAGE = 1000;
+      for (let start = 0; ; start += PAGE) {
+        const { data, error } = await supabase
+          .from("site_visits")
+          .select("path")
+          .gt("last_seen", cutoff)
+          .range(start, start + PAGE - 1);
+        if (error) throw error;
+        all.push(...((data ?? []) as { path: string }[]));
+        if (!data || data.length < PAGE) break;
+      }
+      return all;
     },
     enabled: Boolean(session),
     refetchInterval: 30_000,
