@@ -123,12 +123,19 @@ function AdminOrders() {
     queryKey: ["live-visitors"],
     queryFn: async () => {
       const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("site_visits")
-        .select("path")
-        .gt("last_seen", cutoff);
-      if (error) throw error;
-      return (data ?? []) as { path: string }[];
+      const all: { path: string }[] = [];
+      const PAGE = 1000;
+      for (let start = 0; ; start += PAGE) {
+        const { data, error } = await supabase
+          .from("site_visits")
+          .select("path")
+          .gt("last_seen", cutoff)
+          .range(start, start + PAGE - 1);
+        if (error) throw error;
+        all.push(...((data ?? []) as { path: string }[]));
+        if (!data || data.length < PAGE) break;
+      }
+      return all;
     },
     enabled: Boolean(session),
     refetchInterval: 30_000,
@@ -141,11 +148,23 @@ function AdminOrders() {
       const dayStart = new Date();
       dayStart.setHours(0, 0, 0, 0);
       const startIso = dayStart.toISOString();
-      const [visits, todayOrders, abandoned] = await Promise.all([
-        supabase
-          .from("site_visits")
-          .select("path")
-          .gte("created_at", startIso),
+      const fetchAllVisits = async () => {
+        const all: { path: string }[] = [];
+        const PAGE = 1000;
+        for (let start = 0; ; start += PAGE) {
+          const { data, error } = await supabase
+            .from("site_visits")
+            .select("path")
+            .gte("created_at", startIso)
+            .range(start, start + PAGE - 1);
+          if (error) throw error;
+          all.push(...((data ?? []) as { path: string }[]));
+          if (!data || data.length < PAGE) break;
+        }
+        return all;
+      };
+      const [visitRows, todayOrders, abandoned] = await Promise.all([
+        fetchAllVisits(),
         supabase
           .from("orders")
           .select("id, total_amount", { count: "exact" })
@@ -158,7 +177,6 @@ function AdminOrders() {
           .is("order_id", null),
       ]);
       const orderRows = (todayOrders.data ?? []) as { total_amount: number }[];
-      const visitRows = (visits.data ?? []) as { path: string }[];
       const byPath: Record<string, number> = {};
       for (const v of visitRows) byPath[v.path] = (byPath[v.path] ?? 0) + 1;
       return {

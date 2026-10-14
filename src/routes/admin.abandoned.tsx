@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { Phone } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { AdminOnly } from "./admin";
+import { StaffOrAdmin } from "./admin";
+import { useAdminSession } from "@/hooks/useAdminSession";
 import { confirmAbandonedCart } from "@/lib/orders.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,14 +51,15 @@ const STATUS_CLASS: Record<string, string> = {
 
 function AbandonedCarts() {
   return (
-    <AdminOnly>
+    <StaffOrAdmin>
       <AbandonedCartsInner />
-    </AdminOnly>
+    </StaffOrAdmin>
   );
 }
 
 function AbandonedCartsInner() {
   const qc = useQueryClient();
+  const { isAdmin } = useAdminSession();
   const confirmCart = useServerFn(confirmAbandonedCart);
   const [busy, setBusy] = useState<string | null>(null);
   const [tab, setTab] = useState<string>("all");
@@ -66,12 +68,19 @@ function AbandonedCartsInner() {
   const { data: carts = [], isLoading } = useQuery({
     queryKey: ["abandoned-carts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("abandoned_carts")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as unknown as Cart[];
+      const all: Cart[] = [];
+      const PAGE = 1000;
+      for (let start = 0; ; start += PAGE) {
+        const { data, error } = await supabase
+          .from("abandoned_carts")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .range(start, start + PAGE - 1);
+        if (error) throw error;
+        all.push(...((data ?? []) as unknown as Cart[]));
+        if (!data || data.length < PAGE) break;
+      }
+      return all;
     },
   });
 
@@ -237,9 +246,11 @@ function AbandonedCartsInner() {
                         বাতিল
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => remove(c.id)}>
-                      মুছুন
-                    </Button>
+                    {isAdmin && (
+                      <Button size="sm" variant="ghost" onClick={() => remove(c.id)}>
+                        মুছুন
+                      </Button>
+                    )}
                   </div>
                 </div>
 
