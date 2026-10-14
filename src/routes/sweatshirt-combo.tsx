@@ -86,7 +86,7 @@ function SweatshirtComboPage() {
 
   const pickSize = (s: Size) => {
     setSize(s); setSweats([]);
-    trackPixel("ViewContent", { content_name: `Hoodie combo ${s}` });
+    trackPixel("ViewContent", { content_name: `Sweatshirt combo ${s}` });
   };
   const toggleSweat = (id: string) => {
     setSweats((cur) => {
@@ -188,7 +188,7 @@ function SweatshirtComboPage() {
     </main>}
 
     {!done && <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-card p-3">
-      <div className="mx-auto flex max-w-4xl items-center gap-3">
+      <div className="mx-auto flex max-w-4xl items-center gap-3 pr-16">
         <p className="flex-1 text-sm"><strong>{sweats.length}/৩</strong> বাছাই · <span className="font-bold text-primary">{PRICE} টাকা</span></p>
         <Button disabled={!complete} className={complete ? "attention-ring" : ""} onClick={() => setOpen(true)}>অর্ডার করুন</Button>
       </div>

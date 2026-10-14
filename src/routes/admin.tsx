@@ -11,6 +11,8 @@ export const Route = createFileRoute("/admin")({
       { name: "description", content: "অর্ডার, স্টক ও সেটিংস ম্যানেজমেন্ট।" },
       { property: "og:title", content: "অ্যাডমিন প্যানেল — Gentsity" },
       { property: "og:description", content: "অর্ডার, স্টক ও সেটিংস ম্যানেজমেন্ট।" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/admin/blocked")({
+  head: () => ({ meta: [{ title: "ব্লক করা আইপি — Gentsity" }, { name: "description", content: "Gentsity — ব্লক করা আইপি ব্যবস্থাপনা।" }, { property: "og:title", content: "ব্লক করা আইপি — Gentsity" }, { property: "og:description", content: "Gentsity — ব্লক করা আইপি ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), 
   component: BlockedIps,
 });
 

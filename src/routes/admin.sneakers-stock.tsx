@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const Route = createFileRoute("/admin/sneakers-stock")({ component: AdminSneakersStock });
+export const Route = createFileRoute("/admin/sneakers-stock")({ head: () => ({ meta: [{ title: "স্নিকার্স স্টক — Gentsity" }, { name: "description", content: "Gentsity — স্নিকার্স স্টক ব্যবস্থাপনা।" }, { property: "og:title", content: "স্নিকার্স স্টক — Gentsity" }, { property: "og:description", content: "Gentsity — স্নিকার্স স্টক ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), component: AdminSneakersStock });
 const SIZES = ["40", "41", "42", "43", "44"] as const;
 type Size = (typeof SIZES)[number];
 type StockRow = { size: string; stock: number };

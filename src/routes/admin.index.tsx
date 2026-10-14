@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/")({
+  head: () => ({ meta: [{ title: "অর্ডার — Gentsity" }, { name: "description", content: "Gentsity — অর্ডার ব্যবস্থাপনা।" }, { property: "og:title", content: "অর্ডার — Gentsity" }, { property: "og:description", content: "Gentsity — অর্ডার ব্যবস্থাপনা।" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }), 
   component: AdminOrders,
 });
 
