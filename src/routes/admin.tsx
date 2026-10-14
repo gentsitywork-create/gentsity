@@ -126,6 +126,7 @@ function AdminLayout() {
               সোয়েটশার্ট স্টক
             </Link>
             <Link to="/admin/hoodie-combo-stock" activeProps={{ className: "bg-secondary font-semibold" }} className="rounded-md px-3 py-2">হুডি কম্বো স্টক</Link>
+            <Link to="/admin/sweatshirt-combo-stock" activeProps={{ className: "bg-secondary font-semibold" }} className="rounded-md px-3 py-2">সোয়েটশার্ট কম্বো স্টক</Link>
             <Link
               to="/admin/abandoned"
               activeProps={{ className: "bg-secondary font-semibold" }}
