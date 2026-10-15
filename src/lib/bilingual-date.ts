@@ -27,6 +27,10 @@ export function formatBengaliDate(date: Date) {
   const pick = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
   return {
     date: new Intl.DateTimeFormat("bn-BD", dateOptions).format(date),
+    /** মোবাইলের জন্য ছোট সংখ্যার তারিখ — যেমন ১৬/১০/২০২৬ */
+    dateShort: new Intl.DateTimeFormat("bn-BD", {
+      ...zone, day: "2-digit", month: "2-digit", year: "numeric",
+    }).format(date),
     time: `${period} ${pick("hour")}:${pick("minute")}`,
   };
 }
