@@ -7,7 +7,7 @@ export function BilingualClock() {
   useEffect(() => {
     setNow(new Date());
     const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.setInterval === undefined ? undefined : window.clearInterval(timer);
+    return () => window.clearInterval(timer);
   }, []);
   const formatted = now ? formatBengaliDate(now) : null;
   return (
