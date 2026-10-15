@@ -92,12 +92,12 @@ function SweatshirtComboPage() {
   /** পোলো পেজের মতো — ৩ পিস পূর্ণ হলে সাথে সাথে চেকআউটে নিয়ে যাওয়া */
   const prevCount = useRef(0);
   useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
     if (sweats.length === 3 && prevCount.current === 2) {
-      const t = setTimeout(() => setOpen(true), 400);
-      prevCount.current = sweats.length;
-      return () => clearTimeout(t);
+      t = setTimeout(() => setOpen(true), 400);
     }
     prevCount.current = sweats.length;
+    return () => { if (t) clearTimeout(t); };
   }, [sweats.length]);
 
   const toggleSweat = (id: string) => {
