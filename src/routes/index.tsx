@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import comboImage from "@/assets/polo-combo.jpg";
 import { LiveViewersBadge } from "@/components/LiveVisitors";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
+import { BilingualClock } from "@/components/BilingualClock";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -231,6 +232,7 @@ function Home() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="relative mx-auto flex min-h-20 max-w-5xl items-center justify-center px-4 py-3 sm:min-h-24">
+          <BilingualClock />
           <img
             src={gentsityLogo}
             alt="Gentsity"

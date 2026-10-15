@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import gentsityLogo from "@/assets/gentsity-header-logo.png";
+import { BilingualClock } from "@/components/BilingualClock";
 import { LiveViewersBadge } from "@/components/LiveVisitors";
 
 export const Route = createFileRoute("/sweatshirt")({
@@ -175,6 +176,7 @@ function SweatshirtPage() {
   return <div className="min-h-screen bg-background">
     <header className="border-b bg-card">
       <div className="relative mx-auto flex min-h-20 max-w-6xl items-center justify-center px-4 py-3 sm:min-h-24">
+        <BilingualClock />
         <img src={gentsityLogo} alt="Gentsity" className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72" />
       </div>
     </header>
