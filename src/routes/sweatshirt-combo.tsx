@@ -47,7 +47,7 @@ const navCls = "rounded-full border px-4 py-1.5 text-sm font-semibold whitespace
 const navActive = { className: "rounded-full border border-primary bg-primary px-4 py-1.5 text-sm font-semibold whitespace-nowrap text-primary-foreground" };
 
 function SweatshirtComboPage() {
-  const [size, setSize] = useState<Size | null>(null);
+  const [size, setSize] = useState<Size>("M");
   const [sweats, setSweats] = useState<string[]>([]);
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
   const [open, setOpen] = useState(false);
@@ -116,7 +116,7 @@ function SweatshirtComboPage() {
     try {
       const res = await submit({ data: { customer_name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim(), size, sweatshirt_ids: sweats } });
       trackPixel("Purchase", { value: res.total, currency: "BDT" }, `order-${res.order_no}`);
-      setDone(res); setOpen(false); setSize(null); setSweats([]); setForm({ name: "", phone: "", address: "" });
+      setDone(res); setOpen(false); setSize("M"); setSweats([]); setForm({ name: "", phone: "", address: "" });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
