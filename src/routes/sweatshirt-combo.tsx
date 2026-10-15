@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -89,6 +89,17 @@ function SweatshirtComboPage() {
     setSize(s); setSweats([]);
     trackPixel("ViewContent", { content_name: `Sweatshirt combo ${s}` });
   };
+  /** পোলো পেজের মতো — ৩ পিস পূর্ণ হলে সাথে সাথে চেকআউটে নিয়ে যাওয়া */
+  const prevCount = useRef(0);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    if (sweats.length === 3 && prevCount.current === 2) {
+      t = setTimeout(() => setOpen(true), 400);
+    }
+    prevCount.current = sweats.length;
+    return () => { if (t) clearTimeout(t); };
+  }, [sweats.length]);
+
   const toggleSweat = (id: string) => {
     setSweats((cur) => {
       if (cur.includes(id)) return cur.filter((x) => x !== id);
