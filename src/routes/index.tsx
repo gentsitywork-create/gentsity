@@ -238,7 +238,7 @@ function Home() {
             alt="Gentsity"
             className="max-h-16 w-48 object-contain sm:max-h-20 sm:w-72"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
+          <span className="absolute right-4 top-1/2 hidden -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground min-[460px]:block">
             {poloFree ? "ফ্রি ডেলিভারি" : "ক্যাশ অন ডেলিভারি"}
           </span>
         </div>
