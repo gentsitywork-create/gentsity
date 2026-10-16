@@ -10,6 +10,27 @@ function clientIp(): string {
   return first || getRequestIP({ xForwardedFor: true }) || "";
 }
 
+/** অর্ডারটি কোন বিজ্ঞাপন/সোর্স থেকে এলো — ক্লায়েন্টের utm_source কুকি বা referrer থেকে। */
+function orderSource(): string {
+  const cookie = getRequestHeader("cookie") ?? "";
+  const match = cookie.match(/(?:^|;\s*)gt_src=([^;]+)/);
+  if (match) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(match[1])) as { s?: string };
+      if (parsed.s) return String(parsed.s).slice(0, 40);
+    } catch {
+      // ভাঙা কুকি — referrer fallback
+    }
+  }
+  const ref = getRequestHeader("referer") ?? "";
+  if (/facebook|fb\./i.test(ref)) return "facebook";
+  if (/instagram/i.test(ref)) return "instagram";
+  if (/tiktok/i.test(ref)) return "tiktok";
+  if (/youtube|youtu\.be/i.test(ref)) return "youtube";
+  if (/google/i.test(ref)) return "google";
+  return "direct";
+}
+
 /** একই মোবাইল নম্বর থেকে ৩০ মিনিটের মধ্যে দ্বিতীয় অর্ডার ব্লক করে। */
 async function blockRecentOrder(supabaseAdmin: any, phone: string) {
   const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
@@ -156,6 +177,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         delivery_charge: deliveryCharge,
         product_type: "polo",
         customer_ip: clientIp() || null,
+        source: orderSource(),
       })
       .select("id, order_no")
       .single();
@@ -282,6 +304,7 @@ async function handleCatalogOrder(config: CatalogConfig, data: CatalogOrderData)
           delivery_charge: deliveryCharge,
           product_type: config.page,
           customer_ip: ip || null,
+          source: orderSource(),
         })
         .select("id, order_no")
         .single();
@@ -395,6 +418,7 @@ export const placeHoodieComboOrder = createServerFn({ method: "POST" })
     const { data: order, error: oErr } = await supabaseAdmin.from("orders").insert({
       customer_name: data.customer_name, phone: data.phone, address: data.address,
       total_amount: total, delivery_charge: 0, product_type: "hoodie_combo", customer_ip: ip || null,
+      source: orderSource(),
     }).select("id, order_no").single();
     if (oErr || !order) throw new Error("অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
 
@@ -446,6 +470,7 @@ export const placeSweatshirtComboOrder = createServerFn({ method: "POST" })
       customer_name: data.customer_name, phone: data.phone, address: data.address,
       total_amount: total, delivery_charge: SWEATSHIRT_COMBO_DELIVERY,
       product_type: "sweatshirt_combo", customer_ip: ip || null,
+      source: orderSource(),
     }).select("id, order_no").single();
     if (error || !order) throw new Error("অর্ডার জমা হয়নি, আবার চেষ্টা করুন।");
     const { error: itemError } = await supabaseAdmin.from("order_items").insert(selected.map(({ product }) => ({
@@ -521,6 +546,7 @@ export const adminCreateOrder = createServerFn({ method: "POST" })
         delivery_charge: data.delivery_charge ?? 0,
         status: data.status ?? "confirmed",
         product_type: data.product_type,
+        source: "admin",
       })
       .select("id, order_no")
       .single();
