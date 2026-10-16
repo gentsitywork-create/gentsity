@@ -15,6 +15,7 @@ import FacebookPixel from "@/components/FacebookPixel";
 import { LiveVisitorTracker } from "@/components/LiveVisitors";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Toaster } from "@/components/ui/sonner";
+import { captureTrafficSource } from "@/lib/traffic-source";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -126,6 +127,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // বিজ্ঞাপনের লিংকে utm_source থাকলে সেটা ধরে রাখে — অর্ডারের সোর্স জানার জন্য
+  useEffect(() => {
+    captureTrafficSource();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

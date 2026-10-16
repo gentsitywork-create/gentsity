@@ -178,6 +178,7 @@ export type Database = {
           order_no: number
           phone: string
           product_type: string
+          source: string | null
           status: string
           total_amount: number
           updated_at: string
@@ -198,6 +199,7 @@ export type Database = {
           order_no?: number
           phone: string
           product_type?: string
+          source?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
@@ -218,6 +220,7 @@ export type Database = {
           order_no?: number
           phone?: string
           product_type?: string
+          source?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
