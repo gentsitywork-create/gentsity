@@ -14,9 +14,10 @@ function clientIp(): string {
 function orderSource(): string {
   const cookie = getRequestHeader("cookie") ?? "";
   const match = cookie.match(/(?:^|;\s*)gt_src=([^;]+)/);
-  if (match) {
+  const raw = match?.[1];
+  if (raw) {
     try {
-      const parsed = JSON.parse(decodeURIComponent(match[1])) as { s?: string };
+      const parsed = JSON.parse(decodeURIComponent(raw)) as { s?: string };
       if (parsed.s) return String(parsed.s).slice(0, 40);
     } catch {
       // ভাঙা কুকি — referrer fallback
