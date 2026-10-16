@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { sendToCourier, checkCourierRatio, refreshCourierStatuses } from "@/lib/orders.functions";
 import { useAdminSession } from "@/hooks/useAdminSession";
+import { sourceLabel } from "@/lib/traffic-source";
 import { OrderDialog, type EditableOrder } from "@/components/admin/OrderDialog";
 import { printCourierLabels } from "@/components/admin/printLabels";
 import { toBn } from "@/components/LiveVisitors";
@@ -72,6 +73,7 @@ type OrderRow = {
   courier_tracking_code: string | null;
   customer_ip: string | null;
   product_type: string;
+  source: string | null;
   label_printed_at: string | null;
   created_at: string;
   order_items: { variant_id: string | null; pajama_product_id: string | null; size: string; color_name: string; qty: number }[];
@@ -107,7 +109,7 @@ function AdminOrders() {
         const { data, error } = await supabase
           .from("orders")
           .select(
-            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, label_printed_at, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
+            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, source, label_printed_at, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
           )
           .order("created_at", { ascending: false })
           .order("id")
@@ -255,6 +257,20 @@ function AdminOrders() {
     [rows],
   );
 
+  /** আজকের অর্ডারগুলো কোন সোর্স (ফেসবুক/টিকটক/ইউটিউব…) থেকে এসেছে */
+  const todayBySource = useMemo(() => {
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const map: Record<string, number> = {};
+    for (const o of orders) {
+      if (o.status === "cancelled") continue;
+      if (new Date(o.created_at) < dayStart) continue;
+      const s = o.source || "direct";
+      map[s] = (map[s] ?? 0) + 1;
+    }
+    return map;
+  }, [orders]);
+
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) {
@@ -385,7 +401,7 @@ function AdminOrders() {
   };
 
   const exportCsv = () => {
-    const head = ["অর্ডার", "নাম", "মোবাইল", "ঠিকানা", "জেলা", "পণ্য", "টাকা", "স্ট্যাটাস", "তারিখ"];
+    const head = ["অর্ডার", "নাম", "মোবাইল", "ঠিকানা", "জেলা", "পণ্য", "টাকা", "স্ট্যাটাস", "সোর্স", "তারিখ"];
     const lines = rows.map((o) =>
       [
         o.order_no,
@@ -396,6 +412,7 @@ function AdminOrders() {
         o.order_items.map((i) => `${i.size}-${i.color_name}x${i.qty}`).join(" | "),
         o.total_amount,
         STATUS[o.status] ?? o.status,
+        sourceLabel(o.source),
         new Date(o.created_at).toLocaleString("bn-BD"),
       ]
         .map((v) => `"${String(v).replace(/"/g, '""')}"`)
@@ -493,6 +510,25 @@ function AdminOrders() {
                   className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
                 >
                   {LIVE_PATHS[path] ?? path}: {toBn(n)} জন
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* আজকের অর্ডার কোন বিজ্ঞাপন/সোর্স থেকে */}
+      {Object.keys(todayBySource).length > 0 && (
+        <div className="mt-3 rounded-xl border bg-card p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-primary">আজকের অর্ডার — কোথা থেকে এসেছে</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {Object.entries(todayBySource)
+              .sort((a, b) => b[1] - a[1])
+              .map(([s, n]) => (
+                <span
+                  key={s}
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground"
+                >
+                  {sourceLabel(s)}: {toBn(n)}টি
                 </span>
               ))}
           </div>
@@ -685,6 +721,11 @@ function AdminOrders() {
                     )}
                     {o.product_type === "sweatshirt_combo" && (
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">সোয়েটশার্ট কম্বো</span>
+                    )}
+                    {o.source && o.source !== "direct" && (
+                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">
+                        {sourceLabel(o.source)}
+                      </span>
                     )}
                     {(phoneCount[o.phone] ?? 0) > 1 && (
                       <button
