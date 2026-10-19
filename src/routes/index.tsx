@@ -380,7 +380,7 @@ function Home() {
             {offerActive && (
               <div className="mb-5 rounded-xl border-2 border-destructive bg-destructive/10 p-4 text-center">
                 <p className="text-base font-bold text-destructive">
-                  ⏰ এই সময়ের মধ্যে অর্ডার করলে পাবেন মাত্র <span className="text-xl">{toBn(price - POLO_OFFER_DISCOUNT)} টাকায়!</span>
+                  এই সময়ের মধ্যে অর্ডার করলে পাবেন মাত্র <span className="text-xl">{toBn(price - POLO_OFFER_DISCOUNT)} টাকায়!</span>
                 </p>
                 <p className="mt-2 font-mono text-4xl font-extrabold tracking-wider text-destructive attention-wobble">
                   {toBn(mm)}:{toBn(ss)}
