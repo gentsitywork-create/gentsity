@@ -1,15 +1,12 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getProductImageUrls } from "@/lib/product-images.functions";
 
 /**
- * Product images live in the public "products" bucket and are served by
- * permanent public URLs instead of short-lived signed URLs. Mapping is
- * synchronous; paths that are empty are skipped.
+ * Browser helper: returns a map of storage path -> view URL for product
+ * images. The "products" bucket is private; URLs are minted server-side by
+ * getProductImageUrls, so no broad storage read access is needed.
  */
-export function productImageUrls(paths: string[]): Record<string, string> {
-  const map: Record<string, string> = {};
-  for (const path of paths) {
-    if (!path) continue;
-    map[path] = supabase.storage.from("products").getPublicUrl(path).data.publicUrl;
-  }
-  return map;
+export async function productImageUrls(paths: string[]): Promise<Record<string, string>> {
+  const usable = paths.filter((p): p is string => Boolean(p));
+  if (usable.length === 0) return {};
+  return getProductImageUrls({ data: usable });
 }
