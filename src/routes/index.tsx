@@ -6,7 +6,10 @@ import { toast } from "sonner";
 import { Check, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
-import { markCartOrdered, placeOrder, saveAbandonedCart } from "@/lib/orders.functions";
+import { markCartOrdered, placeOrder, saveAbandonedCart, startPoloOffer } from "@/lib/orders.functions";
+import { POLO_OFFER_DISCOUNT, POLO_OFFER_MINUTES, poloOfferPrice, poloOfferValid } from "@/lib/polo-offer";
+
+const toBn = (v: string | number) => String(v).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]!);
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,7 +92,33 @@ function Home() {
   const outsideCharge = Math.max(0, Number(settings?.["polo_delivery_charge_outside"] ?? 150) || 150);
   const [deliveryArea, setDeliveryArea] = useState<"dhaka" | "outside">("outside");
   const deliveryCharge = poloFree ? 0 : deliveryArea === "dhaka" ? dhakaCharge : outsideCharge;
-  const grandTotal = price + deliveryCharge;
+
+  // নতুন ভিজিটরের ১০ মিনিটের অফার — একবারই শুরু হয়, রিফ্রেশে নতুন করে শুরু হয় না
+  const startOffer = useServerFn(startPoloOffer);
+  const [offer, setOffer] = useState<{ token: string; started_at: number } | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const saved = window.localStorage.getItem("gt_polo_offer");
+    if (saved) {
+      try { setOffer(JSON.parse(saved)); } catch { /* ignore */ }
+      return;
+    }
+    startOffer()
+      .then((o) => {
+        window.localStorage.setItem("gt_polo_offer", JSON.stringify(o));
+        setOffer(o);
+      })
+      .catch(() => {});
+  }, [startOffer]);
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const offerActive = offer !== null && poloOfferValid(offer.started_at, now);
+  const remaining = offer ? Math.max(0, offer.started_at + POLO_OFFER_MINUTES * 60_000 - now) : 0;
+  const mm = String(Math.floor(remaining / 60000)).padStart(2, "0");
+  const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2, "0");
+  const grandTotal = poloOfferPrice(price, offerActive) + deliveryCharge;
   const { data: variants = [], isLoading } = useQuery({
     queryKey: ["variants", size],
     enabled: Boolean(size),
@@ -212,6 +241,7 @@ function Home() {
           address: form.address.trim(),
           size,
           delivery_area: deliveryArea,
+          offer_token: offerActive ? offer?.token : undefined,
           items: Object.entries(picks).map(([variant_id, qty]) => ({ variant_id, qty })),
         },
       });
@@ -347,6 +377,19 @@ function Home() {
           </section>
 
           <section id="order" className="mx-auto max-w-3xl px-4 pb-16">
+            {offerActive && (
+              <div className="mb-5 rounded-xl border-2 border-destructive bg-destructive/10 p-4 text-center">
+                <p className="text-base font-bold text-destructive">
+                  ⏰ এই সময়ের মধ্যে অর্ডার করলে পাবেন মাত্র <span className="text-xl">{toBn(price - POLO_OFFER_DISCOUNT)} টাকায়!</span>
+                </p>
+                <p className="mt-2 font-mono text-4xl font-extrabold tracking-wider text-destructive attention-wobble">
+                  {toBn(mm)}:{toBn(ss)}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  দাম <s>{toBn(price)}</s> টাকা থেকে {toBn(POLO_OFFER_DISCOUNT)} টাকা ছাড়
+                </p>
+              </div>
+            )}
             <div className="rounded-xl border bg-card p-5">
               <h2 className="text-lg font-bold"><span className="attention-wobble attention-flash-red">১. সাইজ বাছুন</span></h2>
               <div className="mt-3 grid grid-cols-4 gap-3">
@@ -501,6 +544,12 @@ function Home() {
                     <span>৫ পিস পোলো শার্ট ({size})</span>
                     <span className="font-semibold">{price} টাকা</span>
                   </div>
+                  {offerActive && (
+                    <div className="mt-1 flex justify-between font-semibold text-destructive">
+                      <span>১০ মিনিটের অফার ছাড় ({toBn(mm)}:{toBn(ss)})</span>
+                      <span>−{toBn(POLO_OFFER_DISCOUNT)} টাকা</span>
+                    </div>
+                  )}
                   <div className="mt-1 flex justify-between">
                     <span>ডেলিভারি চার্জ</span>
                     <span className="font-semibold text-primary">{poloFree ? "ফ্রি" : `${deliveryCharge} টাকা`}</span>
