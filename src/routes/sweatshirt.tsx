@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Check, Flame, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { placeSweatshirtOrder } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
@@ -89,19 +90,15 @@ function SweatshirtPage() {
     queryKey: ["sweatshirt-product-images", products.map((p) => p.image_url).join(",")],
     enabled: products.some((p) => Boolean(p.image_url)),
     queryFn: async () => {
-      const paths = products.map((p) => p.image_url).filter((path): path is string => Boolean(path));
-      const map: Record<string, string> = {};
-      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-      (data ?? []).forEach((row) => { if (row.path && row.signedUrl) map[row.path] = row.signedUrl; });
-      return map;
+      return productImageUrls(products.map((p) => p.image_url));
     },
   });
   const BANNER_PATHS = ["sweatshirt/products/sweatshirt-1.png", "sweatshirt/products/sweatshirt-2.png"];
   const { data: bannerImages = [] } = useQuery({
     queryKey: ["sweatshirt-banner-images"],
     queryFn: async () => {
-      const { data } = await supabase.storage.from("products").createSignedUrls(BANNER_PATHS, 3600);
-      return (data ?? []).map((row) => row.signedUrl).filter((url): url is string => Boolean(url));
+      const map = await productImageUrls(BANNER_PATHS);
+      return BANNER_PATHS.map((p) => map[p]).filter((url): url is string => Boolean(url));
     },
   });
 

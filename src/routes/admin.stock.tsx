@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Trash2, Upload } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { useAdminSession } from "@/hooks/useAdminSession";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,14 +36,8 @@ type Variant = {
   sort_order: number;
 };
 
-async function signedUrls(paths: string[]) {
-  const map: Record<string, string> = {};
-  if (paths.length === 0) return map;
-  const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-  (data ?? []).forEach((d) => {
-    if (d.path && d.signedUrl) map[d.path] = d.signedUrl;
-  });
-  return map;
+function signedUrls(paths: string[]) {
+  return productImageUrls(paths);
 }
 
 function AdminStock() {

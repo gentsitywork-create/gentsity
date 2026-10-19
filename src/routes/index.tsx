@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Check, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { markCartOrdered, placeOrder, saveAbandonedCart, startPoloOffer } from "@/lib/orders.functions";
 import { POLO_OFFER_DISCOUNT, POLO_OFFER_MINUTES, poloOfferPrice, poloOfferValid } from "@/lib/polo-offer";
 
@@ -141,14 +142,7 @@ function Home() {
     queryKey: ["variant-images", variants.map((v) => v.image_url).join(",")],
     enabled: variants.length > 0,
     queryFn: async () => {
-      const paths = variants.map((v) => v.image_url).filter((p): p is string => Boolean(p));
-      const map: Record<string, string> = {};
-      if (paths.length === 0) return map;
-      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-      (data ?? []).forEach((d) => {
-        if (d.path && d.signedUrl) map[d.path] = d.signedUrl;
-      });
-      return map;
+      return productImageUrls(variants.map((v) => v.image_url));
     },
   });
 
