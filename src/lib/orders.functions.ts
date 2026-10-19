@@ -157,7 +157,10 @@ export const placeOrder = createServerFn({ method: "POST" })
       ]);
     const sMap: Record<string, string> = {};
     (priceRows ?? []).forEach((r: any) => (sMap[r.key] = r.value ?? ""));
-    const comboPrice = Number(sMap["combo_price"] ?? 999) || 999;
+    const basePrice = Number(sMap["combo_price"] ?? 999) || 999;
+    const offerStart = data.offer_token ? await verifyOfferToken(data.offer_token) : null;
+    const offerActive = offerStart !== null && poloOfferValid(offerStart, Date.now(), POLO_OFFER_GRACE_MS);
+    const comboPrice = poloOfferPrice(basePrice, offerActive);
     const poloFree = sMap["polo_free_delivery"] !== "off";
     const poloRate =
       data.delivery_area === "dhaka"
@@ -165,6 +168,9 @@ export const placeOrder = createServerFn({ method: "POST" })
         : Number(sMap["polo_delivery_charge_outside"] ?? 150) || 150;
     const deliveryCharge = poloFree ? 0 : Math.max(0, poloRate);
     const total = comboPrice + deliveryCharge;
+    if (offerActive) {
+      data.note = `[১০ মিনিট অফার −${POLO_OFFER_DISCOUNT}৳]${data.note ? " " + data.note : ""}`;
+    }
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
