@@ -64,6 +64,13 @@
       "when": 1792170537733,
       "tag": "0008_orders_ad_source",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792439493882,
+      "tag": "0009_tighten_products_storage_read",
+      "breakpoints": true
     }
   ]
 }
