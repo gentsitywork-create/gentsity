@@ -29,7 +29,12 @@ export function captureTrafficSource() {
 export function sourceLabel(source: string | null | undefined): string {
   const map: Record<string, string> = {
     facebook: "ফেসবুক",
+    fb: "ফেসবুক",
     instagram: "ইনস্টাগ্রাম",
+    ig: "ইনস্টাগ্রাম",
+    th: "থ্রেডস (ফেসবুক অ্যাড)",
+    msg: "মেসেঞ্জার (ফেসবুক অ্যাড)",
+    an: "ফেসবুক অ্যাড নেটওয়ার্ক",
     tiktok: "টিকটক",
     youtube: "ইউটিউব",
     google: "গুগল",
