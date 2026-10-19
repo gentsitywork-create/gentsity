@@ -8,10 +8,14 @@ describe("polo 10-minute offer", () => {
   it("full price after the offer", () => {
     expect(poloOfferPrice(1050, false)).toBe(1050);
   });
-  it("valid within 10 minutes, expired after", () => {
+  it("valid within 10 minutes, expired after (only while the offer is enabled)", () => {
     const t = 1_000_000_000;
-    expect(poloOfferValid(t, t + 9 * 60_000)).toBe(true);
-    expect(poloOfferValid(t, t + 11 * 60_000)).toBe(false);
+    if (POLO_OFFER_ENABLED) {
+      expect(poloOfferValid(t, t + 9 * 60_000)).toBe(true);
+      expect(poloOfferValid(t, t + 11 * 60_000)).toBe(false);
+    } else {
+      expect(poloOfferValid(t, t + 9 * 60_000)).toBe(false);
+    }
   });
   it("offer is currently switched off — timer never activates and full price applies", () => {
     expect(POLO_OFFER_ENABLED).toBe(false);
