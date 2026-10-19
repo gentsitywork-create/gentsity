@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { createStaff, listStaff, removeStaff } from "@/lib/orders.functions";
 import { AdminOnly } from "./admin";
 import { Button } from "@/components/ui/button";
@@ -98,8 +99,8 @@ function AdminSettingsInner() {
     queryKey: ["admin-logo-url", values.logo_path],
     enabled: Boolean(values.logo_path),
     queryFn: async () => {
-      const { data } = await supabase.storage.from("products").createSignedUrl(values.logo_path, 3600);
-      return data?.signedUrl ?? "";
+      const map = await productImageUrls([values.logo_path]);
+      return map[values.logo_path] ?? "";
     },
   });
 

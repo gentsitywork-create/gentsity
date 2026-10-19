@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { useAdminSession } from "@/hooks/useAdminSession";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,11 +43,7 @@ function AdminSweatshirtComboStock() {
   const { data: images = {} } = useQuery({
     queryKey: ["admin-sweatshirt-combo-images", products.map((p) => p.image_url).join(",")], enabled: products.some((p) => Boolean(p.image_url)),
     queryFn: async () => {
-      const paths = products.map((p) => p.image_url).filter((path): path is string => Boolean(path));
-      const map: Record<string, string> = {};
-      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-      (data ?? []).forEach((row) => { if (row.path && row.signedUrl) map[row.path] = row.signedUrl; });
-      return map;
+      return productImageUrls(products.map((p) => p.image_url));
     },
   });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-sweatshirt-combo-products"] });

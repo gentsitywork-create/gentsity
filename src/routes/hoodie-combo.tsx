@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Check, Flame, ShieldCheck, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { placeHoodieComboOrder } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
@@ -76,11 +77,7 @@ function HoodieComboPage() {
     queryKey: ["hoodie-combo-images", products.map((p) => p.image_url).join(",")],
     enabled: products.some((p) => Boolean(p.image_url)),
     queryFn: async () => {
-      const paths = products.map((p) => p.image_url).filter((x): x is string => Boolean(x));
-      const map: Record<string, string> = {};
-      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-      (data ?? []).forEach((r) => { if (r.path && r.signedUrl) map[r.path] = r.signedUrl; });
-      return map;
+      return productImageUrls(products.map((p) => p.image_url));
     },
   });
 

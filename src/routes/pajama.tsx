@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Check, Flame, KeyRound, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { productImageUrls } from "@/lib/product-images";
 import { placePajamaOrder } from "@/lib/orders.functions";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
@@ -85,11 +86,7 @@ function PajamaPage() {
     queryKey: ["pajama-product-images", products.map((p) => p.image_url).join(",")],
     enabled: products.some((p) => Boolean(p.image_url)),
     queryFn: async () => {
-      const paths = products.map((p) => p.image_url).filter((path): path is string => Boolean(path));
-      const map: Record<string, string> = {};
-      const { data } = await supabase.storage.from("products").createSignedUrls(paths, 3600);
-      (data ?? []).forEach((row) => { if (row.path && row.signedUrl) map[row.path] = row.signedUrl; });
-      return map;
+      return productImageUrls(products.map((p) => p.image_url));
     },
   });
 
