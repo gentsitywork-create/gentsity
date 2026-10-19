@@ -3,6 +3,7 @@ import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sweatshirtComboSchema, SWEATSHIRT_COMBO_PRICE, SWEATSHIRT_COMBO_DELIVERY } from "@/lib/sweatshirt-combo";
+import { POLO_OFFER_DISCOUNT, POLO_OFFER_GRACE_MS, poloOfferPrice, poloOfferValid } from "@/lib/polo-offer";
 
 function clientIp(): string {
   const fwd = getRequestHeader("x-forwarded-for") ?? "";
@@ -105,6 +106,28 @@ const orderSchema = z.object({
     .array(z.object({ variant_id: z.string().uuid(), qty: z.number().int().min(1).max(5) }))
     .min(1)
     .max(5),
+  offer_token: z.string().max(200).optional(),
+});
+
+/** অফার শুরুর সময় সার্ভার-স্বাক্ষরিত, যাতে কেউ নিজে সময় বানাতে না পারে */
+async function offerHmac(msg: string): Promise<string> {
+  const secret = process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "gentsity-offer";
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`polo-offer:${msg}`));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function verifyOfferToken(token: string): Promise<number | null> {
+  const [ts, sig] = token.split(".");
+  if (!ts || !sig || !/^\d+$/.test(ts)) return null;
+  return (await offerHmac(ts)) === sig ? Number(ts) : null;
+}
+
+export const startPoloOffer = createServerFn({ method: "POST" }).handler(async () => {
+  const now = Date.now();
+  return { token: `${now}.${await offerHmac(String(now))}`, started_at: now };
 });
 
 export const placeOrder = createServerFn({ method: "POST" })
@@ -157,7 +180,10 @@ export const placeOrder = createServerFn({ method: "POST" })
       ]);
     const sMap: Record<string, string> = {};
     (priceRows ?? []).forEach((r: any) => (sMap[r.key] = r.value ?? ""));
-    const comboPrice = Number(sMap["combo_price"] ?? 999) || 999;
+    const basePrice = Number(sMap["combo_price"] ?? 999) || 999;
+    const offerStart = data.offer_token ? await verifyOfferToken(data.offer_token) : null;
+    const offerActive = offerStart !== null && poloOfferValid(offerStart, Date.now(), POLO_OFFER_GRACE_MS);
+    const comboPrice = poloOfferPrice(basePrice, offerActive);
     const poloFree = sMap["polo_free_delivery"] !== "off";
     const poloRate =
       data.delivery_area === "dhaka"
@@ -165,6 +191,9 @@ export const placeOrder = createServerFn({ method: "POST" })
         : Number(sMap["polo_delivery_charge_outside"] ?? 150) || 150;
     const deliveryCharge = poloFree ? 0 : Math.max(0, poloRate);
     const total = comboPrice + deliveryCharge;
+    if (offerActive) {
+      data.note = `[১০ মিনিট অফার −${POLO_OFFER_DISCOUNT}৳]${data.note ? " " + data.note : ""}`;
+    }
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
