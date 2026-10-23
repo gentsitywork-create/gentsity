@@ -86,7 +86,7 @@ function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="admin-shell min-h-screen bg-background text-foreground">
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3">
           <span className="font-display text-xl font-extrabold text-primary">Gentsity</span>

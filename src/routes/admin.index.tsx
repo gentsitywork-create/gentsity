@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { orderPage } from "@/lib/admin-order-pages";
 import { toast } from "sonner";
+import { Users, ShoppingBag, ShoppingCart, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { sendToCourier, checkCourierRatio, refreshCourierStatuses } from "@/lib/orders.functions";
@@ -40,14 +41,14 @@ const STATUS: Record<string, string> = {
 };
 
 const STATUS_CLASS: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  hold: "bg-slate-200 text-slate-800",
-  shipped: "bg-violet-100 text-violet-800",
-  courier_pending: "bg-orange-100 text-orange-800",
-  partial_delivered: "bg-teal-100 text-teal-800",
-  delivered: "bg-emerald-100 text-emerald-800",
-  cancelled: "bg-rose-100 text-rose-800",
+  pending: "admin-status text-admin-warning",
+  confirmed: "admin-status text-admin-info",
+  hold: "admin-status text-admin-neutral",
+  shipped: "admin-status text-admin-review",
+  courier_pending: "admin-status text-admin-orange",
+  partial_delivered: "admin-status text-admin-teal",
+  delivered: "admin-status text-admin-success",
+  cancelled: "admin-status text-admin-danger",
 };
 
 const LIVE_PATHS: Record<string, string> = {
@@ -406,12 +407,9 @@ function AdminOrders() {
       {/* হেডার */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-primary">
+          <h1 className="font-display text-3xl font-extrabold text-primary">
             অর্ডার ম্যানেজমেন্ট
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            অর্ডার রিভিউ, ফুলফিলমেন্ট ও ট্র্যাকিং — সব এক জায়গায়।
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -450,20 +448,24 @@ function AdminOrders() {
       {/* আজকের সামারি */}
       {todaySummary && (
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
-            <p className="text-2xl font-extrabold text-primary">{toBn(todaySummary.visitors)}</p>
+          <div className="admin-metric p-4 text-admin-info">
+            <Users className="mb-3 size-5" aria-hidden="true" />
+            <p className="text-2xl font-extrabold">{toBn(todaySummary.visitors)}</p>
             <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের ভিজিটর</p>
           </div>
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
-            <p className="text-2xl font-extrabold text-emerald-600">{toBn(todaySummary.orders)}</p>
+          <div className="admin-metric p-4 text-admin-success">
+            <ShoppingBag className="mb-3 size-5" aria-hidden="true" />
+            <p className="text-2xl font-extrabold">{toBn(todaySummary.orders)}</p>
             <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের অর্ডার</p>
           </div>
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
-            <p className="text-2xl font-extrabold text-amber-600">{toBn(todaySummary.left)}</p>
+          <div className="admin-metric p-4 text-admin-warning">
+            <ShoppingCart className="mb-3 size-5" aria-hidden="true" />
+            <p className="text-2xl font-extrabold">{toBn(todaySummary.left)}</p>
             <p className="mt-1 text-xs font-semibold text-muted-foreground">অর্ডার না করে চলে গেছে</p>
           </div>
-          <div className="rounded-xl border bg-card p-4 text-center shadow-sm">
-            <p className="text-2xl font-extrabold text-primary">৳{toBn(todaySummary.sales)}</p>
+          <div className="admin-metric p-4 text-admin-review">
+            <Wallet className="mb-3 size-5" aria-hidden="true" />
+            <p className="break-words text-2xl font-extrabold">৳{toBn(todaySummary.sales)}</p>
             <p className="mt-1 text-xs font-semibold text-muted-foreground">আজকের বিক্রি</p>
           </div>
         </div>
@@ -471,7 +473,7 @@ function AdminOrders() {
 
       {/* আজকের পেজ-ভিত্তিক ভিজিটর */}
       {todaySummary && Object.keys(todaySummary.byPath).length > 0 && (
-        <div className="mt-3 rounded-xl border bg-card p-4 shadow-sm">
+        <div className="admin-band mt-3">
           <h3 className="text-sm font-bold text-primary">আজকের ভিজিটর — কোন পেজে কত জন</h3>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(todaySummary.byPath)
@@ -490,7 +492,7 @@ function AdminOrders() {
 
       {/* আজকের অর্ডার কোন বিজ্ঞাপন/সোর্স থেকে */}
       {Object.keys(todayBySource).length > 0 && (
-        <div className="mt-3 rounded-xl border bg-card p-4 shadow-sm">
+        <div className="admin-band mt-3">
           <h3 className="text-sm font-bold text-primary">আজকের অর্ডার — কোথা থেকে এসেছে</h3>
           <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(todayBySource)
@@ -509,11 +511,11 @@ function AdminOrders() {
 
       {/* লাইভ ভিজিটর */}
       {liveVisitorCount > 0 && (
-        <div className="mt-5 rounded-xl border bg-card p-4 shadow-sm">
+        <div className="admin-band mt-5">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-admin-success opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-admin-success" />
             </span>
             <h2 className="text-sm font-bold text-primary">
               এখন {toBn(liveVisitorCount)} জন ভিজিটর লাইভ
@@ -562,25 +564,23 @@ function AdminOrders() {
         {(["all", ...Object.keys(STATUS), "label_pending"] as string[]).map((k) => {
           const active = filter === k;
           return (
-            <button
+            <Button
               key={k}
               type="button"
+              variant="outline"
+              aria-pressed={active}
               onClick={() => { setFilter(k); setPage(1); }}
-              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition ${
-                active
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "bg-card hover:bg-secondary"
-              }`}
+              className={`admin-status-tab gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${STATUS_CLASS[k] ?? "text-primary"}`}
             >
               {k === "all" ? "সব" : k === "label_pending" ? "🖨 লেবেল বাকি" : STATUS[k]}
               <span
                 className={`rounded-md px-1.5 py-0.5 text-xs font-bold ${
-                  active ? "bg-primary-foreground/20" : "bg-secondary"
+                  "bg-card/70"
                 }`}
               >
                 {counts[k] ?? 0}
               </span>
-            </button>
+            </Button>
           );
         })}
         <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-bold text-primary shadow-sm">
@@ -590,7 +590,7 @@ function AdminOrders() {
 
       {/* বাল্ক অ্যাকশন বার */}
       {selected.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-primary px-4 py-3 text-primary-foreground shadow-md">
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg bg-primary px-4 py-3 text-primary-foreground shadow-md">
           <span className="text-sm font-bold">{selected.length}টি অর্ডার সিলেক্ট করা হয়েছে</span>
           <button
             type="button"
@@ -640,13 +640,13 @@ function AdminOrders() {
       ) : isLoading || (rows.length > 0 && detailsPending) ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (
-        <div className="mt-5 rounded-xl border bg-card p-10 text-center text-sm text-muted-foreground">
+        <div className="mt-5 rounded-lg border bg-card p-10 text-center text-sm text-muted-foreground">
           কোনো অর্ডার পাওয়া যায়নি।
         </div>
       ) : (
-        <div className="mt-5 overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="mt-5 overflow-hidden rounded-lg border bg-card shadow-sm">
           {/* টেবিল হেড */}
-          <div className="hidden items-center gap-4 border-b bg-secondary/40 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground xl:grid xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,1fr)_70px_90px_110px_150px]">
+          <div className="hidden items-center gap-4 border-b bg-secondary px-4 py-3 text-xs font-bold text-secondary-foreground xl:grid xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,1fr)_70px_90px_110px_150px]">
             <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
             <span>অর্ডার তথ্য</span>
             <span>পণ্য</span>
@@ -661,7 +661,7 @@ function AdminOrders() {
             return (
               <div
                 key={o.id}
-                className={`grid gap-3 border-b px-4 py-4 last:border-0 transition xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,1fr)_70px_90px_110px_150px] xl:items-start xl:gap-4 ${
+                className={`admin-order-row admin-row-${o.status} grid gap-3 border-b px-4 py-4 last:border-b-0 transition xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,1fr)_70px_90px_110px_150px] xl:items-start xl:gap-4 ${
                   isSel ? "bg-primary/5" : "hover:bg-secondary/30"
                 }`}
               >
@@ -674,33 +674,33 @@ function AdminOrders() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
                     {(o.product_type === "polo" || !o.product_type) && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
+                      <span className="rounded-full bg-admin-success/10 px-2 py-0.5 text-xs font-bold text-admin-success">
                         পোলো শার্ট
                       </span>
                     )}
                     {o.product_type === "pajama" && (
-                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-800">
+                      <span className="rounded-full bg-admin-review/10 px-2 py-0.5 text-xs font-bold text-admin-review">
                         পায়জামা
                       </span>
                     )}
                     {o.product_type === "sneakers" && (
-                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
+                      <span className="rounded-full bg-admin-warning/10 px-2 py-0.5 text-xs font-bold text-admin-warning">
                         স্নিকার্স
                       </span>
                     )}
                     {o.product_type === "sweatshirt" && (
-                      <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800">
+                      <span className="rounded-full bg-admin-teal/10 px-2 py-0.5 text-xs font-bold text-admin-teal">
                         সোয়েটশার্ট
                       </span>
                     )}
                     {o.product_type === "hoodie_combo" && (
-                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">হুডি কম্বো</span>
+                      <span className="rounded-full bg-admin-info/10 px-2 py-0.5 text-xs font-bold text-admin-info">হুডি কম্বো</span>
                     )}
                     {o.product_type === "sweatshirt_combo" && (
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">সোয়েটশার্ট কম্বো</span>
                     )}
                     {o.source && o.source !== "direct" && (
-                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">
+                      <span className="rounded-full bg-admin-info/10 px-2 py-0.5 text-xs font-bold text-admin-info">
                         {sourceLabel(o.source)}
                       </span>
                     )}
@@ -730,7 +730,7 @@ function AdminOrders() {
                       target="_blank"
                       rel="noreferrer"
                       title="WhatsApp এ মেসেজ করুন"
-                      className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black text-white"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-admin-success text-[10px] font-black text-primary-foreground"
                     >
                       W
                     </a>
@@ -739,10 +739,10 @@ function AdminOrders() {
                     <p
                       className={`mt-1 text-xs font-bold ${
                         (ratios[o.id]?.ratio ?? 0) >= 70
-                          ? "text-emerald-600"
+                          ? "text-admin-success"
                           : (ratios[o.id]?.ratio ?? 0) >= 40
-                            ? "text-amber-600"
-                            : "text-rose-600"
+                            ? "text-admin-warning"
+                            : "text-admin-danger"
                       }`}
                     >
                       {ratios[o.id]?.ratio}% Success · মোট {ratios[o.id]?.total} · বাতিল{" "}
@@ -772,7 +772,7 @@ function AdminOrders() {
                     {o.customer_ip ? ` · আইপি: ${o.customer_ip}` : ""}
                   </p>
                   {o.note && (
-                    <p className="mt-1.5 inline-block rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+                    <p className="mt-1.5 inline-block rounded-md bg-admin-warning/10 px-2 py-1 text-xs font-medium text-admin-warning">
                       নোট: {o.note}
                     </p>
                   )}
@@ -806,8 +806,8 @@ function AdminOrders() {
                   <span
                     className={`inline-block rounded-md px-2 py-1 text-xs font-bold ${
                       (o.status === "delivered" || o.status === "partial_delivered")
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
+                        ? "bg-admin-success/10 text-admin-success"
+                        : "bg-admin-warning/10 text-admin-warning"
                     }`}
                   >
                     {(o.status === "delivered" || o.status === "partial_delivered") ? "Paid" : "Pending"}
@@ -880,7 +880,7 @@ function AdminOrders() {
                     size="sm"
                     variant="outline"
                     className={`h-8 text-xs ${
-                      o.status === "hold" ? "bg-slate-200 font-semibold text-slate-800" : ""
+                      o.status === "hold" ? "bg-admin-neutral/10 font-semibold text-admin-neutral" : ""
                     }`}
                     title={o.status === "hold" ? "হোল্ড থেকে সরান" : "অর্ডার হোল্ড করুন"}
                     onClick={() => setStatus(o.id, o.status === "hold" ? "pending" : "hold")}
@@ -900,7 +900,7 @@ function AdminOrders() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 text-xs text-rose-600 hover:bg-rose-50"
+                        className="h-8 text-xs text-admin-danger hover:bg-admin-danger/10"
                         title="এই কাস্টমারের আইপি ব্লক করুন"
                         onClick={() => blockIp(o.customer_ip, o.customer_name)}
                       >
