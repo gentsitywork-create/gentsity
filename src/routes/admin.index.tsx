@@ -142,84 +142,20 @@ function AdminOrders() {
     },
   });
 
-  // লাইভ ভিজিটর — শেষ ২ মিনিটে সক্রিয়
-  const { data: liveVisits = [] } = useQuery({
-    queryKey: ["live-visitors"],
-    queryFn: async () => {
-      const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-      const all: { path: string }[] = [];
-      const PAGE = 1000;
-      for (let start = 0; ; start += PAGE) {
-        const { data, error } = await supabase
-          .from("site_visits")
-          .select("path")
-          .gt("last_seen", cutoff)
-          .range(start, start + PAGE - 1);
-        if (error) throw error;
-        all.push(...((data ?? []) as { path: string }[]));
-        if (!data || data.length < PAGE) break;
-      }
-      return all;
-    },
-    enabled: Boolean(session),
-    refetchInterval: 30_000,
-  });
-
-  // আজকের সামারি — ভিজিটর, অর্ডার, অর্ডার না করে চলে যাওয়া
   const { data: todaySummary } = useQuery({
     queryKey: ["today-summary"],
     queryFn: async () => {
-      const dayStart = new Date();
-      dayStart.setHours(0, 0, 0, 0);
-      const startIso = dayStart.toISOString();
-      const fetchAllVisits = async () => {
-        const all: { path: string }[] = [];
-        const PAGE = 1000;
-        for (let start = 0; ; start += PAGE) {
-          const { data, error } = await supabase
-            .from("site_visits")
-            .select("path")
-            .gte("created_at", startIso)
-            .range(start, start + PAGE - 1);
-          if (error) throw error;
-          all.push(...((data ?? []) as { path: string }[]));
-          if (!data || data.length < PAGE) break;
-        }
-        return all;
-      };
-      const [visitRows, todayOrders, abandoned] = await Promise.all([
-        fetchAllVisits(),
-        supabase
-          .from("orders")
-          .select("id, total_amount", { count: "exact" })
-          .gte("created_at", startIso)
-          .neq("status", "cancelled"),
-        supabase
-          .from("abandoned_carts")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", startIso)
-          .is("order_id", null),
-      ]);
-      const orderRows = (todayOrders.data ?? []) as { total_amount: number }[];
-      const byPath: Record<string, number> = {};
-      for (const v of visitRows) byPath[v.path] = (byPath[v.path] ?? 0) + 1;
-      return {
-        visitors: visitRows.length,
-        orders: todayOrders.count ?? 0,
-        sales: orderRows.reduce((s, o) => s + (o.total_amount ?? 0), 0),
-        left: abandoned.count ?? 0,
-        byPath,
-      };
+      const { data, error } = await supabase.rpc("admin_dashboard_summary_v1");
+      if (error) throw error;
+      return data as { visitors: number; orders: number; sales: number; left: number; byPath: Record<string, number>; liveByPath: Record<string, number> } | null;
     },
     enabled: Boolean(session),
-    refetchInterval: 60_000,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: false,
   });
-
-  const liveByPath = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const v of liveVisits) map[v.path] = (map[v.path] ?? 0) + 1;
-    return map;
-  }, [liveVisits]);
+  const liveByPath = todaySummary?.liveByPath ?? {};
+  const liveVisitorCount = Object.values(liveByPath).reduce((sum, count) => sum + count, 0);
 
   const dateFiltered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -572,7 +508,7 @@ function AdminOrders() {
       )}
 
       {/* লাইভ ভিজিটর */}
-      {liveVisits.length > 0 && (
+      {liveVisitorCount > 0 && (
         <div className="mt-5 rounded-xl border bg-card p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
@@ -580,7 +516,7 @@ function AdminOrders() {
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </span>
             <h2 className="text-sm font-bold text-primary">
-              এখন {toBn(liveVisits.length)} জন ভিজিটর লাইভ
+              এখন {toBn(liveVisitorCount)} জন ভিজিটর লাইভ
             </h2>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
