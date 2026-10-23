@@ -738,9 +738,9 @@ function AdminOrders() {
                   {ratios[o.id] ? (
                     <p
                       className={`mt-1 text-xs font-bold ${
-                        ratios[o.id]?.ratio >= 70
+                        (ratios[o.id]?.ratio ?? 0) >= 70
                           ? "text-emerald-600"
-                          : ratios[o.id]?.ratio >= 40
+                          : (ratios[o.id]?.ratio ?? 0) >= 40
                             ? "text-amber-600"
                             : "text-rose-600"
                       }`}
