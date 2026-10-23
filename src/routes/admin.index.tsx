@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
+import { orderPage } from "@/lib/admin-order-pages";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +80,20 @@ type OrderRow = {
   order_items: { variant_id: string | null; pajama_product_id: string | null; size: string; color_name: string; qty: number }[];
 };
 
+type OrderSummary = Pick<OrderRow, "id" | "order_no" | "customer_name" | "phone" | "total_amount" | "status" | "courier_consignment_id" | "source" | "label_printed_at" | "created_at">;
+const ORDER_DETAILS = "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, source, label_printed_at, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)";
+
+async function loadOrderDetails(ids: string[]) {
+  const all: OrderRow[] = [];
+  for (let start = 0; start < ids.length; start += 100) {
+    const { data, error } = await supabase.from("orders").select(ORDER_DETAILS).in("id", ids.slice(start, start + 100));
+    if (error) throw error;
+    all.push(...((data ?? []) as OrderRow[]));
+  }
+  const byId = new Map(all.map((order) => [order.id, order]));
+  return ids.flatMap((id) => { const order = byId.get(id); return order ? [order] : []; });
+}
+
 function AdminOrders() {
   const qc = useQueryClient();
   const { session, isAdmin } = useAdminSession();
@@ -91,6 +106,8 @@ function AdminOrders() {
     Record<string, { total: number; success: number; cancelled: number; ratio: number }>
   >({});
   const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
   const [search, setSearch] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -100,22 +117,25 @@ function AdminOrders() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editOrder, setEditOrder] = useState<EditableOrder | null>(null);
 
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: orders = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["admin-orders"],
+    enabled: Boolean(session),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
-      const all: OrderRow[] = [];
+      const all: OrderSummary[] = [];
       const PAGE = 1000;
       for (let start = 0; ; start += PAGE) {
         const { data, error } = await supabase
           .from("orders")
           .select(
-            "id, order_no, customer_name, phone, address, district, note, total_amount, status, courier_consignment_id, courier_tracking_code, customer_ip, product_type, source, label_printed_at, created_at, order_items(variant_id, pajama_product_id, size, color_name, qty)",
+            "id, order_no, customer_name, phone, total_amount, status, courier_consignment_id, source, label_printed_at, created_at",
           )
           .order("created_at", { ascending: false })
           .order("id")
           .range(start, start + PAGE - 1);
         if (error) throw error;
-        all.push(...((data ?? []) as OrderRow[]));
+        all.push(...((data ?? []) as OrderSummary[]));
         if (!data || data.length < PAGE) break;
       }
       return all;
@@ -231,7 +251,7 @@ function AdminOrders() {
   }, [orders]);
 
   /** কুরিয়ারে পাঠানো হয়েছে কিন্তু লেবেল এখনো প্রিন্ট হয়নি এমন অর্ডার */
-  const isLabelPending = (o: OrderRow) =>
+  const isLabelPending = (o: OrderSummary) =>
     Boolean(o.courier_consignment_id) && !o.label_printed_at && o.status !== "cancelled";
 
   const counts = useMemo(() => {
@@ -250,6 +270,17 @@ function AdminOrders() {
     if (filter === "label_pending") return dateFiltered.filter(isLabelPending);
     return dateFiltered.filter((o) => o.status === filter);
   }, [dateFiltered, filter]);
+
+  const pagination = orderPage(rows, page);
+  const pageIds = pagination.rows.map((order) => order.id);
+  const { data: visibleOrders = [], isPending: detailsPending, isError: detailsError, refetch: refetchDetails } = useQuery({
+    queryKey: ["admin-orders", "details", pageIds],
+    queryFn: () => loadOrderDetails(pageIds),
+    enabled: Boolean(session) && pageIds.length > 0,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const selectedIds = useMemo(() => new Set(selected), [selected]);
 
   /** বর্তমান ফিল্টারের অর্ডারগুলোর মোট টাকার পরিমাণ */
   const totalAmount = useMemo(
@@ -386,12 +417,12 @@ function AdminOrders() {
     if (fail) toast.error(`${fail}টি অর্ডার পাঠানো যায়নি।`);
   };
 
-  const printLabels = async (list: OrderRow[]) => {
+  const printLabels = async (list: OrderSummary[]) => {
     if (list.length === 0) {
       toast.error("আগে অর্ডার সিলেক্ট করুন।");
       return;
     }
-    await printCourierLabels(list);
+    await printCourierLabels(await loadOrderDetails(list.map((order) => order.id)));
     // প্রিন্ট হয়ে গেছে মার্ক করি — পরে "লেবেল বাকি" ফিল্টারে আর দেখাবে না
     const { error } = await supabase
       .from("orders")
@@ -400,9 +431,12 @@ function AdminOrders() {
     if (!error) qc.invalidateQueries({ queryKey: ["admin-orders"] });
   };
 
-  const exportCsv = () => {
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+    const exportRows = await loadOrderDetails(rows.map((order) => order.id));
     const head = ["অর্ডার", "নাম", "মোবাইল", "ঠিকানা", "জেলা", "পণ্য", "টাকা", "স্ট্যাটাস", "সোর্স", "তারিখ"];
-    const lines = rows.map((o) =>
+    const lines = exportRows.map((o) =>
       [
         o.order_no,
         o.customer_name,
@@ -427,6 +461,8 @@ function AdminOrders() {
     a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    } catch { toast.error("এক্সপোর্ট করা যায়নি। আবার চেষ্টা করুন।"); }
+    finally { setExporting(false); }
   };
 
   return (
@@ -451,8 +487,8 @@ function AdminOrders() {
           >
             + ম্যানুয়াল অর্ডার
           </Button>
-          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
-            ⬇ এক্সপোর্ট
+          <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0 || exporting}>
+            {exporting ? "এক্সপোর্ট হচ্ছে…" : "⬇ এক্সপোর্ট"}
           </Button>
           <Button
             variant="outline"
@@ -564,23 +600,23 @@ function AdminOrders() {
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="নাম, মোবাইল বা অর্ডার নম্বর খুঁজুন…"
           className="w-full bg-card sm:w-96"
         />
-        <div className="flex items-center gap-2">
+        <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:w-auto">
           <Input
             type="date"
             value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            className="w-40 bg-card"
+            onChange={(e) => { setFrom(e.target.value); setPage(1); }}
+            className="min-w-0 w-full bg-card sm:w-40"
           />
           <span className="text-sm text-muted-foreground">থেকে</span>
           <Input
             type="date"
             value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="w-40 bg-card"
+            onChange={(e) => { setTo(e.target.value); setPage(1); }}
+            className="min-w-0 w-full bg-card sm:w-40"
           />
         </div>
       </div>
@@ -593,7 +629,7 @@ function AdminOrders() {
             <button
               key={k}
               type="button"
-              onClick={() => setFilter(k)}
+              onClick={() => { setFilter(k); setPage(1); }}
               className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition ${
                 active
                   ? "border-primary bg-primary text-primary-foreground"
@@ -660,7 +696,12 @@ function AdminOrders() {
       )}
 
       {/* অর্ডার তালিকা */}
-      {isLoading ? (
+      {isError || detailsError ? (
+        <div role="alert" className="mt-6 flex items-center gap-3 text-sm text-destructive">
+          অর্ডার লোড করা যায়নি।
+          <Button variant="outline" onClick={() => { void refetch(); void refetchDetails(); }}>আবার চেষ্টা করুন</Button>
+        </div>
+      ) : isLoading || (rows.length > 0 && detailsPending) ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (
         <div className="mt-5 rounded-xl border bg-card p-10 text-center text-sm text-muted-foreground">
@@ -669,7 +710,7 @@ function AdminOrders() {
       ) : (
         <div className="mt-5 overflow-hidden rounded-xl border bg-card shadow-sm">
           {/* টেবিল হেড */}
-          <div className="hidden items-center gap-4 border-b bg-secondary/40 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground lg:grid lg:grid-cols-[28px_minmax(240px,1.3fr)_minmax(200px,1fr)_90px_110px_110px_180px]">
+          <div className="hidden items-center gap-4 border-b bg-secondary/40 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground xl:grid xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,1fr)_70px_90px_110px_150px]">
             <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
             <span>অর্ডার তথ্য</span>
             <span>পণ্য</span>
@@ -679,12 +720,12 @@ function AdminOrders() {
             <span className="text-right">অ্যাকশন</span>
           </div>
 
-          {rows.map((o) => {
-            const isSel = selected.includes(o.id);
+          {visibleOrders.map((o) => {
+            const isSel = selectedIds.has(o.id);
             return (
               <div
                 key={o.id}
-                className={`grid gap-3 border-b px-4 py-4 last:border-0 transition lg:grid-cols-[28px_minmax(240px,1.3fr)_minmax(200px,1fr)_90px_110px_110px_180px] lg:items-start lg:gap-4 ${
+                className={`grid gap-3 border-b px-4 py-4 last:border-0 transition xl:grid-cols-[28px_minmax(0,1.3fr)_minmax(0,1fr)_70px_90px_110px_150px] xl:items-start xl:gap-4 ${
                   isSel ? "bg-primary/5" : "hover:bg-secondary/30"
                 }`}
               >
@@ -761,15 +802,15 @@ function AdminOrders() {
                   {ratios[o.id] ? (
                     <p
                       className={`mt-1 text-xs font-bold ${
-                        ratios[o.id]!.ratio >= 70
+                        ratios[o.id]?.ratio >= 70
                           ? "text-emerald-600"
-                          : ratios[o.id]!.ratio >= 40
+                          : ratios[o.id]?.ratio >= 40
                             ? "text-amber-600"
                             : "text-rose-600"
                       }`}
                     >
-                      {ratios[o.id]!.ratio}% Success · মোট {ratios[o.id]!.total} · বাতিল{" "}
-                      {ratios[o.id]!.cancelled}
+                      {ratios[o.id]?.ratio}% Success · মোট {ratios[o.id]?.total} · বাতিল{" "}
+                      {ratios[o.id]?.cancelled}
                     </p>
                   ) : (
                     <button
@@ -864,7 +905,7 @@ function AdminOrders() {
                 </div>
 
                 {/* অ্যাকশন */}
-                <div className="flex flex-wrap gap-1.5 lg:justify-end">
+                <div className="flex flex-wrap gap-1.5 xl:justify-end">
                   <Button
                     size="sm"
                     className="h-8 text-xs"
@@ -936,6 +977,19 @@ function AdminOrders() {
             );
           })}
         </div>
+      )}
+
+      {rows.length > 0 && (
+        <nav aria-label="অর্ডার তালিকার পৃষ্ঠা" className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-sm text-muted-foreground">
+            {toBn(pagination.offset + 1)}–{toBn(Math.min(pagination.offset + 50, rows.length))} / {toBn(rows.length)} অর্ডার
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" disabled={pagination.page === 1} onClick={() => setPage(pagination.page - 1)}>আগের</Button>
+            <span className="text-sm">{toBn(pagination.page)} / {toBn(pagination.pageCount)}</span>
+            <Button variant="outline" disabled={pagination.page === pagination.pageCount} onClick={() => setPage(pagination.page + 1)}>পরের</Button>
+          </div>
+        </nav>
       )}
 
       <OrderDialog
