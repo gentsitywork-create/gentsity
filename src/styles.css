@@ -59,6 +59,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-admin-info: var(--admin-info);
+  --color-admin-success: var(--admin-success);
+  --color-admin-warning: var(--admin-warning);
+  --color-admin-danger: var(--admin-danger);
+  --color-admin-review: var(--admin-review);
+  --color-admin-neutral: var(--admin-neutral);
+  --color-admin-teal: var(--admin-teal);
+  --color-admin-orange: var(--admin-orange);
 }
 
 :root {
@@ -205,6 +213,88 @@
 .attention-ring {
   animation: gentsity-ring 1.8s ease-out infinite;
 }
+
+/* Admin-only palette: storefront colors stay unchanged. */
+.admin-shell {
+  --background: oklch(0.98 0.007 220);
+  --foreground: oklch(0.27 0.025 240);
+  --primary: oklch(0.47 0.13 175);
+  --primary-foreground: oklch(0.99 0.002 175);
+  --secondary: oklch(0.95 0.022 180);
+  --secondary-foreground: oklch(0.35 0.08 175);
+  --muted: oklch(0.96 0.008 220);
+  --muted-foreground: oklch(0.49 0.025 240);
+  --accent: oklch(0.93 0.04 180);
+  --accent-foreground: oklch(0.32 0.09 175);
+  --border: oklch(0.9 0.018 220);
+  --input: oklch(0.86 0.023 220);
+  --ring: var(--primary);
+  --admin-info: oklch(0.47 0.15 250);
+  --admin-success: oklch(0.43 0.12 155);
+  --admin-warning: oklch(0.49 0.11 80);
+  --admin-danger: oklch(0.5 0.18 20);
+  --admin-review: oklch(0.48 0.14 305);
+  --admin-neutral: oklch(0.46 0.025 240);
+  --admin-teal: oklch(0.44 0.1 185);
+  --admin-orange: oklch(0.5 0.15 45);
+  --admin-shadow: 0 3px 14px color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+.dark .admin-shell {
+  --background: oklch(0.19 0.018 220);
+  --foreground: oklch(0.94 0.012 220);
+  --primary: oklch(0.75 0.12 175);
+  --primary-foreground: oklch(0.2 0.035 175);
+  --secondary: oklch(0.28 0.035 180);
+  --secondary-foreground: oklch(0.88 0.05 175);
+  --muted: oklch(0.25 0.012 220);
+  --muted-foreground: oklch(0.73 0.025 220);
+  --accent: oklch(0.32 0.05 180);
+  --accent-foreground: oklch(0.91 0.03 175);
+  --border: oklch(0.35 0.02 220);
+  --input: var(--border);
+  --admin-info: oklch(0.78 0.1 250);
+  --admin-success: oklch(0.78 0.12 155);
+  --admin-warning: oklch(0.83 0.13 80);
+  --admin-danger: oklch(0.76 0.14 20);
+  --admin-review: oklch(0.78 0.12 305);
+  --admin-neutral: oklch(0.76 0.025 240);
+  --admin-teal: oklch(0.78 0.1 185);
+  --admin-orange: oklch(0.78 0.13 45);
+}
+.admin-shell header { border-top: 4px solid var(--primary); }
+.admin-shell nav a { transition: background-color 150ms, color 150ms; }
+.admin-shell nav a:hover { background: var(--secondary); color: var(--primary); }
+.admin-shell nav a[aria-current="page"] { background: var(--primary); color: var(--primary-foreground); }
+.admin-metric {
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in oklab, currentColor 22%, var(--border));
+  border-top: 3px solid currentColor;
+  background: color-mix(in oklab, currentColor 7%, var(--card));
+  box-shadow: var(--admin-shadow);
+}
+.admin-band { border-block: 1px solid var(--border); padding-block: 1rem; }
+.admin-status { background: color-mix(in oklab, currentColor 10%, var(--card)); }
+.admin-status-tab {
+  background: color-mix(in oklab, currentColor 7%, var(--card));
+  border-color: color-mix(in oklab, currentColor 22%, var(--border));
+  height: auto;
+  min-height: 2.75rem;
+  white-space: normal;
+}
+.admin-status-tab[aria-pressed="true"] {
+  background: color-mix(in oklab, currentColor 16%, var(--card));
+  border-color: currentColor;
+  box-shadow: inset 0 -3px currentColor;
+}
+.admin-order-row { border-inline-start: 3px solid color-mix(in oklab, var(--admin-row-color) 70%, var(--border)); }
+.admin-row-pending { --admin-row-color: var(--admin-warning); }
+.admin-row-confirmed { --admin-row-color: var(--admin-info); }
+.admin-row-hold { --admin-row-color: var(--admin-neutral); }
+.admin-row-shipped { --admin-row-color: var(--admin-review); }
+.admin-row-courier_pending { --admin-row-color: var(--admin-orange); }
+.admin-row-partial_delivered { --admin-row-color: var(--admin-teal); }
+.admin-row-delivered { --admin-row-color: var(--admin-success); }
+.admin-row-cancelled { --admin-row-color: var(--admin-danger); }
 @media (prefers-reduced-motion: reduce) {
   .attention-wobble,
   .attention-flash,
