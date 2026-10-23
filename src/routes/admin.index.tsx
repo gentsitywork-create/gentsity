@@ -590,7 +590,7 @@ function AdminOrders() {
 
       {/* বাল্ক অ্যাকশন বার */}
       {selected.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-primary px-4 py-3 text-primary-foreground shadow-md">
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg bg-primary px-4 py-3 text-primary-foreground shadow-md">
           <span className="text-sm font-bold">{selected.length}টি অর্ডার সিলেক্ট করা হয়েছে</span>
           <button
             type="button"
@@ -640,7 +640,7 @@ function AdminOrders() {
       ) : isLoading || (rows.length > 0 && detailsPending) ? (
         <p className="mt-6 text-sm text-muted-foreground">লোড হচ্ছে…</p>
       ) : rows.length === 0 ? (
-        <div className="mt-5 rounded-xl border bg-card p-10 text-center text-sm text-muted-foreground">
+        <div className="mt-5 rounded-lg border bg-card p-10 text-center text-sm text-muted-foreground">
           কোনো অর্ডার পাওয়া যায়নি।
         </div>
       ) : (
@@ -674,33 +674,33 @@ function AdminOrders() {
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-extrabold text-primary">#{o.order_no}</p>
                     {(o.product_type === "polo" || !o.product_type) && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
+                      <span className="rounded-full bg-admin-success/10 px-2 py-0.5 text-xs font-bold text-admin-success">
                         পোলো শার্ট
                       </span>
                     )}
                     {o.product_type === "pajama" && (
-                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-800">
+                      <span className="rounded-full bg-admin-review/10 px-2 py-0.5 text-xs font-bold text-admin-review">
                         পায়জামা
                       </span>
                     )}
                     {o.product_type === "sneakers" && (
-                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
+                      <span className="rounded-full bg-admin-warning/10 px-2 py-0.5 text-xs font-bold text-admin-warning">
                         স্নিকার্স
                       </span>
                     )}
                     {o.product_type === "sweatshirt" && (
-                      <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-800">
+                      <span className="rounded-full bg-admin-teal/10 px-2 py-0.5 text-xs font-bold text-admin-teal">
                         সোয়েটশার্ট
                       </span>
                     )}
                     {o.product_type === "hoodie_combo" && (
-                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">হুডি কম্বো</span>
+                      <span className="rounded-full bg-admin-info/10 px-2 py-0.5 text-xs font-bold text-admin-info">হুডি কম্বো</span>
                     )}
                     {o.product_type === "sweatshirt_combo" && (
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">সোয়েটশার্ট কম্বো</span>
                     )}
                     {o.source && o.source !== "direct" && (
-                      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">
+                      <span className="rounded-full bg-admin-info/10 px-2 py-0.5 text-xs font-bold text-admin-info">
                         {sourceLabel(o.source)}
                       </span>
                     )}
@@ -730,7 +730,7 @@ function AdminOrders() {
                       target="_blank"
                       rel="noreferrer"
                       title="WhatsApp এ মেসেজ করুন"
-                      className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black text-white"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-admin-success text-[10px] font-black text-primary-foreground"
                     >
                       W
                     </a>
@@ -739,10 +739,10 @@ function AdminOrders() {
                     <p
                       className={`mt-1 text-xs font-bold ${
                         (ratios[o.id]?.ratio ?? 0) >= 70
-                          ? "text-emerald-600"
+                          ? "text-admin-success"
                           : (ratios[o.id]?.ratio ?? 0) >= 40
-                            ? "text-amber-600"
-                            : "text-rose-600"
+                            ? "text-admin-warning"
+                            : "text-admin-danger"
                       }`}
                     >
                       {ratios[o.id]?.ratio}% Success · মোট {ratios[o.id]?.total} · বাতিল{" "}
@@ -772,7 +772,7 @@ function AdminOrders() {
                     {o.customer_ip ? ` · আইপি: ${o.customer_ip}` : ""}
                   </p>
                   {o.note && (
-                    <p className="mt-1.5 inline-block rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+                    <p className="mt-1.5 inline-block rounded-md bg-admin-warning/10 px-2 py-1 text-xs font-medium text-admin-warning">
                       নোট: {o.note}
                     </p>
                   )}
@@ -806,8 +806,8 @@ function AdminOrders() {
                   <span
                     className={`inline-block rounded-md px-2 py-1 text-xs font-bold ${
                       (o.status === "delivered" || o.status === "partial_delivered")
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
+                        ? "bg-admin-success/10 text-admin-success"
+                        : "bg-admin-warning/10 text-admin-warning"
                     }`}
                   >
                     {(o.status === "delivered" || o.status === "partial_delivered") ? "Paid" : "Pending"}
@@ -880,7 +880,7 @@ function AdminOrders() {
                     size="sm"
                     variant="outline"
                     className={`h-8 text-xs ${
-                      o.status === "hold" ? "bg-slate-200 font-semibold text-slate-800" : ""
+                      o.status === "hold" ? "bg-admin-neutral/10 font-semibold text-admin-neutral" : ""
                     }`}
                     title={o.status === "hold" ? "হোল্ড থেকে সরান" : "অর্ডার হোল্ড করুন"}
                     onClick={() => setStatus(o.id, o.status === "hold" ? "pending" : "hold")}
@@ -900,7 +900,7 @@ function AdminOrders() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 text-xs text-rose-600 hover:bg-rose-50"
+                        className="h-8 text-xs text-admin-danger hover:bg-admin-danger/10"
                         title="এই কাস্টমারের আইপি ব্লক করুন"
                         onClick={() => blockIp(o.customer_ip, o.customer_name)}
                       >
