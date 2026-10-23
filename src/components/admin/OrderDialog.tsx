@@ -79,6 +79,8 @@ export function OrderDialog({
 
   const { data: variants = [] } = useQuery({
     queryKey: ["admin-variants-all"],
+    enabled: open && productType === "polo",
+    staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product_variants")
