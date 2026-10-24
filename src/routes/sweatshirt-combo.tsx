@@ -165,7 +165,7 @@ function SweatshirtComboPage() {
       <section className="text-center">
         <p className="text-sm font-bold text-primary">SWEATSHIRT COMBO</p>
         <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> ৩ পিস সোয়েটশার্ট মাত্র ৯৯৯ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
-        <p className="mt-2 text-base font-semibold">রেগুলার প্রাইস <span className="text-destructive line-through decoration-2">১৭৫০ টাকা</span> — অফারে মাত্র <span className="text-primary">{PRICE} টাকা</span></p>
+        <p className="mt-2 text-base font-semibold">রেগুলার প্রাইস <span className="text-destructive line-through decoration-2">১৭৫০ টাকা</span> — অফারে মাত্র <span className="text-primary">{String(PRICE).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)])} টাকা</span></p>
         <p className="mt-2 text-muted-foreground">সোয়েটশার্ট — কটন ফ্লিস ফেব্রিকস, ইনসাইড ব্রাশ</p>
         <div>
           <LiveViewersBadge />
