@@ -165,6 +165,7 @@ function SweatshirtComboPage() {
       <section className="text-center">
         <p className="text-sm font-bold text-primary">SWEATSHIRT COMBO</p>
         <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> ৩ পিস সোয়েটশার্ট মাত্র ৯৯৯ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
+        <p className="mt-2 text-base font-semibold">রেগুলার প্রাইস <span className="text-destructive line-through decoration-2">১৭৫০ টাকা</span> — অফারে মাত্র <span className="text-primary">{String(PRICE).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯".charAt(Number(d)))} টাকা</span></p>
         <p className="mt-2 text-muted-foreground">সোয়েটশার্ট — কটন ফ্লিস ফেব্রিকস, ইনসাইড ব্রাশ</p>
         <div>
           <LiveViewersBadge />
@@ -222,7 +223,9 @@ function SweatshirtComboPage() {
           <div className="rounded-lg bg-secondary p-4 text-sm">
             <p>সোয়েটশার্ট: {sweats.map((id) => products.find((p) => p.id === id)?.name).join(", ")}</p>
             <p>সাইজ: {SIZES.find((s) => s.key === size)?.label}</p>
-            <div className="mt-2 flex justify-between border-t pt-2"><span>ডেলিভারি চার্জ</span><span>ফ্রি</span></div>
+            <div className="mt-2 flex justify-between border-t pt-2"><span>রেগুলার প্রাইস</span><span className="text-muted-foreground line-through">১৭৫০ টাকা</span></div>
+            <div className="mt-1 flex justify-between"><span>অফার প্রাইস</span><span className="font-semibold text-primary">{PRICE} টাকা</span></div>
+            <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ</span><span>ফ্রি</span></div>
             <div className="mt-1 flex justify-between text-base font-bold"><span>সর্বমোট</span><span>{PRICE} টাকা</span></div>
           </div>
           <Button type="submit" className="w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${PRICE} টাকা`}</Button>
