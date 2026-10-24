@@ -23,10 +23,10 @@ import { LiveViewersBadge } from "@/components/LiveVisitors";
 export const Route = createFileRoute("/sweatshirt-combo")({
   head: () => ({
     meta: [
-      { title: "Gentsity — সোয়েটশার্ট কম্বো মাত্র ১০৯০ টাকা" },
-      { name: "description", content: "৩ পিস সোয়েটশার্ট মাত্র ১০৯০ টাকা। কটন ফ্লিস, ইনসাইড ব্রাশ। ডেলিভারি চার্জ ফ্রি।" },
+      { title: "Gentsity — সোয়েটশার্ট কম্বো মাত্র ৯৯৯ টাকা" },
+      { name: "description", content: "৩ পিস সোয়েটশার্ট মাত্র ৯৯৯ টাকা। কটন ফ্লিস, ইনসাইড ব্রাশ। ডেলিভারি চার্জ ফ্রি।" },
       { property: "og:title", content: "Gentsity — সোয়েটশার্ট কম্বো" },
-      { property: "og:description", content: "পছন্দের ৩টি সোয়েটশার্ট বেছে নিন মাত্র ১০৯০ টাকায়, ফ্রি ডেলিভারি।" },
+      { property: "og:description", content: "পছন্দের ৩টি সোয়েটশার্ট বেছে নিন মাত্র ৯৯৯ টাকায়, ফ্রি ডেলিভারি।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -164,7 +164,7 @@ function SweatshirtComboPage() {
     </section> : <main className="mx-auto max-w-4xl px-4 pt-8">
       <section className="text-center">
         <p className="text-sm font-bold text-primary">SWEATSHIRT COMBO</p>
-        <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> ৩ পিস সোয়েটশার্ট মাত্র ১০৯০ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
+        <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> ৩ পিস সোয়েটশার্ট মাত্র ৯৯৯ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
         <p className="mt-2 text-muted-foreground">সোয়েটশার্ট — কটন ফ্লিস ফেব্রিকস, ইনসাইড ব্রাশ</p>
         <div>
           <LiveViewersBadge />
