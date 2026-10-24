@@ -93,7 +93,7 @@ function SweatshirtPage() {
       return productImageUrls(products.map((p) => p.image_url));
     },
   });
-  const BANNER_PATHS = ["sweatshirt/products/sweatshirt-1.png", "sweatshirt/products/sweatshirt-2.png"];
+  const BANNER_PATHS = ["sweatshirt/products/sweatshirt-3.jpg", "sweatshirt/products/sweatshirt-4.jpg"];
   const { data: bannerImages = [] } = useQuery({
     queryKey: ["sweatshirt-banner-images"],
     queryFn: async () => {
