@@ -223,7 +223,9 @@ function SweatshirtComboPage() {
           <div className="rounded-lg bg-secondary p-4 text-sm">
             <p>সোয়েটশার্ট: {sweats.map((id) => products.find((p) => p.id === id)?.name).join(", ")}</p>
             <p>সাইজ: {SIZES.find((s) => s.key === size)?.label}</p>
-            <div className="mt-2 flex justify-between border-t pt-2"><span>ডেলিভারি চার্জ</span><span>ফ্রি</span></div>
+            <div className="mt-2 flex justify-between border-t pt-2"><span>রেগুলার প্রাইস</span><span className="text-muted-foreground line-through">১৭৫০ টাকা</span></div>
+            <div className="mt-1 flex justify-between"><span>অফার প্রাইস</span><span className="font-semibold text-primary">{PRICE} টাকা</span></div>
+            <div className="mt-1 flex justify-between"><span>ডেলিভারি চার্জ</span><span>ফ্রি</span></div>
             <div className="mt-1 flex justify-between text-base font-bold"><span>সর্বমোট</span><span>{PRICE} টাকা</span></div>
           </div>
           <Button type="submit" className="w-full py-6 text-base" disabled={submitting}>{submitting ? "জমা হচ্ছে…" : `অর্ডার কনফার্ম করুন — ${PRICE} টাকা`}</Button>
