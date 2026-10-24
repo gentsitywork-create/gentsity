@@ -258,7 +258,7 @@ export function OrderDialog({
                   setProductType(k);
                   setItems([]);
                   setSize(k === "sneakers" ? "40" : "M");
-                  if (k === "sweatshirt_combo") setPrice("1090");
+                  if (k === "sweatshirt_combo") setPrice("999");
                 }}
               >
                 {label}

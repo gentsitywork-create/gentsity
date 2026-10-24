@@ -5,7 +5,7 @@ import { formatBilingualDate } from "../bilingual-date";
 const ids = ["11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222", "33333333-3333-4333-8333-333333333333"];
 const order = { phone: "01700000000", size: "M", sweatshirt_ids: ids };
 describe("sweatshirt combo rules", () => {
-  it("costs 1090 taka", () => expect(SWEATSHIRT_COMBO_PRICE).toBe(1090));
+  it("costs 999 taka", () => expect(SWEATSHIRT_COMBO_PRICE).toBe(999));
   it("has free delivery", () => expect(SWEATSHIRT_COMBO_DELIVERY).toBe(0));
   it("requires exactly three sweatshirts", () => {
     expect(sweatshirtComboSchema.safeParse(order).success).toBe(true);

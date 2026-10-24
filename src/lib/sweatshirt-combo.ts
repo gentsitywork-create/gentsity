@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const SWEATSHIRT_COMBO_PRICE = 1090;
+export const SWEATSHIRT_COMBO_PRICE = 999;
 export const SWEATSHIRT_COMBO_DELIVERY = 0;
 export const SWEATSHIRT_COMBO_SIZES = [
   { key: "M", label: "M-38" },
