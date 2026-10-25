@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Flame, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
+import { Check, Flame, Gauge, Ruler, ShieldCheck, Shirt, Snowflake, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { productImageUrls } from "@/lib/product-images";
@@ -51,6 +51,13 @@ const SIZE_CHART: Record<Size, { chest: string; length: string }> = {
   L: { chest: "৪০", length: "২৮" },
   XL: { chest: "৪২", length: "২৯" },
 };
+
+const SPEC_ITEMS = [
+  { label: "ফেব্রিক", value: "ফ্লিস কটন (Fleece Cotton)", icon: Shirt },
+  { label: "GSM", value: "৩০০", icon: Gauge },
+  { label: "ইনসাইড", value: "ব্রাশড ফিনিশ (Inside Brushed)", icon: Sparkles },
+  { label: "উপযোগিতা", value: "হালকা শীতের জন্য পারফেক্ট", icon: Snowflake },
+] as const;
 
 function SweatshirtPage() {
   const [size, setSize] = useState<Size | null>(null);
@@ -228,14 +235,45 @@ function SweatshirtPage() {
           <li className="flex items-start gap-2"><ShieldCheck className="h-4 w-4 shrink-0 text-primary" /> ক্লাসিক ক্রু-নেক ডিজাইন — সব পোশাকের সাথে মানানসই</li>
         </ul>
 
-        <div className="mt-6 rounded-lg border bg-card p-4 text-left text-sm">
-          <h2 className="mb-2 font-bold text-foreground"><Ruler className="inline h-4 w-4" /> SIZE MEASUREMENT (INCH)</h2>
-          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-            <li><strong className="text-foreground">M</strong> — বুক {SIZE_CHART.M.chest} ইঞ্চি · লম্বা {SIZE_CHART.M.length} ইঞ্চি</li>
-            <li><strong className="text-foreground">L</strong> — বুক {SIZE_CHART.L.chest} ইঞ্চি · লম্বা {SIZE_CHART.L.length} ইঞ্চি</li>
-            <li><strong className="text-foreground">XL</strong> — বুক {SIZE_CHART.XL.chest} ইঞ্চি · লম্বা {SIZE_CHART.XL.length} ইঞ্চি</li>
+        <section className="mt-6 rounded-lg border bg-card p-4 text-left sm:p-5">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-foreground"><Shirt className="h-5 w-5 text-primary" /> সোয়েটশার্টের বিস্তারিত তথ্য</h2>
+          <p className="mt-1 text-sm text-muted-foreground">হালকা শীতের জন্য আরামদায়ক ও স্টাইলিশ সোয়েটশার্ট।</p>
+          <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            {SPEC_ITEMS.map((s) => { const Icon = s.icon; return (
+              <li key={s.label} className="flex items-start gap-2 rounded-md bg-secondary px-3 py-2">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span className="text-muted-foreground">{s.label}</span>
+                <strong className="ml-auto text-right font-semibold text-foreground">{s.value}</strong>
+              </li>
+            ); })}
           </ul>
-        </div>
+
+          <h3 className="mt-4 flex items-center gap-2 font-bold text-foreground"><Ruler className="h-4 w-4 text-primary" /> সাইজ চার্ট (ইঞ্চি)</h3>
+          <div className="mt-2 overflow-hidden rounded-md border">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary text-foreground">
+                <tr><th className="px-3 py-2 text-left font-bold">সাইজ</th><th className="px-3 py-2 text-left font-bold">বডি</th><th className="px-3 py-2 text-left font-bold">লম্বা</th></tr>
+              </thead>
+              <tbody>
+                {SIZES.map((key) => <tr key={key} className="border-t">
+                  <td className="px-3 py-2 font-bold text-foreground">{key}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{SIZE_CHART[key].chest}″</td>
+                  <td className="px-3 py-2 text-muted-foreground">{SIZE_CHART[key].length}″</td>
+                </tr>)}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+            <p className="font-bold text-foreground">সাইজ নির্বাচনের আগে গুরুত্বপূর্ণ নির্দেশনা</p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+              <li>অর্ডার করার আগে অবশ্যই সাইজ চার্ট দেখে আপনার উপযুক্ত সাইজ নির্বাচন করুন।</li>
+              <li>সাইজ বুঝতে সমস্যা হলে চিন্তার কিছু নেই।</li>
+              <li>আপনার পছন্দের প্রোডাক্টটি সিলেক্ট করে অর্ডার কনফার্ম করুন — আমাদের প্রতিনিধি ফোন করে আপনার সঠিক সাইজ নিশ্চিত করে অর্ডার কনফার্ম করবেন।</li>
+            </ul>
+          </div>
+          <p className="mt-3 text-center text-sm font-bold text-primary">Gentsity — আপনার স্টাইল, আপনার পছন্দ!</p>
+        </section>
 
         <ul className="mt-5 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
           <li className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> সারা বাংলাদেশে ডেলিভারি</li>
