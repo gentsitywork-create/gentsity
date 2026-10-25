@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Flame, ShieldCheck, Truck, Wallet } from "lucide-react";
+import { Check, Flame, Gauge, Ruler, ShieldCheck, Shirt, Snowflake, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { productImageUrls } from "@/lib/product-images";
@@ -37,6 +37,19 @@ export const Route = createFileRoute("/sweatshirt-combo")({
 const PRICE = SWEATSHIRT_COMBO_PRICE;
 const SIZES = SWEATSHIRT_COMBO_SIZES;
 type Size = (typeof SIZES)[number]["key"];
+
+const SPEC_ITEMS = [
+  { label: "ফেব্রিক", value: "ফ্লিস কটন (Fleece Cotton)", icon: Shirt },
+  { label: "GSM", value: "৩০০", icon: Gauge },
+  { label: "ইনসাইড", value: "ব্রাশড ফিনিশ (Inside Brushed)", icon: Sparkles },
+  { label: "উপযোগিতা", value: "হালকা শীতের জন্য পারফেক্ট", icon: Snowflake },
+] as const;
+
+const SIZE_CHART = [
+  { key: "M", body: "৩৮", length: "২৭" },
+  { key: "L", body: "৪০", length: "২৮" },
+  { key: "XL", body: "৪২", length: "২৯" },
+] as const;
 type Product = {
   id: string;
   name: string;
@@ -180,6 +193,46 @@ function SweatshirtComboPage() {
       <div className="mt-6 overflow-hidden rounded-lg border bg-card">
         <img src={sweatshirtComboHeroBanner.url} alt="Gentsity সোয়েটশার্ট কম্বো — Premium Collection, Comfort Meets Style" className="w-full" loading="lazy" />
       </div>
+
+      <section className="mt-6 rounded-lg border bg-card p-4 sm:p-5">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-foreground"><Shirt className="h-5 w-5 text-primary" /> সোয়েটশার্টের বিস্তারিত তথ্য</h2>
+        <p className="mt-1 text-sm text-muted-foreground">হালকা শীতের জন্য আরামদায়ক ও স্টাইলিশ সোয়েটশার্ট।</p>
+        <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+          {SPEC_ITEMS.map((s) => { const Icon = s.icon; return (
+            <li key={s.label} className="flex items-start gap-2 rounded-md bg-secondary px-3 py-2">
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span className="text-muted-foreground">{s.label}</span>
+              <strong className="ml-auto text-right font-semibold text-foreground">{s.value}</strong>
+            </li>
+          ); })}
+        </ul>
+
+        <h3 className="mt-4 flex items-center gap-2 font-bold text-foreground"><Ruler className="h-4 w-4 text-primary" /> সাইজ চার্ট (ইঞ্চি)</h3>
+        <div className="mt-2 overflow-hidden rounded-md border">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary text-foreground">
+              <tr><th className="px-3 py-2 text-left font-bold">সািজ</th><th className="px-3 py-2 text-left font-bold">বডি</th><th className="px-3 py-2 text-left font-bold">লম্বা</th></tr>
+            </thead>
+            <tbody>
+              {SIZE_CHART.map((r) => <tr key={r.key} className="border-t">
+                <td className="px-3 py-2 font-bold text-foreground">{r.key}</td>
+                <td className="px-3 py-2 text-muted-foreground">{r.body}″</td>
+                <td className="px-3 py-2 text-muted-foreground">{r.length}″</td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+          <p className="font-bold text-foreground">সাইজ নির্বাচনের আগে গুরত্বপূর্ণ নিন্দেশনা</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
+            <li>অর্ডার করার আগে অবশ্যই সাইজ চার্ট দেখে আপনার উপযুক্ত সািजটিন নির্বাচন করুন।</li>
+            <li>সািজ বুঝতে সমস্যা হলে চিন্তার কিছু নেই।</li>
+            <li>আপনার পছন্দের প্রোডাক্টটিন সিলেক্ট করে অর্ডার কনফার্ম করুন — আমাদের প্রতিনিনধি ফোন করে আপনার সঠিক সািज নিশ্চিত করে অর্ডারটিন কনফার্ম করবেন।</li>
+          </ul>
+        </div>
+        <p className="mt-3 text-center text-sm font-bold text-primary">Gentsity — আপনার স্টাইল, আপনার পছন্দ!</p>
+      </section>
 
       <section className="mt-8 border-y py-4">
         <h2 className={`text-lg font-bold ${size ? "" : "attention-wobble attention-flash-red"}`}>১. আপনার সাইজ বাছুন</h2>
