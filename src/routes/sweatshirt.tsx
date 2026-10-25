@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, Flame, Ruler, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
+import { Check, Flame, Gauge, Ruler, ShieldCheck, Shirt, Snowflake, Sparkles, Truck, Wallet } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { productImageUrls } from "@/lib/product-images";
@@ -51,6 +51,13 @@ const SIZE_CHART: Record<Size, { chest: string; length: string }> = {
   L: { chest: "৪০", length: "২৮" },
   XL: { chest: "৪২", length: "২৯" },
 };
+
+const SPEC_ITEMS = [
+  { label: "ফেব্রিক", value: "ফ্লিস কটন (Fleece Cotton)", icon: Shirt },
+  { label: "GSM", value: "৩০০", icon: Gauge },
+  { label: "ইনসাইড", value: "ব্রাশড ফিনিশ (Inside Brushed)", icon: Sparkles },
+  { label: "উপযোগিতা", value: "হালকা শীতের জন্য পারফেক্ট", icon: Snowflake },
+] as const;
 
 function SweatshirtPage() {
   const [size, setSize] = useState<Size | null>(null);
