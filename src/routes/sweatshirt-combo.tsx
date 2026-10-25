@@ -211,7 +211,7 @@ function SweatshirtComboPage() {
         <div className="mt-2 overflow-hidden rounded-md border">
           <table className="w-full text-sm">
             <thead className="bg-secondary text-foreground">
-              <tr><th className="px-3 py-2 text-left font-bold">সািজ</th><th className="px-3 py-2 text-left font-bold">বডি</th><th className="px-3 py-2 text-left font-bold">লম্বা</th></tr>
+              <tr><th className="px-3 py-2 text-left font-bold">সাইজ</th><th className="px-3 py-2 text-left font-bold">বডি</th><th className="px-3 py-2 text-left font-bold">লম্বা</th></tr>
             </thead>
             <tbody>
               {SIZE_CHART.map((r) => <tr key={r.key} className="border-t">
@@ -224,7 +224,7 @@ function SweatshirtComboPage() {
         </div>
 
         <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
-          <p className="font-bold text-foreground">সাইজ নির্বাচনের আগে গুরত্বপূর্ণ নিন্দেশনা</p>
+          <p className="font-bold text-foreground">সাইজ নির্বাচনের আগে গুরুত্বপূর্ণ নির্দেশনা</p>
           <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
             <li>অর্ডার করার আগে অবশ্যই সাইজ চার্ট দেখে আপনার উপযুক্ত সািजটিন নির্বাচন করুন।</li>
             <li>সািজ বুঝতে সমস্যা হলে চিন্তার কিছু নেই।</li>
