@@ -221,7 +221,7 @@ function SweatshirtPage() {
         {bannerImages.length > 0 && (
           <div className={`mx-auto mt-5 grid max-w-2xl gap-2 overflow-hidden rounded-lg border bg-card sm:gap-3 ${bannerImages.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
             {bannerImages.map((src, index) => (
-              <img key={src} src={src} alt={index === 0 ? "Gentsity প্রিমিয়াম সোয়েটশার্ট (কালো)" : "Gentsity প্রিমিয়াম সোয়েটশার্ট (সাদা)"} className="aspect-[3/4] h-auto w-full object-cover sm:aspect-auto sm:h-full" loading="lazy" />
+              <img key={src} src={src} alt={index === 0 ? "Gentsity প্রিমিয়াম সোয়েটশার্ট (কালো)" : "Gentsity প্রিমিয়াম সোয়েটশার্ট (সাদা)"} className="aspect-[5/6] h-auto w-full object-cover" loading="lazy" />
             ))}
           </div>
         )}
