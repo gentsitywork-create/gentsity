@@ -48,7 +48,42 @@ async function blockRecentOrder(supabaseAdmin: any, phone: string) {
   }
 }
 
-/** Facebook Conversions API-তে সার্ভার থেকে Purchase ইভেন্ট পাঠায় (টোকেন সেট থাকলে)। */
+async function sendTikTokPurchase(supabaseAdmin: any, opts: { orderNo: number | string; total: number; phone: string }) {
+  try {
+    const [{ data: pixel }, { data: credential }] = await Promise.all([
+      supabaseAdmin.from("settings").select("value").eq("key", "tiktok_pixel_id").maybeSingle(),
+      supabaseAdmin.from("tracking_credentials").select("access_token").eq("provider", "tiktok").maybeSingle(),
+    ]);
+    if (!pixel?.value || !credential?.access_token) return;
+    const normalized = `88${opts.phone.replace(/\D/g, "")}`;
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normalized));
+    const phoneHash = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+    const cookie = getRequestHeader("cookie") ?? "";
+    const cookieValue = (name: string) => {
+      const raw = cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${name}=`))?.slice(name.length + 1);
+      if (!raw) return undefined;
+      try { return decodeURIComponent(raw).slice(0, 500); } catch { return undefined; }
+    };
+    const response = await fetch("https://business-api.tiktok.com/open_api/v1.3/event/track/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Access-Token": credential.access_token },
+      signal: AbortSignal.timeout(5000),
+      body: JSON.stringify(tiktokPurchasePayload({
+        pixelId: pixel.value, orderNo: opts.orderNo, total: opts.total, phoneHash,
+        timestamp: Math.floor(Date.now() / 1000), url: getRequestHeader("referer") ?? undefined,
+        ip: clientIp() || undefined, userAgent: getRequestHeader("user-agent") ?? undefined,
+        ttclid: cookieValue("gt_ttclid"), ttp: cookieValue("_ttp"),
+      })),
+    });
+    if (!response.ok) { console.error("TikTok Events API failed", { status: response.status }); return; }
+    const result = await response.json() as { code?: number };
+    if (result.code !== 0) console.error("TikTok Events API rejected event", { status: response.status, code: result.code });
+  } catch {
+    console.error("TikTok Events API unavailable; order remains saved");
+  }
+}
+
+/** Browser and server use the same order event ID across advertising providers. */
 async function sendPurchaseCapi(
   supabaseAdmin: any,
   opts: { orderNo: number | string; total: number; phone: string },

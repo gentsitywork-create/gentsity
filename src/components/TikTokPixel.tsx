@@ -41,9 +41,14 @@ export default function TikTokPixel() {
         queue.methods.forEach((method) => queue.setAndDefer(queue, method));
         // Official base-code loader metadata lets the SDK adopt queued calls.
         const metadata = queue as unknown as Record<string, any>;
-        metadata._i = { [pixelId]: Object.assign([], { _u: "https://analytics.tiktok.com/i18n/pixel/events.js" }) };
-        metadata._t = { [pixelId]: Date.now() };
-        metadata._o = { [pixelId]: {} };
+        metadata['_i'] = { [pixelId]: Object.assign([], { _u: "https://analytics.tiktok.com/i18n/pixel/events.js" }) };
+        metadata['_t'] = { [pixelId]: Date.now() };
+        metadata['_o'] = { [pixelId]: {} };
+        metadata['instance'] = (id: string) => {
+          const instance = metadata['_i'][id] as TikTokQueue;
+          queue.methods.forEach((method) => queue.setAndDefer(instance, method));
+          return instance;
+        };
         const script = document.createElement("script");
         script.id = "tiktok-pixel-script";
         script.async = true;
