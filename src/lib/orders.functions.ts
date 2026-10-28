@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sweatshirtComboSchema, SWEATSHIRT_COMBO_PRICE, SWEATSHIRT_COMBO_DELIVERY } from "@/lib/sweatshirt-combo";
 import { POLO_OFFER_DISCOUNT, POLO_OFFER_GRACE_MS, poloOfferPrice, poloOfferValid } from "@/lib/polo-offer";
+import { tiktokPurchasePayload } from "@/lib/tiktok-events";
 
 function clientIp(): string {
   const fwd = getRequestHeader("x-forwarded-for") ?? "";
@@ -52,6 +53,7 @@ async function sendPurchaseCapi(
   supabaseAdmin: any,
   opts: { orderNo: number | string; total: number; phone: string },
 ) {
+  await sendTikTokPurchase(supabaseAdmin, opts);
   try {
     const { data: rows } = await supabaseAdmin
       .from("settings")

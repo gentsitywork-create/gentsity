@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackTikTok } from "@/components/TikTokPixel";
 
 declare global {
   interface Window {
@@ -9,6 +10,7 @@ declare global {
 }
 
 export function trackPixel(event: string, params?: Record<string, unknown>, eventId?: string) {
+  trackTikTok(event, params, eventId);
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
     // eventID lets Facebook merge this browser event with the server (CAPI) event — no double count.
     if (eventId) window.fbq("track", event, params, { eventID: eventId });

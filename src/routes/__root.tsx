@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import FacebookPixel from "@/components/FacebookPixel";
+import TikTokPixel from "@/components/TikTokPixel";
 import { LiveVisitorTracker } from "@/components/LiveVisitors";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Toaster } from "@/components/ui/sonner";
@@ -136,6 +137,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <FacebookPixel />
+      <TikTokPixel />
       <LiveVisitorTracker />
       <Toaster />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
