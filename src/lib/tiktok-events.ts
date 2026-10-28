@@ -1,6 +1,6 @@
 export function tiktokPurchasePayload(opts: {
   pixelId: string; orderNo: number | string; total: number; phoneHash: string;
-  timestamp: number; url?: string; ip?: string; userAgent?: string; ttclid?: string; ttp?: string;
+  timestamp: number; url?: string | undefined; ip?: string | undefined; userAgent?: string | undefined; ttclid?: string | undefined; ttp?: string | undefined;
 }) {
   return {
     event_source: "web",
