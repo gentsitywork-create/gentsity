@@ -385,6 +385,24 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_credentials: {
+        Row: {
+          access_token: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
