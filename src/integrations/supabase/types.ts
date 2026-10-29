@@ -21,11 +21,13 @@ export type Database = {
           created_at: string
           customer_ip: string | null
           customer_name: string | null
+          delivery_area: string | null
           district: string | null
           id: string
           items: Json
           note: string | null
           order_id: string | null
+          page: string
           phone: string | null
           session_key: string
           size: string | null
@@ -39,11 +41,13 @@ export type Database = {
           created_at?: string
           customer_ip?: string | null
           customer_name?: string | null
+          delivery_area?: string | null
           district?: string | null
           id?: string
           items?: Json
           note?: string | null
           order_id?: string | null
+          page?: string
           phone?: string | null
           session_key: string
           size?: string | null
@@ -57,11 +61,13 @@ export type Database = {
           created_at?: string
           customer_ip?: string | null
           customer_name?: string | null
+          delivery_area?: string | null
           district?: string | null
           id?: string
           items?: Json
           note?: string | null
           order_id?: string | null
+          page?: string
           phone?: string | null
           session_key?: string
           size?: string | null

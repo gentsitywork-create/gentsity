@@ -92,6 +92,13 @@
       "when": 1793177465705,
       "tag": "0012_tiktok_tracking_credentials",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793283809476,
+      "tag": "0013_abandoned_carts_page_column",
+      "breakpoints": true
     }
   ]
 }

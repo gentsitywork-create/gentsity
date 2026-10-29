@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StaffOrAdmin } from "./admin";
 import { useAdminSession } from "@/hooks/useAdminSession";
 import { confirmAbandonedCart } from "@/lib/orders.functions";
+import { ABANDONED_PAGE_LABELS, type AbandonedCartPage } from "@/lib/abandoned-cart-pages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -27,6 +28,8 @@ type Cart = {
   district: string | null;
   note: string | null;
   size: string | null;
+  page: string | null;
+  delivery_area: string | null;
   items: CartItem[];
   total_amount: number;
   customer_ip: string | null;
@@ -196,7 +199,12 @@ function AbandonedCartsInner() {
                       </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {c.phone ?? "—"} · সাইজ {c.size ?? "—"} · {qty} পিস · {c.total_amount} টাকা
+                      {c.phone ?? "—"} ·{" "}
+                      <span className="font-semibold text-foreground">
+                        {ABANDONED_PAGE_LABELS[(c.page ?? "polo") as AbandonedCartPage] ?? c.page}
+                      </span>{" "}
+                      · সাইজ {c.size ?? "—"} · {qty} পিস · {c.total_amount} টাকা
+                      {c.delivery_area ? ` · ${c.delivery_area === "dhaka" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"}` : ""}
                     </p>
                     <p className="text-sm text-muted-foreground">{c.address || "ঠিকানা দেয়নি"}</p>
                     <p className="mt-1 text-xs text-muted-foreground">

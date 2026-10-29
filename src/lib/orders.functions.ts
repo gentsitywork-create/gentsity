@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sweatshirtComboSchema, SWEATSHIRT_COMBO_PRICE, SWEATSHIRT_COMBO_DELIVERY } from "@/lib/sweatshirt-combo";
 import { POLO_OFFER_DISCOUNT, POLO_OFFER_GRACE_MS, poloOfferPrice, poloOfferValid } from "@/lib/polo-offer";
 import { tiktokPurchasePayload } from "@/lib/tiktok-events";
+import { ABANDONED_CART_PAGES, CATALOG_DELIVERY_CONFIG, POLO_DELIVERY_CONFIG } from "@/lib/abandoned-cart-pages";
 
 function clientIp(): string {
   const fwd = getRequestHeader("x-forwarded-for") ?? "";
@@ -922,35 +923,86 @@ export const checkCourierRatio = createServerFn({ method: "POST" })
 
 const cartSchema = z.object({
   session_key: z.string().trim().min(8).max(80),
+  page: z.enum(ABANDONED_CART_PAGES).optional().default("polo"),
+  delivery_area: z.enum(["dhaka", "outside"]).optional(),
   customer_name: z.string().trim().max(80).optional().default(""),
   phone: z.string().trim().max(20).optional().default(""),
   address: z.string().trim().max(400).optional().default(""),
   district: z.string().trim().max(60).optional().default(""),
   note: z.string().trim().max(300).optional().default(""),
-  size: z.enum(["M", "L", "XL", "XXL"]),
+  size: z.string().trim().min(1).max(10),
   items: z
     .array(
       z.object({
         variant_id: z.string().uuid(),
         color_name: z.string().trim().max(200).optional().default(""),
-        qty: z.number().int().min(1).max(6),
+        qty: z.number().int().min(1).max(10),
       }),
     )
     .max(6),
 });
 
-/** কাস্টমার সিলেক্ট/তথ্য দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার না করলেও) */
+type AbandonedCartData = z.infer<typeof cartSchema>;
+
+/** পেজ অনুযায়ী অসম্পূর্ণ কার্টের মোট টাকা — দাম ও ডেলিভারি সেটিংস সার্ভার থেকেই হিসাব হয় */
+async function abandonedCartTotal(supabaseAdmin: any, data: AbandonedCartData): Promise<number> {
+  if (data.page === "sweatshirt_combo") return SWEATSHIRT_COMBO_PRICE;
+  if (data.page === "hoodie_combo") return HOODIE_COMBO_PRICE;
+
+  if (data.page === "polo") {
+    const price = Number((await getSetting(supabaseAdmin, "combo_price")) ?? 999) || 999;
+    if (!data.delivery_area) return price;
+    const free = (await getSetting(supabaseAdmin, POLO_DELIVERY_CONFIG.freeKey)) !== "off";
+    if (free) return price;
+    const key = data.delivery_area === "dhaka" ? POLO_DELIVERY_CONFIG.dhakaKey : POLO_DELIVERY_CONFIG.outsideKey;
+    const fallback =
+      data.delivery_area === "dhaka" ? POLO_DELIVERY_CONFIG.dhakaFallback : POLO_DELIVERY_CONFIG.outsideFallback;
+    const charge = Math.max(0, Number((await getSetting(supabaseAdmin, key)) ?? fallback) || fallback);
+    return price + charge;
+  }
+
+  const cfg = CATALOG_DELIVERY_CONFIG[data.page];
+  const ids = data.items.map((i) => i.variant_id);
+  const { data: products } = await supabaseAdmin
+    .from("pajama_products")
+    .select("id, price")
+    .eq("page", data.page)
+    .in("id", ids);
+  const subtotal = (products ?? []).reduce((sum: number, p: any) => {
+    const qty = data.items.find((i) => i.variant_id === p.id)?.qty ?? 0;
+    return sum + Number(p.price ?? 0) * qty;
+  }, 0);
+
+  let charge = 0;
+  if (data.delivery_area) {
+    const [{ data: freeRow }, { data: areaRow }] = await Promise.all([
+      supabaseAdmin.from("settings").select("value").eq("key", cfg.freeKey).maybeSingle(),
+      supabaseAdmin
+        .from("settings")
+        .select("value")
+        .eq("key", data.delivery_area === "dhaka" ? cfg.dhakaKey : cfg.outsideKey)
+        .maybeSingle(),
+    ]);
+    const fallback = data.delivery_area === "dhaka" ? cfg.dhakaFallback : cfg.outsideFallback;
+    charge = freeRow?.value === "on" ? 0 : Math.max(0, Number(areaRow?.value ?? fallback) || fallback);
+  }
+  return subtotal + charge;
+}
+
+/** কাস্টমার সিলেক্ট/তথ্য দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার না করলেও) — সব পেজে */
 export const saveAbandonedCart = createServerFn({ method: "POST" })
   .inputValidator((data) => cartSchema.parse(data))
   .handler(async ({ data }) => {
     if (!/^01[3-9]\d{8}$/.test(data.phone)) return { saved: false };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const total = Number((await getSetting(supabaseAdmin, "combo_price")) ?? 999) || 999;
+    const total = await abandonedCartTotal(supabaseAdmin, data);
 
     const { error } = await supabaseAdmin.from("abandoned_carts").upsert(
       {
         session_key: data.session_key,
+        page: data.page,
+        delivery_area: data.delivery_area ?? null,
         customer_name: data.customer_name || null,
         phone: data.phone,
         address: data.address || null,
@@ -998,11 +1050,116 @@ export const confirmAbandonedCart = createServerFn({ method: "POST" })
     const items = (cart.items as { variant_id: string; qty: number; color_name?: string }[]) ?? [];
     if (items.length === 0) throw new Error("কার্টে কোনো পণ্য নেই।");
 
+    const page = (cart as any).page ?? "polo";
+
+    if (page === "polo") {
+      const ids = items.map((i) => i.variant_id);
+      const { data: variants } = await supabaseAdmin
+        .from("product_variants")
+        .select("id, size, color_name, stock")
+        .in("id", ids);
+
+      const { data: order, error: oErr } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          customer_name: cart.customer_name || "কাস্টমার",
+          phone: cart.phone,
+          address: cart.address,
+          district: cart.district,
+          note: cart.note,
+          total_amount: cart.total_amount || 999,
+          delivery_charge: 0,
+          status: "confirmed",
+          customer_ip: cart.customer_ip,
+        })
+        .select("id, order_no")
+        .single();
+      if (oErr || !order) throw new Error("অর্ডার তৈরি হয়নি।");
+
+      await supabaseAdmin.from("order_items").insert(
+        items.map((it) => {
+          const v = variants?.find((x) => x.id === it.variant_id);
+          return {
+            order_id: order.id,
+            variant_id: v ? v.id : null,
+            size: v?.size ?? cart.size ?? "M",
+            color_name: v?.color_name ?? it.color_name ?? "—",
+            qty: it.qty,
+          };
+        }),
+      );
+
+      for (const it of items) {
+        const v = variants?.find((x) => x.id === it.variant_id);
+        if (!v) continue;
+        await supabaseAdmin
+          .from("product_variants")
+          .update({ stock: Math.max(0, v.stock - it.qty) })
+          .eq("id", v.id);
+      }
+
+      await supabaseAdmin
+        .from("abandoned_carts")
+        .update({ status: "converted", order_id: order.id })
+        .eq("id", cart.id);
+
+      return { order_no: order.order_no };
+    }
+
+    // অন্য পেজ (পায়জামা / স্নিকার্স / সোয়েটশার্ট / কম্বো) — pajama_products থেকে অর্ডার তৈরি
     const ids = items.map((i) => i.variant_id);
-    const { data: variants } = await supabaseAdmin
-      .from("product_variants")
-      .select("id, size, color_name, stock")
+    const { data: rawProducts, error: pErr } = await supabaseAdmin
+      .from("pajama_products")
+      .select("id, name, product_kind, pieces_per_unit, price, is_active")
+      .eq("page", page)
       .in("id", ids);
+    if (pErr) throw new Error("অর্ডার তৈরি করা যায়নি, আবার চেষ্টা করুন।");
+    const products = rawProducts as
+      | { id: string; name: string; product_kind: string; pieces_per_unit: number; price: number; is_active: boolean }[]
+      | null;
+
+    const { data: stocks } = await supabaseAdmin
+      .from("pajama_product_stock")
+      .select("product_id, size, stock")
+      .in("product_id", ids)
+      .eq("size", cart.size ?? "");
+
+    for (const it of items) {
+      const p = products?.find((x) => x.id === it.variant_id);
+      if (!p || !p.is_active) throw new Error("কার্টের ডিজাইন এখন আর পাওয়া যাচ্ছে না। কার্টটি বাতিল করুন।");
+      const s = stocks?.find((x) => x.product_id === it.variant_id);
+      if (!s || s.stock < it.qty) {
+        throw new Error(`${p.name} — কার্টের সাইজে এখন পর্যাপ্ত স্টক নেই। কার্টটি বাতিল করে নতুন করে নিন।`);
+      }
+    }
+
+    let subtotal = 0;
+    let deliveryCharge = 0;
+    if (page === "sweatshirt_combo") {
+      subtotal = SWEATSHIRT_COMBO_PRICE;
+    } else if (page === "hoodie_combo") {
+      subtotal = HOODIE_COMBO_PRICE;
+    } else {
+      const cfg = CATALOG_DELIVERY_CONFIG[page as "pajama" | "sneakers" | "sweatshirt"];
+      for (const it of items) {
+        const p = products!.find((x) => x.id === it.variant_id)!;
+        subtotal += Number(p.price ?? 0) * it.qty;
+      }
+      if ((cart as any).delivery_area) {
+        const area = (cart as any).delivery_area === "dhaka" ? "dhaka" : "outside";
+        const [{ data: freeRow }, { data: areaRow }] = await Promise.all([
+          supabaseAdmin.from("settings").select("value").eq("key", cfg.freeKey).maybeSingle(),
+          supabaseAdmin
+            .from("settings")
+            .select("value")
+            .eq("key", area === "dhaka" ? cfg.dhakaKey : cfg.outsideKey)
+            .maybeSingle(),
+        ]);
+        const fallback = area === "dhaka" ? cfg.dhakaFallback : cfg.outsideFallback;
+        deliveryCharge = freeRow?.value === "on" ? 0 : Math.max(0, Number(areaRow?.value ?? fallback) || fallback);
+      }
+    }
+    const total = subtotal + deliveryCharge;
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
@@ -1012,8 +1169,9 @@ export const confirmAbandonedCart = createServerFn({ method: "POST" })
         address: cart.address,
         district: cart.district,
         note: cart.note,
-        total_amount: cart.total_amount || 999,
-        delivery_charge: 0,
+        total_amount: total,
+        delivery_charge: deliveryCharge,
+        product_type: page,
         status: "confirmed",
         customer_ip: cart.customer_ip,
       })
@@ -1021,26 +1179,40 @@ export const confirmAbandonedCart = createServerFn({ method: "POST" })
       .single();
     if (oErr || !order) throw new Error("অর্ডার তৈরি হয়নি।");
 
-    await supabaseAdmin.from("order_items").insert(
-      items.map((it) => {
-        const v = variants?.find((x) => x.id === it.variant_id);
-        return {
-          order_id: order.id,
-          variant_id: v ? v.id : null,
-          size: v?.size ?? cart.size ?? "M",
-          color_name: v?.color_name ?? it.color_name ?? "—",
-          qty: it.qty,
-        };
-      }),
-    );
+    const rows = items.map((it) => {
+      const p = products!.find((x) => x.id === it.variant_id)!;
+      const label =
+        page === "sweatshirt_combo"
+          ? `${p.name} (সোয়েটশার্ট)`
+          : page === "hoodie_combo"
+            ? `${p.name} (${p.product_kind === "hoodie" ? "হুডি" : "সোয়েটশার্ট"})`
+            : `${p.name} (${p.product_kind === "combo" ? "২ পিস কম্বো" : "সিঙ্গেল পিস"})`;
+      const combo = page === "sweatshirt_combo" || page === "hoodie_combo";
+      return {
+        order_id: order.id,
+        variant_id: null,
+        pajama_product_id: p.id,
+        size: cart.size ?? "M",
+        color_name: label,
+        qty: it.qty,
+        unit_price: combo ? null : p.price,
+        pieces_per_unit: p.pieces_per_unit ?? 1,
+      };
+    });
+    const { error: iErr } = await supabaseAdmin.from("order_items").insert(rows);
+    if (iErr) {
+      await supabaseAdmin.from("orders").delete().eq("id", order.id);
+      throw new Error("অর্ডারের তথ্য সেভ হয়নি, আবার চেষ্টা করুন।");
+    }
 
     for (const it of items) {
-      const v = variants?.find((x) => x.id === it.variant_id);
-      if (!v) continue;
+      const s = stocks?.find((x) => x.product_id === it.variant_id);
+      if (!s) continue;
       await supabaseAdmin
-        .from("product_variants")
-        .update({ stock: Math.max(0, v.stock - it.qty) })
-        .eq("id", v.id);
+        .from("pajama_product_stock")
+        .update({ stock: Math.max(0, s.stock - it.qty) })
+        .eq("product_id", it.variant_id)
+        .eq("size", cart.size ?? "");
     }
 
     await supabaseAdmin
