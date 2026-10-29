@@ -8,6 +8,7 @@ import { Check, Flame, KeyRound, Ruler, ShieldCheck, Sparkles, Truck, Wallet } f
 import { supabase } from "@/integrations/supabase/client";
 import { productImageUrls } from "@/lib/product-images";
 import { placePajamaOrder } from "@/lib/orders.functions";
+import { useAbandonedCartCapture } from "@/lib/use-abandoned-cart";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +96,18 @@ function PajamaPage() {
   const totalUnits = Object.values(picks).reduce((sum, qty) => sum + qty, 0);
   const subtotal = selected.reduce((sum, p) => sum + p.price * (picks[p.id] ?? 0), 0);
   const total = subtotal + deliveryCharge;
+
+  /** মোবাইল নম্বর দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার শেষ না করলেও) */
+  const cartItems = useMemo(
+    () =>
+      Object.entries(picks).map(([product_id, qty]) => ({
+        variant_id: product_id,
+        qty,
+        color_name: products.find((p) => p.id === product_id)?.name ?? "",
+      })),
+    [picks, products],
+  );
+  useAbandonedCartCapture({ page: "pajama", size, items: cartItems, form, deliveryArea, done: done !== null });
 
   const changeQty = (product: Product, delta: number) => {
     setPicks((current) => {

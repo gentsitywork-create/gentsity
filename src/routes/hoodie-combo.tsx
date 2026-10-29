@@ -8,6 +8,7 @@ import { Check, Flame, ShieldCheck, Truck, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { productImageUrls } from "@/lib/product-images";
 import { placeHoodieComboOrder } from "@/lib/orders.functions";
+import { useAbandonedCartCapture } from "@/lib/use-abandoned-cart";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,16 @@ function HoodieComboPage() {
   const hoodies = inSize("hoodie");
   const sweatshirts = inSize("sweatshirt");
   const complete = Boolean(hoodie) && sweats.length === 2;
+
+  /** মোবাইল নম্বর দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার শেষ না করলেও) */
+  const cartItems = useMemo(
+    () =>
+      [hoodie, ...sweats]
+        .filter((id): id is string => Boolean(id))
+        .map((id) => ({ variant_id: id, qty: 1, color_name: products.find((p) => p.id === id)?.name ?? "" })),
+    [hoodie, sweats, products],
+  );
+  useAbandonedCartCapture({ page: "hoodie_combo", size, items: cartItems, form, done: done !== null });
 
   const pickSize = (s: Size) => {
     setSize(s); setHoodie(null); setSweats([]);

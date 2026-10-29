@@ -8,6 +8,7 @@ import { Check, Flame, Gauge, Ruler, ShieldCheck, Shirt, Snowflake, Sparkles, Tr
 import { supabase } from "@/integrations/supabase/client";
 import { productImageUrls } from "@/lib/product-images";
 import { placeSweatshirtComboOrder } from "@/lib/orders.functions";
+import { useAbandonedCartCapture } from "@/lib/use-abandoned-cart";
 import { trackPixel } from "@/components/FacebookPixel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +96,13 @@ function SweatshirtComboPage() {
   const inSize = (kind: string) => products.filter((p) => p.product_kind === kind && stockOf(p) > 0);
   const sweatshirts = inSize("sweatshirt");
   const complete = sweats.length === 3;
+
+  /** মোবাইল নম্বর দিলে অসম্পূর্ণ কার্ট সেভ হয় (অর্ডার শেষ না করলেও) */
+  const cartItems = useMemo(
+    () => sweats.map((id) => ({ variant_id: id, qty: 1, color_name: products.find((p) => p.id === id)?.name ?? "" })),
+    [sweats, products],
+  );
+  useAbandonedCartCapture({ page: "sweatshirt_combo", size, items: cartItems, form, done: done !== null });
 
   const pickSize = (s: Size) => {
     setSize(s); setSweats([]);
