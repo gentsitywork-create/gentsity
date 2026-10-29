@@ -22,9 +22,9 @@ export const Route = createFileRoute("/sweatshirt")({
   head: () => ({
     meta: [
       { title: "Gentsity — এক্সপোর্ট কোয়ালিটি প্রিমিয়াম সোয়েটশার্ট" },
-      { name: "description", content: "এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা। ফ্রি ডেলিভারি, ক্যাশ অন ডেলিভারি।" },
+      { name: "description", content: "এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ৯৯৯ টাকা। ক্যাশ অন ডেলিভারি।" },
       { property: "og:title", content: "Gentsity — এক্সপোর্ট কোয়ালিটি প্রিমিয়াম সোয়েটশার্ট" },
-      { property: "og:description", content: "কটন ফ্লিস ফেব্রিকের ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা। ফ্রি ডেলিভারি, ক্যাশ অন ডেলিভারি।" },
+      { property: "og:description", content: "কটন ফ্লিস ফেব্রিকের ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ৯৯৯ টাকা। ক্যাশ অন ডেলিভারি।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -206,15 +206,15 @@ function SweatshirtPage() {
     </section> : <>
       <section className="mx-auto max-w-4xl px-4 pb-6 pt-9 text-center">
         <p className="text-sm font-bold text-primary">GENTSITY SWEATSHIRT COLLECTION</p>
-        <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের তৈরি ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ১১৯০ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
-        <p className="mt-3 text-lg font-bold">রেগুলার প্রাইস <span className="text-muted-foreground line-through">২২০০ টাকা</span> — অফারে মাত্র <span className="text-primary">১১৯০ টাকা</span></p>
+        <h1 className="mt-2 font-display text-2xl font-extrabold md:text-4xl"><Flame className="inline h-7 w-7 text-destructive" /> এক্সপোর্ট কোয়ালিটির কটন ফ্লিস ফেব্রিকসের তৈরি ২ পিস প্রিমিয়াম সুইট-শার্ট মাত্র ৯৯৯ টাকা <Flame className="inline h-7 w-7 text-destructive" /></h1>
+        <p className="mt-3 text-lg font-bold">রেগুলার প্রাইস <span className="text-muted-foreground line-through">২২০০ টাকা</span> — অফারে মাত্র <span className="text-primary">৯৯৯ টাকা</span></p>
         <p className="mx-auto mt-2 max-w-2xl text-muted-foreground">সফট, উষ্ণ ও প্রিমিয়াম কোয়ালিটি — শীতের জন্য পারফেক্ট পছন্দ! <Sparkles className="inline h-4 w-4 text-primary" /></p>
         <div>
           <LiveViewersBadge />
         </div>
 
         <ul className="mt-5 flex flex-wrap justify-center gap-3 text-sm font-semibold">
-          <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Truck className="h-4 w-4" /> ডেলিভারি চার্জ ফ্রি</li>
+          <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Truck className="h-4 w-4" /> সারা বাংলাদেশে হোম ডেলিভারি</li>
           <li className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-primary"><Wallet className="h-4 w-4" /> ক্যাশ অন ডেলিভারি</li>
         </ul>
 
